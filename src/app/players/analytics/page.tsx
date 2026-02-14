@@ -6,6 +6,7 @@ import { Tournament } from "@/lib/types";
 import { listTournaments } from "@/lib/storage";
 import { loadRegistry, syncCareerStats, getCareerLeaderboard } from "@/lib/playerRegistry";
 import {
+    computeStandings,
     getGoldenBoot,
     getGoldenGlove,
     getMvpLeaderboard,
@@ -142,6 +143,169 @@ export default function GlobalAnalyticsPage() {
                     {registry.reduce((sum, p) => sum + p.career.totalMatches, 0) / 2} total matches
                 </p>
             </div>
+
+            {/* ═══ Hall of Fame — Title Winners ═══ */}
+            {(() => {
+                const completedTs = tournaments.filter(t => t.status === "completed");
+                if (completedTs.length === 0) return null;
+
+                // Compute podiums
+                const podiums = completedTs.map(t => {
+                    const standings = computeStandings(t.players, t.matches);
+                    return {
+                        name: t.name,
+                        top3: standings.slice(0, 3).map((s, i) => ({
+                            rank: i + 1,
+                            playerName: s.playerName,
+                            team: s.team,
+                            pts: s.points,
+                            gd: s.goalDifference,
+                            gf: s.goalsFor,
+                            w: s.won,
+                            d: s.drawn,
+                            l: s.lost,
+                        })),
+                    };
+                });
+
+                // Count total titles per player
+                const titleCount: Record<string, number> = {};
+                podiums.forEach(p => {
+                    const champ = p.top3[0]?.playerName;
+                    if (champ) titleCount[champ] = (titleCount[champ] || 0) + 1;
+                });
+
+                const medalEmoji = ["🥇", "🥈", "🥉"];
+                const medalColors = [
+                    "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+                    "linear-gradient(135deg, #C0C0C0 0%, #A0A0A0 100%)",
+                    "linear-gradient(135deg, #CD7F32 0%, #A0522D 100%)",
+                ];
+                const medalGlow = [
+                    "0 0 20px rgba(255,215,0,0.25)",
+                    "0 0 20px rgba(192,192,192,0.15)",
+                    "0 0 20px rgba(205,127,50,0.15)",
+                ];
+
+                return (
+                    <div className="card animate-fade-in" style={{ marginBottom: 24 }}>
+                        <div className="analytics-card-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-color)" }}>
+                            <span className="analytics-card-icon">🏆</span>
+                            <span className="analytics-card-title">Hall of Fame</span>
+                        </div>
+                        <div style={{ padding: 20 }}>
+                            {/* Title count summary */}
+                            {Object.keys(titleCount).length > 0 && (
+                                <div style={{
+                                    display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20,
+                                    padding: "12px 16px",
+                                    background: "rgba(255,215,0,0.04)",
+                                    border: "1px solid rgba(255,215,0,0.12)",
+                                    borderRadius: 10,
+                                }}>
+                                    {Object.entries(titleCount)
+                                        .sort((a, b) => b[1] - a[1])
+                                        .map(([name, count]) => (
+                                            <div key={name} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                                <span style={{ fontSize: 18 }}>🏆</span>
+                                                <span style={{ fontWeight: 800, color: "var(--accent-gold)", fontSize: 14 }}>{name}</span>
+                                                <span style={{ fontSize: 12, color: "var(--text-muted)" }}>× {count} title{count > 1 ? "s" : ""}</span>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
+
+                            {/* Season-by-season podiums */}
+                            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                                {podiums.map((season, si) => (
+                                    <div key={si} style={{
+                                        background: "rgba(255,255,255,0.02)",
+                                        border: "1px solid var(--border-color)",
+                                        borderRadius: 12,
+                                        padding: 16,
+                                    }}>
+                                        <div style={{
+                                            fontSize: 13, fontWeight: 700,
+                                            color: "var(--text-secondary)",
+                                            marginBottom: 12,
+                                            fontFamily: "var(--font-heading)",
+                                            letterSpacing: "0.5px",
+                                            textTransform: "uppercase",
+                                        }}>
+                                            {season.name}
+                                        </div>
+                                        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                                            {season.top3.map((p, idx) => (
+                                                <div key={idx} style={{
+                                                    flex: idx === 0 ? "1.3" : "1",
+                                                    minWidth: 160,
+                                                    background: idx === 0
+                                                        ? "rgba(255,215,0,0.06)"
+                                                        : idx === 1
+                                                            ? "rgba(192,192,192,0.04)"
+                                                            : "rgba(205,127,50,0.04)",
+                                                    border: `1px solid ${idx === 0 ? "rgba(255,215,0,0.2)" : idx === 1 ? "rgba(192,192,192,0.15)" : "rgba(205,127,50,0.12)"}`,
+                                                    borderRadius: 10,
+                                                    padding: "12px 14px",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: 10,
+                                                    boxShadow: medalGlow[idx],
+                                                    transition: "transform 0.2s",
+                                                }}>
+                                                    <div style={{
+                                                        fontSize: idx === 0 ? 28 : 22,
+                                                        lineHeight: 1,
+                                                        filter: idx === 0 ? "drop-shadow(0 0 6px rgba(255,215,0,0.4))" : "none",
+                                                    }}>
+                                                        {medalEmoji[idx]}
+                                                    </div>
+                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                        <div style={{
+                                                            fontWeight: 800,
+                                                            fontSize: idx === 0 ? 15 : 13,
+                                                            color: idx === 0 ? "var(--accent-gold)" : "var(--text-primary)",
+                                                            overflow: "hidden",
+                                                            textOverflow: "ellipsis",
+                                                            whiteSpace: "nowrap",
+                                                        }}>
+                                                            {p.playerName}
+                                                        </div>
+                                                        <div style={{
+                                                            fontSize: 11,
+                                                            color: "var(--text-muted)",
+                                                            overflow: "hidden",
+                                                            textOverflow: "ellipsis",
+                                                            whiteSpace: "nowrap",
+                                                        }}>
+                                                            {p.team}
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ textAlign: "right" }}>
+                                                        <div style={{
+                                                            fontWeight: 800,
+                                                            fontSize: idx === 0 ? 16 : 14,
+                                                            color: idx === 0 ? "var(--accent-gold)" : "var(--text-primary)",
+                                                        }}>
+                                                            {p.pts} pts
+                                                        </div>
+                                                        <div style={{
+                                                            fontSize: 10,
+                                                            color: p.gd > 0 ? "var(--accent-green)" : p.gd < 0 ? "var(--accent-red)" : "var(--text-muted)",
+                                                        }}>
+                                                            {p.gd > 0 ? "+" : ""}{p.gd} GD
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
 
             {/* Radar */}
             <div className="card animate-fade-in" style={{ marginBottom: 24 }}>

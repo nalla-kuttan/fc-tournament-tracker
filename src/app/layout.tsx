@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AdminProvider } from "@/lib/AdminContext";
+import ClientProviders from "@/components/ClientProviders";
 
 export const metadata: Metadata = {
   title: "FC Tournament Tracker",
@@ -15,9 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AdminProvider>
+        <ClientProviders>
           {children}
-        </AdminProvider>
+        </ClientProviders>
       </body>
     </html>
   );
