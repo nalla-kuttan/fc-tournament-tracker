@@ -7,7 +7,8 @@ import { Tournament, Match, Player } from "@/lib/types";
 import { loadTournament, saveTournament } from "@/lib/storage";
 import { useAdmin } from "@/lib/AdminContext";
 
-function getPlayer(players: Player[], id: string): Player | undefined {
+function getPlayer(players: Player[], id: string | null | undefined): Player | undefined {
+    if (!id) return undefined;
     return players.find((p) => p.id === id);
 }
 
