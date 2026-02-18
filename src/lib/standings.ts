@@ -668,3 +668,93 @@ export function getPlayerTournamentBreakdowns(
     return breakdowns;
 }
 
+export interface GlobalMatchEntry extends Match {
+    tournamentName: string;
+    homePlayerName: string;
+    awayPlayerName: string;
+}
+
+export function getGlobalRecentMatches(
+    tournaments: { id: string; name: string; players: Player[]; matches: Match[] }[],
+    limit: number = 20
+): GlobalMatchEntry[] {
+    const allMatches: GlobalMatchEntry[] = [];
+
+    for (const t of tournaments) {
+        const pMap = new Map(t.players.map(p => [p.id, p.name]));
+
+        for (const m of t.matches) {
+            if (m.isPlayed && m.homePlayerId !== "BYE" && m.awayPlayerId !== "BYE") {
+                allMatches.push({
+                    ...m,
+                    tournamentName: t.name,
+                    homePlayerName: pMap.get(m.homePlayerId) ?? "Unknown",
+                    awayPlayerName: pMap.get(m.awayPlayerId) ?? "Unknown",
+                });
+            }
+        }
+    }
+
+    // Sort by tournament creation date (fallback if match timestamps are missing) 
+    // or just assume later tournaments have later matches.
+    // Ideally matches should have a playedAt timestamp.
+    // For now, let's sort by tournament ID or just use the order.
+    // If we have a lot of tournaments, we might want a better sort.
+    return allMatches.reverse().slice(0, limit);
+}
+
+export function getGlobalH2H(
+    playerNames: string[],
+    tournaments: { id: string; name: string; players: Player[]; matches: Match[] }[]
+): Map<string, Map<string, H2HCell>> {
+    const matrix = new Map<string, Map<string, H2HCell>>();
+
+    // Use lowercase names for stability
+    const names = playerNames.map(n => n.toLowerCase());
+
+    for (const n1 of names) {
+        const row = new Map<string, H2HCell>();
+        for (const n2 of names) {
+            if (n1 !== n2) {
+                row.set(n2, { wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 });
+            }
+        }
+        matrix.set(n1, row);
+    }
+
+    for (const t of tournaments) {
+        const pMap = new Map(t.players.map(p => [p.id, p.name.toLowerCase()]));
+
+        for (const m of t.matches) {
+            if (!m.isPlayed || m.homePlayerId === "BYE" || m.awayPlayerId === "BYE") continue;
+
+            const p1 = pMap.get(m.homePlayerId);
+            const p2 = pMap.get(m.awayPlayerId);
+
+            if (!p1 || !p2) continue;
+
+            const hs = m.homeScore ?? 0;
+            const as = m.awayScore ?? 0;
+
+            const row1 = matrix.get(p1)?.get(p2);
+            const row2 = matrix.get(p2)?.get(p1);
+
+            if (row1) {
+                row1.goalsFor += hs;
+                row1.goalsAgainst += as;
+                if (hs > as) row1.wins++;
+                else if (hs === as) row1.draws++;
+                else row1.losses++;
+            }
+            if (row2) {
+                row2.goalsFor += as;
+                row2.goalsAgainst += hs;
+                if (as > hs) row2.wins++;
+                else if (as === hs) row2.draws++;
+                else row2.losses++;
+            }
+        }
+    }
+
+    return matrix;
+}

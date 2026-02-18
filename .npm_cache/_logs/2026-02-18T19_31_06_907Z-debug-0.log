@@ -1,0 +1,23 @@
+0 verbose cli /Users/ruban/.nvm/versions/node/v22.20.0/bin/node /Users/ruban/.nvm/versions/node/v22.20.0/lib/node_modules/npm/bin/npm-cli.js
+1 info using npm@11.6.2
+2 info using node@v22.20.0
+3 silly config load:file:/Users/ruban/.nvm/versions/node/v22.20.0/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/ruban/.gemini/antigravity/playground/inner-celestial/.npmrc
+5 silly config load:file:/Users/ruban/.npmrc
+6 silly config load:file:/Users/ruban/.nvm/versions/node/v22.20.0/etc/npmrc
+7 verbose title npm exec tsx seed_season_5.ts
+8 verbose argv "exec" "--" "tsx" "seed_season_5.ts"
+9 verbose logfile logs-max:10 dir:/Users/ruban/.gemini/antigravity/playground/inner-celestial/.npm_cache/_logs/2026-02-18T19_31_06_907Z-
+10 verbose logfile /Users/ruban/.gemini/antigravity/playground/inner-celestial/.npm_cache/_logs/2026-02-18T19_31_06_907Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly logfile done cleaning log files
+13 silly packumentCache heap:2197815296 maxSize:549453824 maxEntrySize:274726912
+14 http fetch GET 200 https://registry.npmjs.org/tsx 248ms (cache revalidated)
+15 silly packumentCache heap:2197815296 maxSize:549453824 maxEntrySize:274726912
+16 silly packumentCache heap:2197815296 maxSize:549453824 maxEntrySize:274726912
+17 verbose cwd /Users/ruban/.gemini/antigravity/playground/inner-celestial
+18 verbose os Darwin 25.3.0
+19 verbose node v22.20.0
+20 verbose npm  v11.6.2
+21 verbose exit 0
+22 info ok

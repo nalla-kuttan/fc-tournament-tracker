@@ -19,8 +19,9 @@ export default function SchedulePage() {
     const dragRound = useRef<number | null>(null);
     const [dragOverRound, setDragOverRound] = useState<number | null>(null);
 
-    const refresh = useCallback(() => {
-        setTournament(loadTournament(id));
+    const refresh = useCallback(async () => {
+        const t = await loadTournament(id);
+        setTournament(t);
     }, [id]);
 
     useEffect(() => {
@@ -48,7 +49,7 @@ export default function SchedulePage() {
         setDragOverRound(roundNum);
     };
 
-    const handleDrop = (targetRound: number) => {
+    const handleDrop = async (targetRound: number) => {
         const sourceRound = dragRound.current;
         if (sourceRound === null || sourceRound === targetRound) {
             setDragOverRound(null);
@@ -63,8 +64,8 @@ export default function SchedulePage() {
             return m;
         });
 
-        saveTournament(updated as Tournament);
-        refresh();
+        await saveTournament(updated as Tournament);
+        await refresh();
         setDragOverRound(null);
         dragRound.current = null;
     };

@@ -4,12 +4,14 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Tournament, Match, Player } from "@/lib/types";
-import { loadTournament, deleteTournament } from "@/lib/storage";
+import { loadTournament, deleteTournament, completeTournament } from "@/lib/storage";
 import { computeStandings, getNextMatch } from "@/lib/standings";
 import StandingsTable from "@/components/StandingsTable";
+import BracketView from "@/components/BracketView";
 import { useAdmin } from "@/lib/AdminContext";
 
-function getPlayer(players: Player[], id: string): Player | undefined {
+function getPlayer(players: Player[], id: string | null): Player | undefined {
+    if (!id || id === "BYE") return undefined;
     return players.find((p) => p.id === id);
 }
 
@@ -20,25 +22,38 @@ export default function DashboardPage() {
     const [tournament, setTournament] = useState<Tournament | null>(null);
     const { isAdmin } = useAdmin();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showCompleteModal, setShowCompleteModal] = useState(false);
+    const [isCompleting, setIsCompleting] = useState(false);
 
-    const refresh = useCallback(() => {
-        setTournament(loadTournament(id));
+    const refresh = useCallback(async () => {
+        const t = await loadTournament(id);
+        setTournament(t);
     }, [id]);
 
     useEffect(() => {
         refresh();
-        const handler = () => refresh();
-        window.addEventListener("storage", handler);
-        window.addEventListener("fc-update", handler);
-        return () => {
-            window.removeEventListener("storage", handler);
-            window.removeEventListener("fc-update", handler);
-        };
     }, [refresh]);
 
-    const handleDelete = () => {
-        deleteTournament(id);
+    const handleDelete = async () => {
+        await deleteTournament(id);
         router.push("/");
+    };
+
+    const handleComplete = async () => {
+        try {
+            setIsCompleting(true);
+            await completeTournament(id);
+            // Force reload to see changes
+            window.location.href = "/"; // Redirect to home to see Hall of Fame? Or reload?
+            // User likely wants to stay or go home. Let's reload to update status.
+            // Actually, verify it completed.
+            window.location.reload();
+        } catch (e) {
+            console.error(e);
+            alert("Failed to complete tournament: " + (e as Error).message);
+            setIsCompleting(false);
+            setShowCompleteModal(false);
+        }
     };
 
     if (!tournament) return null;
@@ -78,6 +93,27 @@ export default function DashboardPage() {
                 </div>
             )}
 
+            {/* Complete modal */}
+            {showCompleteModal && (
+                <div className="modal-overlay" onClick={() => !isCompleting && setShowCompleteModal(false)}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div style={{ textAlign: "center", fontSize: 40, marginBottom: 12 }}>🏆</div>
+                        <div className="modal-title">Complete Tournament?</div>
+                        <p style={{ color: "var(--text-secondary)", textAlign: "center", marginBottom: 24, fontSize: 14, lineHeight: 1.6 }}>
+                            Are you sure? This will calculate the final winner and add them to the <strong style={{ color: "var(--accent-gold)" }}>Hall of Fame</strong>.
+                        </p>
+                        <div style={{ display: "flex", gap: 10 }}>
+                            <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowCompleteModal(false)} disabled={isCompleting}>
+                                Cancel
+                            </button>
+                            <button className="btn btn-primary" style={{ flex: 1, background: "var(--accent-green)", borderColor: "var(--accent-green)" }} onClick={handleComplete} disabled={isCompleting}>
+                                {isCompleting ? "Saving..." : "🏆 Confirm Winner"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Stats bar */}
             <div className="grid-4 dashboard-stats" style={{ marginBottom: 28 }}>
                 <div className="card" style={{ textAlign: "center" }}>
@@ -89,8 +125,10 @@ export default function DashboardPage() {
                     <div className="stat-label">Matches Played</div>
                 </div>
                 <div className="card" style={{ textAlign: "center" }}>
-                    <div className="stat-value">{tournament.format === "double" ? "2×" : "1×"}</div>
-                    <div className="stat-label">Legs</div>
+                    <div className="stat-value">
+                        {tournament.format === "knockout" ? "KO" : (tournament.format === "double" ? "2×" : "1×")}
+                    </div>
+                    <div className="stat-label">Format</div>
                 </div>
                 <div className="card" style={{ textAlign: "center" }}>
                     <div className="stat-value" style={{ color: tournament.status === "active" ? "var(--accent-green)" : "var(--text-muted)" }}>
@@ -128,14 +166,27 @@ export default function DashboardPage() {
                 </div>
             )}
 
-            {/* Standings */}
+            {/* Standings or Bracket */}
             <div style={{ marginBottom: 28 }}>
                 <div className="section-header">
                     <div>
-                        <h2 className="section-title">🏆 Standings</h2>
+                        <h2 className="section-title">
+                            {tournament.format === "knockout" ? "🌳 Tournament Bracket" : "🏆 Standings"}
+                        </h2>
                     </div>
                 </div>
-                <StandingsTable rows={standings} />
+                {tournament.format === "knockout" ? (
+                    <div className="bracket-container animate-fade-in" style={{ backgroundColor: "rgba(10, 15, 30, 0.4)", borderRadius: 12, border: "1px solid var(--border-color)", overflow: "hidden" }}>
+                        <BracketView
+                            matches={tournament.matches}
+                            players={tournament.players}
+                            tournamentId={tournament.id}
+                            isAdmin={isAdmin}
+                        />
+                    </div>
+                ) : (
+                    <StandingsTable rows={standings} />
+                )}
             </div>
 
             {/* Recent Results */}
@@ -185,12 +236,23 @@ export default function DashboardPage() {
                             Permanently delete this tournament and all match data.
                         </div>
                     </div>
-                    <button
-                        className="btn btn-danger"
-                        onClick={() => setShowDeleteModal(true)}
-                    >
-                        🗑️ Delete Tournament
-                    </button>
+                    <div style={{ display: "flex", gap: 10 }}>
+                        {isAdmin && tournament.status === "active" && (
+                            <button
+                                className="btn btn-primary"
+                                style={{ background: "var(--accent-green)", borderColor: "var(--accent-green)" }}
+                                onClick={() => setShowCompleteModal(true)}
+                            >
+                                🏆 Complete
+                            </button>
+                        )}
+                        <button
+                            className="btn btn-danger"
+                            onClick={() => setShowDeleteModal(true)}
+                        >
+                            Delete
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

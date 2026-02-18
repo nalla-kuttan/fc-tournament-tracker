@@ -1,0 +1,114 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Tournament {
+  id        String   @id @default(uuid())
+  name      String
+  format    String   // "league" | "knockout" | "cup"
+  status    String
+  createdAt DateTime @default(now())
+  adminPin  String
+  players   Player[]
+  matches   Match[]
+}
+
+model Player {
+  id           String     @id @default(uuid())
+  name         String
+  team         String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournamentId String
+  
+  homeMatches Match[] @relation("HomePlayer")
+  awayMatches Match[] @relation("AwayPlayer")
+  
+  goals       Goal[]
+}
+
+model Match {
+  id           String      @id @default(uuid())
+  tournamentId String
+  tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  roundNumber  Int
+  stage        String?     // "Round of 16", "Quarter-final", "Semi-final", "Final"
+  
+  homePlayerId String?
+  homePlayer   Player?     @relation("HomePlayer", fields: [homePlayerId], references: [id])
+  
+  awayPlayerId String?
+  awayPlayer   Player?     @relation("AwayPlayer", fields: [awayPlayerId], references: [id])
+  
+  homeScore    Int?
+  awayScore    Int?
+  isPlayed     Boolean     @default(false)
+  
+  // Bracket chaining
+  nextMatchId         String?
+  isHomeInNextMatch Boolean @default(true)
+  
+  // Home Stats
+  homeXg            Float?
+  homePossession    Int?
+  homeTackles       Int?
+  homeInterceptions Int?
+  homeRating        Float?
+  homeIsMotm        Boolean @default(false)
+  
+  // Away Stats
+  awayXg            Float?
+  awayPossession    Int?
+  awayTackles       Int?
+  awayInterceptions Int?
+  awayRating        Float?
+  awayIsMotm        Boolean @default(false)
+
+  goals        Goal[]
+}
+
+model Goal {
+  id        String   @id @default(uuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  playerId  String
+  player    Player   @relation(fields: [playerId], references: [id])
+  minute    Int?
+  side      String   // "home" | "away"
+}
+
+model RegisteredPlayer {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  team      String
+  createdAt DateTime @default(now())
+  
+  totalMatches           Int @default(0)
+  totalWins              Int @default(0)
+  totalDraws             Int @default(0)
+  totalLosses            Int @default(0)
+  totalGoals             Int @default(0)
+  totalConceded          Int @default(0)
+  totalCleanSheets       Int @default(0)
+  totalXg                Float @default(0)
+  totalRatingSum         Float @default(0)
+  totalRatedMatches      Int @default(0)
+  totalPossessionSum     Int @default(0)
+  totalPossessionMatches Int @default(0)
+  totalMotm              Int @default(0)
+  
+  tournamentsPlayedJson  String @default("[]")
+}
+
+model HallOfFame {
+  id             String   @id @default(uuid())
+  tournamentName String
+  winnerName     String
+  winnerTeam     String
+  date           DateTime @default(now())
+}

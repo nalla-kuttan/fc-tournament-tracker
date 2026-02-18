@@ -15,6 +15,8 @@ import {
     getBiggestWins,
     getH2HMatrix,
     getPossessionKings,
+    getGlobalH2H,
+    getGlobalRecentMatches,
 } from "@/lib/standings";
 import dynamic from "next/dynamic";
 
@@ -23,33 +25,22 @@ const WDLCharts = dynamic(() => import("@/components/DoughnutChart"), { ssr: fal
 
 export default function GlobalAnalyticsPage() {
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
+    const [registry, setRegistry] = useState<any[]>([]);
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
-        const ts = listTournaments();
-        syncCareerStats(ts);
-        setTournaments(ts);
-        setLoaded(true);
+        async function init() {
+            const ts = await listTournaments();
+            await syncCareerStats(ts);
+            const reg = await getCareerLeaderboard();
+            setTournaments(ts);
+            setRegistry(reg);
+            setLoaded(true);
+        }
+        init();
     }, []);
 
     if (!loaded) return null;
-
-    // Merge all players & matches across tournaments into a unified view
-    // We need a unique player list (by name, merging across tournaments)
-    const playerMap = new Map<string, { id: string; name: string; team: string }>();
-    const allMatches: Tournament["matches"] = [];
-
-    for (const t of tournaments) {
-        for (const p of t.players) {
-            if (!playerMap.has(p.name.toLowerCase())) {
-                playerMap.set(p.name.toLowerCase(), { id: p.id, name: p.name, team: p.team });
-            }
-        }
-        allMatches.push(...t.matches);
-    }
-
-    // For per-tournament analytics with consistent IDs, we need to use the career registry instead
-    const registry = getCareerLeaderboard();
 
     // Aggregate per-player stats from the registry for charts
     const hasData = registry.length > 0 && registry.some(p => p.career.totalMatches > 0);
@@ -94,6 +85,7 @@ export default function GlobalAnalyticsPage() {
     const radarPlayers = registry.map(p => {
         const wr = p.career.totalMatches > 0 ? Math.round((p.career.totalWins / p.career.totalMatches) * 100) : 0;
         const avgRtg = p.career.totalRatedMatches > 0 ? (p.career.totalRatingSum / p.career.totalRatedMatches) : 0;
+        const avgPoss = p.career.totalPossessionMatches > 0 ? Math.round(p.career.totalPossessionSum / p.career.totalPossessionMatches) : 50;
         return {
             playerName: p.name,
             color: "",
@@ -101,7 +93,7 @@ export default function GlobalAnalyticsPage() {
             cleanSheets: (p.career.totalCleanSheets / Math.max(maxCS, 1)) * 100,
             winRate: wr,
             avgRating: (avgRtg / 10) * 100,
-            possession: 50, // not tracked globally, use 50 as baseline
+            possession: avgPoss,
         };
     });
 
@@ -124,9 +116,50 @@ export default function GlobalAnalyticsPage() {
     allBiggestWins.sort((a, b) => b.margin - a.margin);
     const topBiggestWins = allBiggestWins.slice(0, 5);
 
-    // H2H across all tournaments
-    // Build a merged H2H from career data
+    // Global H2H
     const allPlayerNames = registry.map(p => p.name);
+    const globalH2h = getGlobalH2H(allPlayerNames, tournaments);
+
+    // Global Recent Matches
+    const recentMatches = getGlobalRecentMatches(tournaments, 10);
+
+    // Career Awards logic
+    const awards = [
+        {
+            title: "Iron Man",
+            description: "Most matches played",
+            winner: registry.sort((a, b) => b.career.totalMatches - a.career.totalMatches)[0],
+            value: (p: any) => `${p.career.totalMatches} matches`,
+            icon: "🦾",
+        },
+        {
+            title: "Clinical Finisher",
+            description: "Best Goals per Match (min 5 matches)",
+            winner: registry
+                .filter(p => p.career.totalMatches >= 5)
+                .sort((a, b) => (b.career.totalGoals / b.career.totalMatches) - (a.career.totalGoals / a.career.totalMatches))[0],
+            value: (p: any) => `${(p.career.totalGoals / p.career.totalMatches).toFixed(2)} G/M`,
+            icon: "🎯",
+        },
+        {
+            title: "The Wall",
+            description: "Clean Sheet percentage (min 5 matches)",
+            winner: registry
+                .filter(p => p.career.totalMatches >= 5)
+                .sort((a, b) => (b.career.totalCleanSheets / b.career.totalMatches) - (a.career.totalCleanSheets / a.career.totalMatches))[0],
+            value: (p: any) => `${Math.round((p.career.totalCleanSheets / p.career.totalMatches) * 100)}% CS`,
+            icon: "🧱",
+        },
+        {
+            title: "Creative Maestro",
+            description: "Highest Expected Goals (xG) per match",
+            winner: registry
+                .filter(p => p.career.totalMatches >= 5)
+                .sort((a, b) => (b.career.totalXg / b.career.totalMatches) - (a.career.totalXg / a.career.totalMatches))[0],
+            value: (p: any) => `${(p.career.totalXg / p.career.totalMatches).toFixed(2)} xG/M`,
+            icon: "🪄",
+        },
+    ];
 
     return (
         <div className="container page">
@@ -149,7 +182,6 @@ export default function GlobalAnalyticsPage() {
                 const completedTs = tournaments.filter(t => t.status === "completed");
                 if (completedTs.length === 0) return null;
 
-                // Compute podiums
                 const podiums = completedTs.map(t => {
                     const standings = computeStandings(t.players, t.matches);
                     return {
@@ -160,15 +192,10 @@ export default function GlobalAnalyticsPage() {
                             team: s.team,
                             pts: s.points,
                             gd: s.goalDifference,
-                            gf: s.goalsFor,
-                            w: s.won,
-                            d: s.drawn,
-                            l: s.lost,
                         })),
                     };
                 });
 
-                // Count total titles per player
                 const titleCount: Record<string, number> = {};
                 podiums.forEach(p => {
                     const champ = p.top3[0]?.playerName;
@@ -176,11 +203,6 @@ export default function GlobalAnalyticsPage() {
                 });
 
                 const medalEmoji = ["🥇", "🥈", "🥉"];
-                const medalColors = [
-                    "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
-                    "linear-gradient(135deg, #C0C0C0 0%, #A0A0A0 100%)",
-                    "linear-gradient(135deg, #CD7F32 0%, #A0522D 100%)",
-                ];
                 const medalGlow = [
                     "0 0 20px rgba(255,215,0,0.25)",
                     "0 0 20px rgba(192,192,192,0.15)",
@@ -194,7 +216,6 @@ export default function GlobalAnalyticsPage() {
                             <span className="analytics-card-title">Hall of Fame</span>
                         </div>
                         <div style={{ padding: 20 }}>
-                            {/* Title count summary */}
                             {Object.keys(titleCount).length > 0 && (
                                 <div style={{
                                     display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20,
@@ -215,7 +236,6 @@ export default function GlobalAnalyticsPage() {
                                 </div>
                             )}
 
-                            {/* Season-by-season podiums */}
                             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                                 {podiums.map((season, si) => (
                                     <div key={si} style={{
@@ -228,9 +248,8 @@ export default function GlobalAnalyticsPage() {
                                             fontSize: 13, fontWeight: 700,
                                             color: "var(--text-secondary)",
                                             marginBottom: 12,
-                                            fontFamily: "var(--font-heading)",
-                                            letterSpacing: "0.5px",
                                             textTransform: "uppercase",
+                                            letterSpacing: "0.5px",
                                         }}>
                                             {season.name}
                                         </div>
@@ -239,11 +258,7 @@ export default function GlobalAnalyticsPage() {
                                                 <div key={idx} style={{
                                                     flex: idx === 0 ? "1.3" : "1",
                                                     minWidth: 160,
-                                                    background: idx === 0
-                                                        ? "rgba(255,215,0,0.06)"
-                                                        : idx === 1
-                                                            ? "rgba(192,192,192,0.04)"
-                                                            : "rgba(205,127,50,0.04)",
+                                                    background: idx === 0 ? "rgba(255,215,0,0.06)" : idx === 1 ? "rgba(192,192,192,0.04)" : "rgba(205,127,50,0.04)",
                                                     border: `1px solid ${idx === 0 ? "rgba(255,215,0,0.2)" : idx === 1 ? "rgba(192,192,192,0.15)" : "rgba(205,127,50,0.12)"}`,
                                                     borderRadius: 10,
                                                     padding: "12px 14px",
@@ -251,50 +266,21 @@ export default function GlobalAnalyticsPage() {
                                                     alignItems: "center",
                                                     gap: 10,
                                                     boxShadow: medalGlow[idx],
-                                                    transition: "transform 0.2s",
                                                 }}>
-                                                    <div style={{
-                                                        fontSize: idx === 0 ? 28 : 22,
-                                                        lineHeight: 1,
-                                                        filter: idx === 0 ? "drop-shadow(0 0 6px rgba(255,215,0,0.4))" : "none",
-                                                    }}>
+                                                    <div style={{ fontSize: idx === 0 ? 28 : 22 }}>
                                                         {medalEmoji[idx]}
                                                     </div>
                                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                                        <div style={{
-                                                            fontWeight: 800,
-                                                            fontSize: idx === 0 ? 15 : 13,
-                                                            color: idx === 0 ? "var(--accent-gold)" : "var(--text-primary)",
-                                                            overflow: "hidden",
-                                                            textOverflow: "ellipsis",
-                                                            whiteSpace: "nowrap",
-                                                        }}>
+                                                        <div style={{ fontWeight: 800, fontSize: idx === 0 ? 15 : 13, color: idx === 0 ? "var(--accent-gold)" : "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                                             {p.playerName}
                                                         </div>
-                                                        <div style={{
-                                                            fontSize: 11,
-                                                            color: "var(--text-muted)",
-                                                            overflow: "hidden",
-                                                            textOverflow: "ellipsis",
-                                                            whiteSpace: "nowrap",
-                                                        }}>
+                                                        <div style={{ fontSize: 11, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                                             {p.team}
                                                         </div>
                                                     </div>
                                                     <div style={{ textAlign: "right" }}>
-                                                        <div style={{
-                                                            fontWeight: 800,
-                                                            fontSize: idx === 0 ? 16 : 14,
-                                                            color: idx === 0 ? "var(--accent-gold)" : "var(--text-primary)",
-                                                        }}>
-                                                            {p.pts} pts
-                                                        </div>
-                                                        <div style={{
-                                                            fontSize: 10,
-                                                            color: p.gd > 0 ? "var(--accent-green)" : p.gd < 0 ? "var(--accent-red)" : "var(--text-muted)",
-                                                        }}>
-                                                            {p.gd > 0 ? "+" : ""}{p.gd} GD
-                                                        </div>
+                                                        <div style={{ fontWeight: 800, fontSize: idx === 0 ? 16 : 14 }}>{p.pts} pts</div>
+                                                        <div style={{ fontSize: 10, color: p.gd > 0 ? "var(--accent-green)" : p.gd < 0 ? "var(--accent-red)" : "var(--text-muted)" }}>{p.gd > 0 ? "+" : ""}{p.gd} GD</div>
                                                     </div>
                                                 </div>
                                             ))}
@@ -307,6 +293,27 @@ export default function GlobalAnalyticsPage() {
                 );
             })()}
 
+            {/* Career Awards */}
+            <div className="grid-2" style={{ marginBottom: 24 }}>
+                {awards.map((award, i) => (
+                    <div key={i} className="card animate-fade-in" style={{
+                        padding: 20,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 16,
+                        animationDelay: `${i * 0.05}s`,
+                        background: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)",
+                    }}>
+                        <div style={{ fontSize: 32 }}>{award.icon}</div>
+                        <div>
+                            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 2 }}>{award.title}</div>
+                            <div style={{ fontSize: 16, fontWeight: 800, color: "var(--accent-gold)" }}>{award.winner?.name || "—"}</div>
+                            <div style={{ fontSize: 14, fontWeight: 700 }}>{award.winner ? award.value(award.winner) : "—"}</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
             {/* Radar */}
             <div className="card animate-fade-in" style={{ marginBottom: 24 }}>
                 <div className="analytics-card-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-color)" }}>
@@ -318,21 +325,108 @@ export default function GlobalAnalyticsPage() {
                 </div>
             </div>
 
-            {/* WDL */}
-            <div className="card animate-fade-in" style={{ marginBottom: 24, animationDelay: "0.05s" }}>
-                <div className="analytics-card-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-color)" }}>
-                    <span className="analytics-card-icon">🎯</span>
-                    <span className="analytics-card-title">All-Time W / D / L</span>
+            <div className="grid-2" style={{ marginBottom: 24 }}>
+                {/* WDL */}
+                <div className="card animate-fade-in">
+                    <div className="analytics-card-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-color)" }}>
+                        <span className="analytics-card-icon">🎯</span>
+                        <span className="analytics-card-title">All-Time W / D / L</span>
+                    </div>
+                    <div style={{ padding: 20 }}>
+                        <WDLCharts players={wdlPlayers} />
+                    </div>
                 </div>
-                <div style={{ padding: 20 }}>
-                    <WDLCharts players={wdlPlayers} />
+
+                {/* Recent Matches Feed */}
+                <div className="card animate-fade-in">
+                    <div className="analytics-card-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-color)" }}>
+                        <span className="analytics-card-icon">⚽</span>
+                        <span className="analytics-card-title">Recent Global Matches</span>
+                    </div>
+                    <div style={{ padding: "10px 20px" }}>
+                        {recentMatches.length === 0 ? (
+                            <p style={{ color: "var(--text-muted)", fontSize: 13, padding: 10 }}>No matches played yet.</p>
+                        ) : (
+                            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                                {recentMatches.map((m, i) => (
+                                    <li key={i} style={{
+                                        padding: "12px 0",
+                                        borderBottom: i === recentMatches.length - 1 ? "none" : "1px solid var(--border-color)",
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                    }}>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ fontSize: 13, fontWeight: 700 }}>
+                                                {m.homePlayerName} <span style={{ color: "var(--accent-cyan)" }}>{m.homeScore} – {m.awayScore}</span> {m.awayPlayerName}
+                                            </div>
+                                            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{m.tournamentName}</div>
+                                        </div>
+                                        <Link href={`/tournament/${m.tournamentId}`} style={{ fontSize: 18, textDecoration: "none" }}>🏟️</Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Global H2H Matrix */}
+            <div className="card animate-fade-in" style={{ marginBottom: 24, overflow: "hidden" }}>
+                <div className="analytics-card-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-color)" }}>
+                    <span className="analytics-card-icon">⚔️</span>
+                    <span className="analytics-card-title">All-Time Global Head-to-Head</span>
+                </div>
+                <div style={{ overflowX: "auto", padding: 20 }}>
+                    <table className="table" style={{ fontSize: 12 }}>
+                        <thead>
+                            <tr>
+                                <th style={{ position: "sticky", left: 0, background: "var(--bg-secondary)", zIndex: 1 }}>vs</th>
+                                {allPlayerNames.map((name) => (
+                                    <th key={name} style={{ textAlign: "center", minWidth: 80 }}>{name}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {allPlayerNames.map((rowName) => (
+                                <tr key={rowName}>
+                                    <td style={{ fontWeight: 600, position: "sticky", left: 0, background: "var(--bg-card)", zIndex: 1 }}>
+                                        {rowName}
+                                    </td>
+                                    {allPlayerNames.map((colName) => {
+                                        if (rowName === colName) {
+                                            return <td key={colName} style={{ textAlign: "center", background: "rgba(255,255,255,0.02)", color: "var(--text-muted)" }}>—</td>;
+                                        }
+                                        const cell = globalH2h.get(rowName.toLowerCase())?.get(colName.toLowerCase());
+                                        if (!cell || (cell.wins === 0 && cell.draws === 0 && cell.losses === 0)) {
+                                            return <td key={colName} style={{ textAlign: "center", color: "var(--text-muted)" }}>—</td>;
+                                        }
+                                        return (
+                                            <td key={colName} style={{ textAlign: "center" }}>
+                                                <div style={{ fontWeight: 700, fontSize: 13 }}>
+                                                    <span style={{ color: "var(--accent-green)" }}>{cell.wins}W</span>
+                                                    {" "}
+                                                    <span style={{ color: "var(--accent-gold)" }}>{cell.draws}D</span>
+                                                    {" "}
+                                                    <span style={{ color: "var(--accent-red)" }}>{cell.losses}L</span>
+                                                </div>
+                                                <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>
+                                                    {cell.goalsFor}–{cell.goalsAgainst}
+                                                </div>
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
             {/* All-Time Leaderboards */}
             <div className="grid-2" style={{ marginBottom: 24 }}>
                 {/* Golden Boot */}
-                <div className="card analytics-card animate-fade-in" style={{ animationDelay: "0.1s" }}>
+                <div className="card analytics-card animate-fade-in">
                     <div className="analytics-card-header">
                         <span className="analytics-card-icon">👟</span>
                         <span className="analytics-card-title">All-Time Top Scorers</span>
@@ -354,7 +448,7 @@ export default function GlobalAnalyticsPage() {
                 </div>
 
                 {/* MVP */}
-                <div className="card analytics-card animate-fade-in" style={{ animationDelay: "0.15s" }}>
+                <div className="card analytics-card animate-fade-in">
                     <div className="analytics-card-header">
                         <span className="analytics-card-icon">⭐</span>
                         <span className="analytics-card-title">All-Time MVP</span>
@@ -377,7 +471,7 @@ export default function GlobalAnalyticsPage() {
             </div>
 
             {/* Biggest Wins All-Time */}
-            <div className="card analytics-card animate-fade-in" style={{ marginBottom: 24, animationDelay: "0.2s" }}>
+            <div className="card analytics-card animate-fade-in" style={{ marginBottom: 24 }}>
                 <div className="analytics-card-header">
                     <span className="analytics-card-icon">💥</span>
                     <span className="analytics-card-title">All-Time Biggest Wins</span>
@@ -403,7 +497,7 @@ export default function GlobalAnalyticsPage() {
             </div>
 
             {/* Career Table */}
-            <div className="card animate-fade-in" style={{ animationDelay: "0.25s", overflow: "auto" }}>
+            <div className="card animate-fade-in" style={{ overflow: "auto" }}>
                 <div className="analytics-card-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-color)" }}>
                     <span className="analytics-card-icon">📊</span>
                     <span className="analytics-card-title">All-Time Career Stats</span>
@@ -421,8 +515,8 @@ export default function GlobalAnalyticsPage() {
                             <th style={{ textAlign: "center" }}>Win%</th>
                             <th style={{ textAlign: "center" }}>Goals</th>
                             <th style={{ textAlign: "center" }}>G/M</th>
+                            <th style={{ textAlign: "center" }}>Poss%</th>
                             <th style={{ textAlign: "center" }}>CS</th>
-                            <th style={{ textAlign: "center" }}>MOTM</th>
                             <th style={{ textAlign: "center" }}>Rtg</th>
                         </tr>
                     </thead>
@@ -432,6 +526,7 @@ export default function GlobalAnalyticsPage() {
                             const wp = cc.totalMatches > 0 ? Math.round((cc.totalWins / cc.totalMatches) * 100) : 0;
                             const ar = cc.totalRatedMatches > 0 ? (cc.totalRatingSum / cc.totalRatedMatches).toFixed(1) : "—";
                             const gpm = cc.totalMatches > 0 ? (cc.totalGoals / cc.totalMatches).toFixed(1) : "0";
+                            const ap = cc.totalPossessionMatches > 0 ? Math.round(cc.totalPossessionSum / cc.totalPossessionMatches) : "—";
                             return (
                                 <tr key={p.id}>
                                     <td style={{ fontWeight: idx === 0 ? 800 : 600, color: idx === 0 ? "var(--accent-gold)" : "var(--text-secondary)" }}>
@@ -451,8 +546,8 @@ export default function GlobalAnalyticsPage() {
                                     <td style={{ textAlign: "center", fontWeight: 700 }}>{wp}%</td>
                                     <td style={{ textAlign: "center", fontWeight: 700, color: "var(--accent-cyan)" }}>{cc.totalGoals}</td>
                                     <td style={{ textAlign: "center", fontSize: 12 }}>{gpm}</td>
+                                    <td style={{ textAlign: "center", fontSize: 12 }}>{ap}{ap !== "—" ? "%" : ""}</td>
                                     <td style={{ textAlign: "center" }}>{cc.totalCleanSheets}</td>
-                                    <td style={{ textAlign: "center", color: "var(--accent-purple)" }}>{cc.totalMotm}</td>
                                     <td style={{
                                         textAlign: "center",
                                         fontWeight: 700,

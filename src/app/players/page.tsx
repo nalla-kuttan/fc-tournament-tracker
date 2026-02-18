@@ -11,9 +11,14 @@ export default function PlayersPage() {
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
-        syncCareerStats(listTournaments());
-        setPlayers(getCareerLeaderboard());
-        setLoaded(true);
+        async function init() {
+            const ts = await listTournaments();
+            await syncCareerStats(ts);
+            const leaderboard = await getCareerLeaderboard();
+            setPlayers(leaderboard);
+            setLoaded(true);
+        }
+        init();
     }, []);
 
     if (!loaded) return null;
@@ -31,13 +36,22 @@ export default function PlayersPage() {
                     <h2 className="section-title">👤 Player Registry</h2>
                     <p className="section-subtitle">Career stats across all tournaments</p>
                 </div>
-                <Link
-                    href="/players/analytics"
-                    className="btn btn-primary"
-                    style={{ fontSize: 13, padding: "8px 18px", textDecoration: "none" }}
-                >
-                    🌍 Global Analytics
-                </Link>
+                <div style={{ display: "flex", gap: 10 }}>
+                    <Link
+                        href="/analytics/h2h"
+                        className="btn btn-secondary"
+                        style={{ fontSize: 13, padding: "8px 18px", textDecoration: "none" }}
+                    >
+                        ⚔️ H2H Comparison
+                    </Link>
+                    <Link
+                        href="/players/analytics"
+                        className="btn btn-primary"
+                        style={{ fontSize: 13, padding: "8px 18px", textDecoration: "none" }}
+                    >
+                        🌍 Global Analytics
+                    </Link>
+                </div>
             </div>
 
             {players.length === 0 ? (

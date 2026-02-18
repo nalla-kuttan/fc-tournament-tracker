@@ -29,8 +29,9 @@ export default function AnalyticsPage() {
     const id = params.id as string;
     const [tournament, setTournament] = useState<Tournament | null>(null);
 
-    const refresh = useCallback(() => {
-        setTournament(loadTournament(id));
+    const refresh = useCallback(async () => {
+        const t = await loadTournament(id);
+        setTournament(t);
     }, [id]);
 
     useEffect(() => {

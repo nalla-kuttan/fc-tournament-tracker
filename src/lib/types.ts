@@ -31,18 +31,21 @@ export interface Match {
   id: string;
   tournamentId: string;
   roundNumber: number;
-  homePlayerId: string; // "BYE" for bye rounds
-  awayPlayerId: string; // "BYE" for bye rounds
+  stage?: string; // "Round of 16", "Quarter-final", "Semi-final", "Final"
+  homePlayerId: string | null; // "BYE" for bye rounds, null if not yet determined
+  awayPlayerId: string | null; // "BYE" for bye rounds, null if not yet determined
   homeScore: number | null;
   awayScore: number | null;
   isPlayed: boolean;
+  nextMatchId?: string;
+  isHomeInNextMatch?: boolean;
   homeStats: MatchStats | null;
   awayStats: MatchStats | null;
   homeGoalscorers: GoalEntry[];
   awayGoalscorers: GoalEntry[];
 }
 
-export type TournamentFormat = "single" | "double";
+export type TournamentFormat = "single" | "double" | "knockout";
 export type TournamentStatus = "active" | "completed";
 
 export interface Tournament {
@@ -83,9 +86,13 @@ export interface CareerStats {
   totalDraws: number;
   totalLosses: number;
   totalGoals: number;
+  totalConceded: number;
   totalCleanSheets: number;
+  totalXg: number;
   totalRatingSum: number;
   totalRatedMatches: number;
+  totalPossessionSum: number;
+  totalPossessionMatches: number;
   totalMotm: number;
   tournamentsPlayed: string[]; // tournament IDs
 }
@@ -96,4 +103,12 @@ export interface RegisteredPlayer {
   team: string; // most recent team
   createdAt: string;
   career: CareerStats;
+}
+
+export interface HallOfFameEntry {
+  id: string;
+  tournamentName: string;
+  winnerName: string;
+  winnerTeam: string;
+  date: string;
 }

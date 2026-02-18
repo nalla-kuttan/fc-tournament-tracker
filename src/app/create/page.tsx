@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Player, Tournament, TournamentFormat, RegisteredPlayer } from "@/lib/types";
 import { generateSchedule } from "@/lib/scheduler";
+import { generateKnockoutSchedule } from "@/lib/knockoutScheduler";
 import { saveTournament } from "@/lib/storage";
 import { getOrCreatePlayer, loadRegistry } from "@/lib/playerRegistry";
 
@@ -39,10 +40,10 @@ function PlayerRow({
     const [showSuggestions, setShowSuggestions] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
-    const handleNameChange = (value: string) => {
+    const handleNameChange = async (value: string) => {
         updatePlayer(idx, "name", value);
         if (value.trim().length >= 1) {
-            const registry = loadRegistry();
+            const registry = await loadRegistry();
             const matches = registry.filter((p) =>
                 p.name.toLowerCase().includes(value.toLowerCase())
             );
@@ -82,9 +83,16 @@ function PlayerRow({
                     placeholder={`Player ${idx + 1}`}
                     value={player.name}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    onFocus={() => {
-                        if (suggestions.length > 0 && player.name.trim().length >= 1) {
-                            setShowSuggestions(true);
+                    onFocus={async () => {
+                        if (player.name.trim().length >= 1) {
+                            const registry = await loadRegistry();
+                            const matches = registry.filter((p) =>
+                                p.name.toLowerCase().includes(player.name.toLowerCase())
+                            );
+                            if (matches.length > 0) {
+                                setSuggestions(matches.slice(0, 5));
+                                setShowSuggestions(true);
+                            }
                         }
                     }}
                 />
@@ -184,7 +192,7 @@ export default function CreatePage() {
         setPlayers(updated);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         const validPlayers = players.filter((p) => p.name.trim());
@@ -205,7 +213,9 @@ export default function CreatePage() {
             team: p.team.trim() || "TBD",
         }));
 
-        const matches = generateSchedule(playerObjs, tournamentId, format);
+        const matches = format === "knockout"
+            ? generateKnockoutSchedule(playerObjs, tournamentId)
+            : generateSchedule(playerObjs, tournamentId, format);
 
         const tournament: Tournament = {
             id: tournamentId,
@@ -220,10 +230,10 @@ export default function CreatePage() {
 
         // Register all players in the global player registry
         for (const p of playerObjs) {
-            getOrCreatePlayer(p.name, p.team, p.id);
+            await getOrCreatePlayer(p.name, p.team, p.id);
         }
 
-        saveTournament(tournament);
+        await saveTournament(tournament);
         router.push(`/tournament/${tournamentId}`);
     };
 
@@ -265,8 +275,9 @@ export default function CreatePage() {
                                 value={format}
                                 onChange={(e) => setFormat(e.target.value as TournamentFormat)}
                             >
-                                <option value="single">Single Leg (play everyone once)</option>
-                                <option value="double">Double Leg (home &amp; away)</option>
+                                <option value="single">Single Leg (League)</option>
+                                <option value="double">Double Leg (League)</option>
+                                <option value="knockout">Knockout (Tournament Bracket)</option>
                             </select>
                         </div>
                         <div className="form-group">

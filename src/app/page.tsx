@@ -2,26 +2,37 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Tournament } from "@/lib/types";
-import { listTournaments, deleteTournament } from "@/lib/storage";
+import { Tournament, HallOfFameEntry } from "@/lib/types";
+import { listTournaments, deleteTournament, getHallOfFame } from "@/lib/storage";
 import { useAdmin } from "@/lib/AdminContext";
 import { loadRegistry } from "@/lib/playerRegistry";
 
 export default function HomePage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [hallOfFame, setHallOfFame] = useState<HallOfFameEntry[]>([]);
   const [loaded, setLoaded] = useState(false);
   const { isAdmin, openPinModal } = useAdmin();
   const [deleteTarget, setDeleteTarget] = useState<Tournament | null>(null);
+  const [totalPlayers, setTotalPlayers] = useState(0);
 
   useEffect(() => {
-    setTournaments(listTournaments());
-    setLoaded(true);
+    async function init() {
+      const ts = await listTournaments();
+      const hof = await getHallOfFame();
+      const registry = await loadRegistry();
+      setTournaments(ts);
+      setHallOfFame(hof);
+      setTotalPlayers(registry.length);
+      setLoaded(true);
+    }
+    init();
   }, []);
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteTarget) {
-      deleteTournament(deleteTarget.id);
-      setTournaments(listTournaments());
+      await deleteTournament(deleteTarget.id);
+      const ts = await listTournaments();
+      setTournaments(ts);
       setDeleteTarget(null);
     }
   };
@@ -34,7 +45,6 @@ export default function HomePage() {
   const totalGoals = tournaments.reduce((sum, t) => {
     return sum + t.matches.filter((m) => m.isPlayed).reduce((ms, m) => ms + (m.homeScore ?? 0) + (m.awayScore ?? 0), 0);
   }, 0);
-  const totalPlayers = loaded ? loadRegistry().length : 0;
 
   return (
     <>
@@ -134,6 +144,35 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Hall of Fame */}
+      {loaded && hallOfFame.length > 0 && (
+        <div className="container page" style={{ paddingBottom: 0 }}>
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">🏆 Hall of Fame</h2>
+              <p className="section-subtitle">Champions of internal tournaments</p>
+            </div>
+          </div>
+          <div className="grid-3">
+            {hallOfFame.map((entry, i) => (
+              <div key={entry.id} className="card animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ fontSize: 32 }}>👑</div>
+                  <div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: "var(--accent-gold)" }}>{entry.winnerName}</div>
+                    <div style={{ fontSize: 14, color: "var(--text-secondary)" }}>{entry.winnerTeam}</div>
+                  </div>
+                </div>
+                <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--border-color)", fontSize: 13, color: "var(--text-muted)" }}>
+                  Won <strong>{entry.tournamentName}</strong>
+                  <div style={{ fontSize: 11, marginTop: 4 }}>{new Date(entry.date).toLocaleDateString()}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tournaments list */}
       <div className="container page">

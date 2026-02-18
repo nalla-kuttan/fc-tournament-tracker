@@ -7,7 +7,8 @@ import { Tournament, Match, MatchStats, Player, GoalEntry } from "@/lib/types";
 import { loadTournament, saveTournament, listTournaments } from "@/lib/storage";
 import { syncCareerStats } from "@/lib/playerRegistry";
 
-function getPlayer(players: Player[], id: string): Player | undefined {
+function getPlayer(players: Player[], id: string | null): Player | undefined {
+    if (!id || id === "BYE") return undefined;
     return players.find((p) => p.id === id);
 }
 
@@ -39,8 +40,8 @@ export default function MatchEntryPage() {
     const homeScore = homeScorers.length;
     const awayScore = awayScorers.length;
 
-    const refresh = useCallback(() => {
-        const t = loadTournament(tournamentId);
+    const refresh = useCallback(async () => {
+        const t = await loadTournament(tournamentId);
         if (!t) return;
         setTournament(t);
         const m = t.matches.find((m) => m.id === matchId);
@@ -49,7 +50,6 @@ export default function MatchEntryPage() {
             if (m.isPlayed) {
                 setHomeStats(m.homeStats ?? emptyStats());
                 setAwayStats(m.awayStats ?? emptyStats());
-                // Backward compat: old data may have string[] scorers
                 setHomeScorers(
                     m.homeGoalscorers.map((g) =>
                         typeof g === "string" ? { playerId: g } : g
@@ -74,7 +74,7 @@ export default function MatchEntryPage() {
     const homePlayer = getPlayer(tournament.players, match.homePlayerId);
     const awayPlayer = getPlayer(tournament.players, match.awayPlayerId);
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const updated: Tournament = {
             ...tournament,
             matches: tournament.matches.map((m) => {
@@ -91,15 +91,16 @@ export default function MatchEntryPage() {
                 };
             }),
         };
-        saveTournament(updated);
-        // Sync career stats across all tournaments
-        syncCareerStats(listTournaments());
+        await saveTournament(updated);
+        const ts = await listTournaments();
+        await syncCareerStats(ts);
         window.dispatchEvent(new Event("fc-update"));
         router.push(`/tournament/${tournamentId}`);
     };
 
     const addGoal = (side: "home" | "away") => {
         const playerId = side === "home" ? match.homePlayerId : match.awayPlayerId;
+        if (!playerId || playerId === "BYE") return;
         const entry: GoalEntry = { playerId };
         if (side === "home") {
             setHomeScorers([...homeScorers, entry]);
@@ -390,7 +391,9 @@ export default function MatchEntryPage() {
                                 <label className="form-label">Man of the Match?</label>
                                 <select className="form-select" value={homeStats.motmPlayerId ?? ""} onChange={(e) => updateStat("home", "motmPlayerId", e.target.value || null)}>
                                     <option value="">None</option>
-                                    <option value={match.homePlayerId}>{homePlayer?.name}</option>
+                                    {match.homePlayerId && match.homePlayerId !== "BYE" && (
+                                        <option value={match.homePlayerId}>{homePlayer?.name}</option>
+                                    )}
                                 </select>
                             </div>
                         </div>
@@ -424,7 +427,9 @@ export default function MatchEntryPage() {
                                 <label className="form-label">Man of the Match?</label>
                                 <select className="form-select" value={awayStats.motmPlayerId ?? ""} onChange={(e) => updateStat("away", "motmPlayerId", e.target.value || null)}>
                                     <option value="">None</option>
-                                    <option value={match.awayPlayerId}>{awayPlayer?.name}</option>
+                                    {match.awayPlayerId && match.awayPlayerId !== "BYE" && (
+                                        <option value={match.awayPlayerId}>{awayPlayer?.name}</option>
+                                    )}
                                 </select>
                             </div>
                         </div>

@@ -1,40 +1,35 @@
 import { Tournament } from "./types";
+import {
+    listTournaments as listTournamentsAction,
+    loadTournament as loadTournamentAction,
+    saveTournament as saveTournamentAction,
+    deleteTournament as deleteTournamentAction,
+    completeTournament as completeTournamentAction,
+    getHallOfFame as getHallOfFameAction
+} from "./actions/tournamentActions";
 
-const STORAGE_KEY = "fc-tracker-tournaments";
-
-function readAll(): Tournament[] {
-    if (typeof window === "undefined") return [];
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : [];
-    } catch {
-        return [];
-    }
+export async function listTournaments(): Promise<Tournament[]> {
+    return await listTournamentsAction();
 }
 
-function writeAll(tournaments: Tournament[]): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tournaments));
+export async function loadTournament(id: string): Promise<Tournament | null> {
+    return await loadTournamentAction(id);
 }
 
-export function listTournaments(): Tournament[] {
-    return readAll();
+export async function saveTournament(tournament: Tournament): Promise<void> {
+    await saveTournamentAction(tournament);
 }
 
-export function loadTournament(id: string): Tournament | null {
-    return readAll().find((t) => t.id === id) ?? null;
+
+
+export async function deleteTournament(id: string): Promise<void> {
+    await deleteTournamentAction(id);
 }
 
-export function saveTournament(tournament: Tournament): void {
-    const all = readAll();
-    const idx = all.findIndex((t) => t.id === tournament.id);
-    if (idx >= 0) {
-        all[idx] = tournament;
-    } else {
-        all.push(tournament);
-    }
-    writeAll(all);
+export async function completeTournament(id: string): Promise<void> {
+    await completeTournamentAction(id);
 }
 
-export function deleteTournament(id: string): void {
-    writeAll(readAll().filter((t) => t.id !== id));
+export async function getHallOfFame(): Promise<any[]> {
+    return await getHallOfFameAction();
 }

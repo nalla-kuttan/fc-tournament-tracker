@@ -12,6 +12,7 @@ import {
     PlayerMatchRecord,
     TournamentBreakdown,
 } from "@/lib/standings";
+import FormMomentumChart from "@/components/FormMomentumChart";
 import dynamic from "next/dynamic";
 
 const WDLCharts = dynamic(() => import("@/components/DoughnutChart"), { ssr: false });
@@ -27,18 +28,21 @@ export default function PlayerProfilePage() {
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
-        const tournaments = listTournaments();
-        syncCareerStats(tournaments);
-        const registry = loadRegistry();
-        const found = registry.find(
-            (p) => p.name.toLowerCase() === playerName.toLowerCase()
-        );
-        if (found) {
-            setPlayer(found);
-            setMatches(getPlayerMatchHistory(found.name, tournaments));
-            setBreakdowns(getPlayerTournamentBreakdowns(found.name, tournaments));
+        async function init() {
+            const tournaments = await listTournaments();
+            await syncCareerStats(tournaments);
+            const registry = await loadRegistry();
+            const found = registry.find(
+                (p) => p.name.toLowerCase() === playerName.toLowerCase()
+            );
+            if (found) {
+                setPlayer(found);
+                setMatches(getPlayerMatchHistory(found.name, tournaments));
+                setBreakdowns(getPlayerTournamentBreakdowns(found.name, tournaments));
+            }
+            setLoaded(true);
         }
-        setLoaded(true);
+        init();
     }, [playerName]);
 
     if (!loaded) return null;
@@ -77,16 +81,15 @@ export default function PlayerProfilePage() {
     })();
 
     // Radar data (single player)
-    const maxGoals = c.totalGoals || 1;
     const radarPlayers = [{
         playerName: player.name,
         color: "",
-        goals: Math.min(100, (c.totalGoals / Math.max(maxGoals, 5)) * 100),
+        goals: Math.min(100, (c.totalGoals / Math.max(c.totalMatches * 2.5, 5)) * 100), // ~2.5 goals/match is 100%
         cleanSheets: Math.min(100, (c.totalCleanSheets / Math.max(c.totalMatches, 1)) * 100),
         winRate: winPct,
         avgRating: ((Number(avgRtg) || 0) / 10) * 100,
-        possession: matches.filter(m => m.possession !== null).length > 0
-            ? Math.round(matches.filter(m => m.possession !== null).reduce((sum, m) => sum + (m.possession ?? 0), 0) / matches.filter(m => m.possession !== null).length)
+        possession: c.totalPossessionMatches > 0
+            ? Math.round(c.totalPossessionSum / c.totalPossessionMatches)
             : 50,
     }];
 
@@ -207,6 +210,22 @@ export default function PlayerProfilePage() {
                     <div style={{ padding: 16 }}>
                         <RadarChart players={radarPlayers} />
                     </div>
+                </div>
+            </div>
+
+            {/* ── Momentum Chart ─────────────────────────── */}
+            <div className="card animate-fade-in" style={{ marginBottom: 24, animationDelay: "0.12s" }}>
+                <div className="analytics-card-header" style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-color)" }}>
+                    <span className="analytics-card-icon">📈</span>
+                    <span className="analytics-card-title">Performance Momentum (Last 20 Matches)</span>
+                </div>
+                <div style={{ padding: 20 }}>
+                    <FormMomentumChart data={matches.slice(-20).map(m => ({
+                        date: m.tournamentId,
+                        tournamentName: m.tournamentName,
+                        rating: m.rating || 0,
+                        result: m.result
+                    }))} />
                 </div>
             </div>
 
