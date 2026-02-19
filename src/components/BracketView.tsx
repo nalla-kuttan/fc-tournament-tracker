@@ -17,7 +17,10 @@ export default function BracketView({
     tournamentId,
     isAdmin,
 }: BracketViewProps) {
-    const getPlayer = (id: string) => players.find((p) => p.id === id);
+    const getPlayer = (id: string | null | undefined) => {
+        if (!id) return undefined;
+        return players.find((p) => p.id === id);
+    };
 
     // Group matches by round number
     const roundNumbers = Array.from(new Set(matches.map((m) => m.roundNumber))).sort((a, b) => a - b);
