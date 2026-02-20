@@ -36,6 +36,7 @@ export function computeStandings(
 
     // Accumulate
     for (const m of played) {
+        if (!m.homePlayerId || !m.awayPlayerId) continue;
         const home = map.get(m.homePlayerId);
         const away = map.get(m.awayPlayerId);
         if (!home || !away) continue;
@@ -175,6 +176,7 @@ export function getGoldenGlove(
 ): CleanSheetEntry[] {
     const csMap = new Map<string, number>();
     for (const m of matches.filter((m) => m.isPlayed)) {
+        if (!m.homePlayerId || !m.awayPlayerId) continue;
         if (m.homePlayerId !== "BYE" && m.awayPlayerId !== "BYE") {
             if ((m.awayScore ?? 0) === 0) {
                 csMap.set(m.homePlayerId, (csMap.get(m.homePlayerId) ?? 0) + 1);
@@ -212,6 +214,7 @@ export function getUnluckyIndex(
     const xgMap = new Map<string, number>();
 
     for (const m of matches.filter((m) => m.isPlayed)) {
+        if (!m.homePlayerId || !m.awayPlayerId) continue;
         if (m.homePlayerId !== "BYE" && m.awayPlayerId !== "BYE") {
             goalMap.set(
                 m.homePlayerId,
@@ -269,6 +272,7 @@ export function getMvpLeaderboard(
     const motmCounts = new Map<string, number>();
 
     for (const m of matches.filter((m) => m.isPlayed)) {
+        if (!m.homePlayerId || !m.awayPlayerId) continue;
         if (m.homeStats) {
             const arr = ratings.get(m.homePlayerId) ?? [];
             arr.push(m.homeStats.rating);
@@ -328,6 +332,7 @@ export function getWinRates(players: Player[], matches: Match[]): WinRateEntry[]
     for (const p of players) stats.set(p.id, { played: 0, wins: 0 });
 
     for (const m of matches.filter((m) => m.isPlayed && m.homePlayerId !== "BYE" && m.awayPlayerId !== "BYE")) {
+        if (!m.homePlayerId || !m.awayPlayerId) continue;
         const hs = m.homeScore ?? 0;
         const as = m.awayScore ?? 0;
         const h = stats.get(m.homePlayerId);
@@ -365,6 +370,7 @@ export function getAvgGoals(players: Player[], matches: Match[]): AvgGoalsEntry[
     for (const p of players) stats.set(p.id, { goals: 0, played: 0 });
 
     for (const m of matches.filter((m) => m.isPlayed && m.homePlayerId !== "BYE" && m.awayPlayerId !== "BYE")) {
+        if (!m.homePlayerId || !m.awayPlayerId) continue;
         const h = stats.get(m.homePlayerId);
         const a = stats.get(m.awayPlayerId);
         if (h) { h.played++; h.goals += m.homeScore ?? 0; }
@@ -398,10 +404,10 @@ export interface BiggestWinEntry {
 export function getBiggestWins(players: Player[], matches: Match[]): BiggestWinEntry[] {
     const pMap = new Map(players.map((p) => [p.id, p.name]));
     return matches
-        .filter((m) => m.isPlayed && m.homePlayerId !== "BYE" && m.awayPlayerId !== "BYE")
+        .filter((m) => m.isPlayed && m.homePlayerId && m.awayPlayerId && m.homePlayerId !== "BYE" && m.awayPlayerId !== "BYE")
         .map((m) => ({
-            homePlayerName: pMap.get(m.homePlayerId) ?? "?",
-            awayPlayerName: pMap.get(m.awayPlayerId) ?? "?",
+            homePlayerName: pMap.get(m.homePlayerId!) ?? "?",
+            awayPlayerName: pMap.get(m.awayPlayerId!) ?? "?",
             homeScore: m.homeScore ?? 0,
             awayScore: m.awayScore ?? 0,
             margin: Math.abs((m.homeScore ?? 0) - (m.awayScore ?? 0)),
@@ -433,6 +439,7 @@ export function getH2HMatrix(
     }
 
     for (const m of matches.filter((m) => m.isPlayed && m.homePlayerId !== "BYE" && m.awayPlayerId !== "BYE")) {
+        if (!m.homePlayerId || !m.awayPlayerId) continue;
         const hs = m.homeScore ?? 0;
         const as = m.awayScore ?? 0;
         const hRow = matrix.get(m.homePlayerId)?.get(m.awayPlayerId);
@@ -469,6 +476,7 @@ export function getPossessionKings(players: Player[], matches: Match[]): Possess
     for (const p of players) data.set(p.id, []);
 
     for (const m of matches.filter((m) => m.isPlayed && m.homePlayerId !== "BYE" && m.awayPlayerId !== "BYE")) {
+        if (!m.homePlayerId || !m.awayPlayerId) continue;
         if (m.homeStats) data.get(m.homePlayerId)?.push(m.homeStats.possession);
         if (m.awayStats) data.get(m.awayPlayerId)?.push(m.awayStats.possession);
     }
@@ -684,7 +692,7 @@ export function getGlobalRecentMatches(
         const pMap = new Map(t.players.map(p => [p.id, p.name]));
 
         for (const m of t.matches) {
-            if (m.isPlayed && m.homePlayerId !== "BYE" && m.awayPlayerId !== "BYE") {
+            if (m.isPlayed && m.homePlayerId && m.awayPlayerId && m.homePlayerId !== "BYE" && m.awayPlayerId !== "BYE") {
                 allMatches.push({
                     ...m,
                     tournamentName: t.name,
@@ -726,7 +734,7 @@ export function getGlobalH2H(
         const pMap = new Map(t.players.map(p => [p.id, p.name.toLowerCase()]));
 
         for (const m of t.matches) {
-            if (!m.isPlayed || m.homePlayerId === "BYE" || m.awayPlayerId === "BYE") continue;
+            if (!m.isPlayed || !m.homePlayerId || !m.awayPlayerId || m.homePlayerId === "BYE" || m.awayPlayerId === "BYE") continue;
 
             const p1 = pMap.get(m.homePlayerId);
             const p2 = pMap.get(m.awayPlayerId);

@@ -1,14 +1,14 @@
-0 verbose cli /Users/ruban/.nvm/versions/node/v22.20.0/bin/node /Users/ruban/.nvm/versions/node/v22.20.0/lib/node_modules/npm/bin/npm-cli.js
+0 verbose cli /Users/ruban/.nvm/versions/node/v22.20.0/bin/node /Users/ruban/.nvm/versions/node/v22.20.0/bin/npm
 1 info using npm@11.6.2
 2 info using node@v22.20.0
 3 silly config load:file:/Users/ruban/.nvm/versions/node/v22.20.0/lib/node_modules/npm/npmrc
 4 silly config load:file:/Users/ruban/.gemini/antigravity/playground/inner-celestial/.npmrc
 5 silly config load:file:/Users/ruban/.npmrc
 6 silly config load:file:/Users/ruban/.nvm/versions/node/v22.20.0/etc/npmrc
-7 verbose title npm exec prisma generate
-8 verbose argv "exec" "--" "prisma" "generate"
-9 verbose logfile logs-max:10 dir:/Users/ruban/.gemini/antigravity/playground/inner-celestial/.npm_cache/_logs/2026-02-18T17_13_37_399Z-
-10 verbose logfile /Users/ruban/.gemini/antigravity/playground/inner-celestial/.npm_cache/_logs/2026-02-18T17_13_37_399Z-debug-0.log
+7 verbose title npm run build
+8 verbose argv "run" "build"
+9 verbose logfile logs-max:10 dir:/Users/ruban/.gemini/antigravity/playground/inner-celestial/.npm_cache/_logs/2026-02-20T08_44_23_368Z-
+10 verbose logfile /Users/ruban/.gemini/antigravity/playground/inner-celestial/.npm_cache/_logs/2026-02-20T08_44_23_368Z-debug-0.log
 11 silly logfile start cleaning logs, removing 1 files
 12 silly logfile done cleaning log files
 13 verbose cwd /Users/ruban/.gemini/antigravity/playground/inner-celestial
