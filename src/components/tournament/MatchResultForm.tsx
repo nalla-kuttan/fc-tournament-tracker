@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -84,6 +84,69 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
   const [error, setError] = useState('');
 
   const allPlayers = [match.home_player, match.away_player].filter(Boolean) as Player[];
+  const homePlayerId = match.home_player?.id;
+  const awayPlayerId = match.away_player?.id;
+
+  // Automatically update goals when score changes
+  useEffect(() => {
+    const targetHomeGoals = typeof homeScore === 'number' ? homeScore : 0;
+    const targetAwayGoals = typeof awayScore === 'number' ? awayScore : 0;
+    const targetTotalGoals = targetHomeGoals + targetAwayGoals;
+
+    // Count current home and away goals
+    const currentHomeGoals = goals.filter(g => g.player_id === homePlayerId).length;
+    const currentAwayGoals = goals.filter(g => g.player_id === awayPlayerId).length;
+
+    setGoals((prev) => {
+      let updated = [...prev];
+
+      // Add home goals if needed
+      if (currentHomeGoals < targetHomeGoals) {
+        const goalsToAdd = targetHomeGoals - currentHomeGoals;
+        for (let i = 0; i < goalsToAdd; i++) {
+          updated.push({ player_id: homePlayerId ?? '', minute: '' });
+        }
+      }
+
+      // Remove home goals if needed (from the end)
+      if (currentHomeGoals > targetHomeGoals) {
+        const goalsToRemove = currentHomeGoals - targetHomeGoals;
+        let removed = 0;
+        for (let i = updated.length - 1; i >= 0 && removed < goalsToRemove; i--) {
+          if (updated[i].player_id === homePlayerId) {
+            updated.splice(i, 1);
+            removed++;
+          }
+        }
+      }
+
+      // Count again after home goal updates
+      const newHomeGoals = updated.filter(g => g.player_id === homePlayerId).length;
+      const newAwayGoals = updated.filter(g => g.player_id === awayPlayerId).length;
+
+      // Add away goals if needed
+      if (newAwayGoals < targetAwayGoals) {
+        const goalsToAdd = targetAwayGoals - newAwayGoals;
+        for (let i = 0; i < goalsToAdd; i++) {
+          updated.push({ player_id: awayPlayerId ?? '', minute: '' });
+        }
+      }
+
+      // Remove away goals if needed (from the end)
+      if (newAwayGoals > targetAwayGoals) {
+        const goalsToRemove = newAwayGoals - targetAwayGoals;
+        let removed = 0;
+        for (let i = updated.length - 1; i >= 0 && removed < goalsToRemove; i--) {
+          if (updated[i].player_id === awayPlayerId) {
+            updated.splice(i, 1);
+            removed++;
+          }
+        }
+      }
+
+      return updated;
+    });
+  }, [homeScore, awayScore, homePlayerId, awayPlayerId]);
 
   const addGoal = () => {
     setGoals((prev) => [...prev, { player_id: allPlayers[0]?.id ?? '', minute: '' }]);
