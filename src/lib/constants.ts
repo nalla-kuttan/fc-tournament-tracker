@@ -115,7 +115,6 @@ export const TEAMS = [
   'Dinamo Zagreb',
   'Feyenoord',
   'Galatasaray',
-  'Juventus',
   'Porto',
   'PSV Eindhoven',
   'Rangers',
