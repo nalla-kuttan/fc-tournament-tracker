@@ -43,30 +43,42 @@ interface Props {
     away_player: Player | null;
     round_number: number;
     stage: string | null;
+    home_score?: number | null;
+    away_score?: number | null;
+    is_played?: boolean;
+    stats?: Record<string, any>;
+    goals?: Array<{ id: string; player: { id: string; name: string } | null; minute: number | null }>;
   };
+  isEditing?: boolean;
+  onSuccess?: () => void;
 }
 
-export default function MatchResultForm({ match }: Props) {
+export default function MatchResultForm({ match, isEditing = false, onSuccess }: Props) {
   const router = useRouter();
   const { getPinForTournament } = useAdmin();
 
-  const [homeScore, setHomeScore] = useState<number | ''>(0);
-  const [awayScore, setAwayScore] = useState<number | ''>(0);
-  const [goals, setGoals] = useState<GoalEntry[]>([]);
+  // Initialize with existing data if editing
+  const stats = match.stats || {};
+
+  const [homeScore, setHomeScore] = useState<number | ''>(match.home_score ?? 0);
+  const [awayScore, setAwayScore] = useState<number | ''>(match.away_score ?? 0);
+  const [goals, setGoals] = useState<GoalEntry[]>(
+    match.goals?.map(g => ({ player_id: g.player?.id ?? '', minute: g.minute ?? '' })) ?? []
+  );
 
   // Advanced stats
-  const [homeXg, setHomeXg] = useState<number | ''>('');
-  const [awayXg, setAwayXg] = useState<number | ''>('');
-  const [homePossession, setHomePossession] = useState<number>(50);
-  const [awayPossession, setAwayPossession] = useState<number>(50);
-  const [homeTackles, setHomeTackles] = useState<number | ''>('');
-  const [awayTackles, setAwayTackles] = useState<number | ''>('');
-  const [homeInterceptions, setHomeInterceptions] = useState<number | ''>('');
-  const [awayInterceptions, setAwayInterceptions] = useState<number | ''>('');
-  const [homeRating, setHomeRating] = useState<number>(6);
-  const [awayRating, setAwayRating] = useState<number>(6);
-  const [motmPlayerId, setMotmPlayerId] = useState<string>('');
-  const [motmRating, setMotmRating] = useState<number>(7);
+  const [homeXg, setHomeXg] = useState<number | ''>(stats.home_xg ?? '');
+  const [awayXg, setAwayXg] = useState<number | ''>(stats.away_xg ?? '');
+  const [homePossession, setHomePossession] = useState<number>(stats.home_possession ?? 50);
+  const [awayPossession, setAwayPossession] = useState<number>(stats.away_possession ?? 50);
+  const [homeTackles, setHomeTackles] = useState<number | ''>(stats.home_tackles ?? '');
+  const [awayTackles, setAwayTackles] = useState<number | ''>(stats.away_tackles ?? '');
+  const [homeInterceptions, setHomeInterceptions] = useState<number | ''>(stats.home_interceptions ?? '');
+  const [awayInterceptions, setAwayInterceptions] = useState<number | ''>(stats.away_interceptions ?? '');
+  const [homeRating, setHomeRating] = useState<number>(stats.home_rating ?? 6);
+  const [awayRating, setAwayRating] = useState<number>(stats.away_rating ?? 6);
+  const [motmPlayerId, setMotmPlayerId] = useState<string>(stats.motm_player_id ?? '');
+  const [motmRating, setMotmRating] = useState<number>(stats.motm_rating ?? 7);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -130,8 +142,9 @@ export default function MatchResultForm({ match }: Props) {
         throw new Error(data.error || 'Failed to submit result');
       }
 
-      // Submit goals
-      if (goals.length > 0) {
+      // Submit goals (POST endpoint handles deletion of old goals and insertion of new ones)
+      // Always submit when editing (even with empty goals) to delete old ones; only submit when creating if goals exist
+      if (isEditing || goals.length > 0) {
         const goalRes = await fetch(`/api/matches/${match.id}/goals`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -151,9 +164,9 @@ export default function MatchResultForm({ match }: Props) {
         }
       }
 
-      // For knockout: advance winner
+      // For knockout: advance winner (only if not editing and scores differ)
       const updatedMatch = await matchRes.json();
-      if (updatedMatch.stage && homeScore !== '' && awayScore !== '' && homeScore !== awayScore) {
+      if (!isEditing && updatedMatch.stage && homeScore !== '' && awayScore !== '' && homeScore !== awayScore) {
         await fetch(`/api/tournaments/${match.tournament_id}/bracket/advance`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -161,8 +174,13 @@ export default function MatchResultForm({ match }: Props) {
         });
       }
 
-      router.push(`/tournaments/${match.tournament_id}`);
-      router.refresh();
+      // If editing, call onSuccess callback; otherwise navigate
+      if (isEditing) {
+        onSuccess?.();
+      } else {
+        router.push(`/tournaments/${match.tournament_id}`);
+        router.refresh();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {

@@ -5,12 +5,14 @@ import { useParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
+import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import AdminGate from '@/components/auth/AdminGate';
 import MatchResultForm from '@/components/tournament/MatchResultForm';
 import GlassCard from '@/components/shared/GlassCard';
 import CardContent from '@mui/material/CardContent';
+import EditIcon from '@mui/icons-material/Edit';
 import type { MatchStats } from '@/lib/types';
 
 interface MatchDetail {
@@ -35,6 +37,7 @@ export default function MatchDetailPage() {
   const tournamentId = params.tournamentId as string;
   const [match, setMatch] = useState<MatchDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     fetch(`/api/matches/${matchId}`)
@@ -78,11 +81,41 @@ export default function MatchDetailPage() {
   // Show match result details
   const stats = match.stats || {};
 
+  // If editing, show the form
+  if (isEditing) {
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+          <Typography variant="h5" fontWeight={700}>
+            Edit Match: Round {match.round_number} {match.stage && `- ${match.stage}`}
+          </Typography>
+          <Button onClick={() => setIsEditing(false)} variant="outlined">
+            Cancel
+          </Button>
+        </Box>
+        <AdminGate tournamentId={tournamentId}>
+          <MatchResultForm match={match as never} isEditing={true} onSuccess={() => setIsEditing(false)} />
+        </AdminGate>
+      </Box>
+    );
+  }
+
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} gutterBottom>
-        Round {match.round_number} {match.stage && `- ${match.stage}`}
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Typography variant="h5" fontWeight={700}>
+          Round {match.round_number} {match.stage && `- ${match.stage}`}
+        </Typography>
+        <AdminGate tournamentId={tournamentId}>
+          <Button
+            startIcon={<EditIcon />}
+            variant="contained"
+            onClick={() => setIsEditing(true)}
+          >
+            Edit Match
+          </Button>
+        </AdminGate>
+      </Box>
 
       {/* Score */}
       <GlassCard sx={{ mb: 3 }}>
