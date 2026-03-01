@@ -1,0 +1,415 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Slider from '@mui/material/Slider';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import IconButton from '@mui/material/IconButton';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import GlassCard from '@/components/shared/GlassCard';
+import CardContent from '@mui/material/CardContent';
+import { useAdmin } from '@/contexts/AdminContext';
+
+interface Player {
+  id: string;
+  name: string;
+  team: string;
+}
+
+interface GoalEntry {
+  player_id: string;
+  minute: number | '';
+}
+
+interface Props {
+  match: {
+    id: string;
+    tournament_id: string;
+    home_player: Player | null;
+    away_player: Player | null;
+    round_number: number;
+    stage: string | null;
+  };
+}
+
+export default function MatchResultForm({ match }: Props) {
+  const router = useRouter();
+  const { getPinForTournament } = useAdmin();
+
+  const [homeScore, setHomeScore] = useState<number | ''>(0);
+  const [awayScore, setAwayScore] = useState<number | ''>(0);
+  const [goals, setGoals] = useState<GoalEntry[]>([]);
+
+  // Advanced stats
+  const [homeXg, setHomeXg] = useState<number | ''>('');
+  const [awayXg, setAwayXg] = useState<number | ''>('');
+  const [homePossession, setHomePossession] = useState<number>(50);
+  const [awayPossession, setAwayPossession] = useState<number>(50);
+  const [homeTackles, setHomeTackles] = useState<number | ''>('');
+  const [awayTackles, setAwayTackles] = useState<number | ''>('');
+  const [homeInterceptions, setHomeInterceptions] = useState<number | ''>('');
+  const [awayInterceptions, setAwayInterceptions] = useState<number | ''>('');
+  const [homeRating, setHomeRating] = useState<number>(6);
+  const [awayRating, setAwayRating] = useState<number>(6);
+  const [motmPlayerId, setMotmPlayerId] = useState<string>('');
+  const [motmRating, setMotmRating] = useState<number>(7);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const allPlayers = [match.home_player, match.away_player].filter(Boolean) as Player[];
+
+  const addGoal = () => {
+    setGoals((prev) => [...prev, { player_id: allPlayers[0]?.id ?? '', minute: '' }]);
+  };
+
+  const removeGoal = (idx: number) => {
+    setGoals((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handlePossessionChange = (value: number) => {
+    setHomePossession(value);
+    setAwayPossession(100 - value);
+  };
+
+  const handleSubmit = async () => {
+    const pin = getPinForTournament(match.tournament_id);
+    if (!pin) {
+      setError('Not authenticated. Please unlock admin access first.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const stats = {
+        home_xg: homeXg !== '' ? homeXg : undefined,
+        away_xg: awayXg !== '' ? awayXg : undefined,
+        home_possession: homePossession,
+        away_possession: awayPossession,
+        home_tackles: homeTackles !== '' ? homeTackles : undefined,
+        away_tackles: awayTackles !== '' ? awayTackles : undefined,
+        home_interceptions: homeInterceptions !== '' ? homeInterceptions : undefined,
+        away_interceptions: awayInterceptions !== '' ? awayInterceptions : undefined,
+        home_rating: homeRating,
+        away_rating: awayRating,
+        motm_player_id: motmPlayerId || undefined,
+        motm_rating: motmPlayerId ? motmRating : undefined,
+      };
+
+      // Submit match result
+      const matchRes = await fetch(`/api/matches/${match.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          home_score: homeScore,
+          away_score: awayScore,
+          stats,
+          pin,
+          tournamentId: match.tournament_id,
+        }),
+      });
+
+      if (!matchRes.ok) {
+        const data = await matchRes.json();
+        throw new Error(data.error || 'Failed to submit result');
+      }
+
+      // Submit goals
+      if (goals.length > 0) {
+        const goalRes = await fetch(`/api/matches/${match.id}/goals`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            goals: goals.map((g) => ({
+              player_id: g.player_id,
+              minute: g.minute !== '' ? g.minute : null,
+            })),
+            pin,
+            tournamentId: match.tournament_id,
+          }),
+        });
+
+        if (!goalRes.ok) {
+          const data = await goalRes.json();
+          throw new Error(data.error || 'Failed to save goals');
+        }
+      }
+
+      // For knockout: advance winner
+      const updatedMatch = await matchRes.json();
+      if (updatedMatch.stage && homeScore !== '' && awayScore !== '' && homeScore !== awayScore) {
+        await fetch(`/api/tournaments/${match.tournament_id}/bracket/advance`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ matchId: match.id, pin }),
+        });
+      }
+
+      router.push(`/tournaments/${match.tournament_id}`);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {error && <Alert severity="error">{error}</Alert>}
+
+      {/* Score Input */}
+      <GlassCard>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Score
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                {match.home_player?.name} ({match.home_player?.team})
+              </Typography>
+              <TextField
+                type="number"
+                value={homeScore}
+                onChange={(e) => setHomeScore(e.target.value === '' ? '' : Number(e.target.value))}
+                inputProps={{ min: 0, style: { textAlign: 'center', fontSize: 32, fontWeight: 700 } }}
+                sx={{ width: 100 }}
+              />
+            </Box>
+            <Typography variant="h4" color="text.secondary">
+              —
+            </Typography>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                {match.away_player?.name} ({match.away_player?.team})
+              </Typography>
+              <TextField
+                type="number"
+                value={awayScore}
+                onChange={(e) => setAwayScore(e.target.value === '' ? '' : Number(e.target.value))}
+                inputProps={{ min: 0, style: { textAlign: 'center', fontSize: 32, fontWeight: 700 } }}
+                sx={{ width: 100 }}
+              />
+            </Box>
+          </Box>
+        </CardContent>
+      </GlassCard>
+
+      {/* Goal Scorers */}
+      <Accordion sx={{ bgcolor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography>Goal Scorers ({goals.length})</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {goals.map((goal, idx) => (
+            <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Scorer</InputLabel>
+                <Select
+                  value={goal.player_id}
+                  label="Scorer"
+                  onChange={(e) => {
+                    const next = [...goals];
+                    next[idx].player_id = e.target.value;
+                    setGoals(next);
+                  }}
+                >
+                  {allPlayers.map((p) => (
+                    <MenuItem key={p.id} value={p.id}>
+                      {p.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                size="small"
+                type="number"
+                label="Min"
+                value={goal.minute}
+                onChange={(e) => {
+                  const next = [...goals];
+                  next[idx].minute = e.target.value === '' ? '' : Number(e.target.value);
+                  setGoals(next);
+                }}
+                sx={{ width: 80 }}
+              />
+              <IconButton onClick={() => removeGoal(idx)} color="error" size="small">
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          ))}
+          <Button startIcon={<AddIcon />} onClick={addGoal} size="small">
+            Add Goal
+          </Button>
+        </AccordionDetails>
+      </Accordion>
+
+      {/* Advanced Stats */}
+      <Accordion sx={{ bgcolor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography>Advanced Stats</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* xG */}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
+                label={`${match.home_player?.name} xG`}
+                type="number"
+                value={homeXg}
+                onChange={(e) => setHomeXg(e.target.value === '' ? '' : Number(e.target.value))}
+                inputProps={{ step: 0.1, min: 0 }}
+                fullWidth
+              />
+              <TextField
+                label={`${match.away_player?.name} xG`}
+                type="number"
+                value={awayXg}
+                onChange={(e) => setAwayXg(e.target.value === '' ? '' : Number(e.target.value))}
+                inputProps={{ step: 0.1, min: 0 }}
+                fullWidth
+              />
+            </Box>
+
+            {/* Possession */}
+            <Box>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Possession: {homePossession}% - {awayPossession}%
+              </Typography>
+              <Slider
+                value={homePossession}
+                onChange={(_, v) => handlePossessionChange(v as number)}
+                min={0}
+                max={100}
+                sx={{ color: 'primary.main' }}
+              />
+            </Box>
+
+            {/* Tackles & Interceptions */}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
+                label={`${match.home_player?.name} Tackles`}
+                type="number"
+                value={homeTackles}
+                onChange={(e) => setHomeTackles(e.target.value === '' ? '' : Number(e.target.value))}
+                fullWidth
+              />
+              <TextField
+                label={`${match.away_player?.name} Tackles`}
+                type="number"
+                value={awayTackles}
+                onChange={(e) => setAwayTackles(e.target.value === '' ? '' : Number(e.target.value))}
+                fullWidth
+              />
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
+                label={`${match.home_player?.name} Interceptions`}
+                type="number"
+                value={homeInterceptions}
+                onChange={(e) => setHomeInterceptions(e.target.value === '' ? '' : Number(e.target.value))}
+                fullWidth
+              />
+              <TextField
+                label={`${match.away_player?.name} Interceptions`}
+                type="number"
+                value={awayInterceptions}
+                onChange={(e) => setAwayInterceptions(e.target.value === '' ? '' : Number(e.target.value))}
+                fullWidth
+              />
+            </Box>
+
+            {/* Ratings */}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  {match.home_player?.name} Rating: {homeRating}
+                </Typography>
+                <Slider
+                  value={homeRating}
+                  onChange={(_, v) => setHomeRating(v as number)}
+                  min={0}
+                  max={10}
+                  step={0.5}
+                />
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  {match.away_player?.name} Rating: {awayRating}
+                </Typography>
+                <Slider
+                  value={awayRating}
+                  onChange={(_, v) => setAwayRating(v as number)}
+                  min={0}
+                  max={10}
+                  step={0.5}
+                />
+              </Box>
+            </Box>
+
+            {/* MOTM */}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <FormControl fullWidth>
+                <InputLabel>Man of the Match</InputLabel>
+                <Select
+                  value={motmPlayerId}
+                  label="Man of the Match"
+                  onChange={(e) => setMotmPlayerId(e.target.value)}
+                >
+                  <MenuItem value="">None</MenuItem>
+                  {allPlayers.map((p) => (
+                    <MenuItem key={p.id} value={p.id}>
+                      {p.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              {motmPlayerId && (
+                <Box sx={{ minWidth: 120 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    MOTM Rating: {motmRating}
+                  </Typography>
+                  <Slider
+                    value={motmRating}
+                    onChange={(_, v) => setMotmRating(v as number)}
+                    min={0}
+                    max={10}
+                    step={0.5}
+                  />
+                </Box>
+              )}
+            </Box>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+
+      {/* Submit */}
+      <Button
+        variant="contained"
+        size="large"
+        onClick={handleSubmit}
+        disabled={loading || homeScore === '' || awayScore === ''}
+        fullWidth
+      >
+        {loading ? <CircularProgress size={24} /> : 'Save & Mark as Played'}
+      </Button>
+    </Box>
+  );
+}
