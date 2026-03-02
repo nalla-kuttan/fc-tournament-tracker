@@ -1,36 +1,56 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import PersonIcon from '@mui/icons-material/Person';
-import GlassCard from '@/components/shared/GlassCard';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import type { RegisteredPlayer } from '@/lib/types';
 
-export default function PlayerCard({ player }: { player: RegisteredPlayer }) {
+export default function PlayerCard({ player, showDivider = true }: { player: RegisteredPlayer; showDivider?: boolean }) {
   const router = useRouter();
 
   return (
-    <GlassCard
-      sx={{
-        cursor: 'pointer',
-        '&:hover': { borderColor: 'rgba(191, 90, 242, 0.3)' },
-      }}
+    <Box
       onClick={() => router.push(`/players/${player.id}`)}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        px: 2,
+        py: 1.5,
+        cursor: 'pointer',
+        borderBottom: showDivider ? '0.5px solid rgba(255,255,255,0.08)' : 'none',
+        '&:active': { background: 'rgba(255,255,255,0.05)' },
+      }}
     >
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <PersonIcon sx={{ color: 'secondary.main' }} />
-          <Box>
-            <Typography variant="h6" fontWeight={600}>
-              {player.name}
-            </Typography>
-            <Chip label={player.base_team} size="small" variant="outlined" sx={{ mt: 0.5 }} />
-          </Box>
-        </Box>
-      </CardContent>
-    </GlassCard>
+      {/* Avatar */}
+      <Box
+        sx={{
+          width: 40,
+          height: 40,
+          borderRadius: '50%',
+          background: 'rgba(10,132,255,0.15)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mr: 1.5,
+          flexShrink: 0,
+        }}
+      >
+        <PersonIcon sx={{ color: '#0A84FF', fontSize: 22 }} />
+      </Box>
+
+      {/* Info */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="body1" fontWeight={600} noWrap>
+          {player.name}
+        </Typography>
+        <Typography variant="caption" sx={{ color: '#8E8E93' }}>
+          {player.base_team}
+        </Typography>
+      </Box>
+
+      <ChevronRightIcon sx={{ color: '#48484A', fontSize: 20 }} />
+    </Box>
   );
 }

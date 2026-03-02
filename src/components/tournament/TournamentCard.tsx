@@ -1,12 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import GlassCard from '@/components/shared/GlassCard';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { TOURNAMENT_STATUSES } from '@/lib/constants';
 import type { Tournament } from '@/lib/types';
 
@@ -16,50 +14,66 @@ const FORMAT_ICONS: Record<string, string> = {
   cup: '🏅',
 };
 
-export default function TournamentCard({ tournament }: { tournament: Tournament }) {
+export default function TournamentCard({ tournament, showDivider = true }: { tournament: Tournament; showDivider?: boolean }) {
   const router = useRouter();
   const statusConfig = TOURNAMENT_STATUSES[tournament.status];
 
   return (
-    <GlassCard
-      sx={{
-        cursor: 'pointer',
-        '&:hover': {
-          borderColor: 'rgba(10, 132, 255, 0.3)',
-          transform: 'translateY(-4px)',
-        },
-      }}
+    <Box
       onClick={() => router.push(`/tournaments/${tournament.id}`)}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        px: 2,
+        py: 1.5,
+        cursor: 'pointer',
+        borderBottom: showDivider ? '0.5px solid rgba(255,255,255,0.08)' : 'none',
+        '&:active': { background: 'rgba(255,255,255,0.05)' },
+      }}
     >
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <EmojiEventsIcon sx={{ color: 'warning.main', fontSize: 20 }} />
-            <Typography variant="h6" fontWeight={700}>
-              {tournament.name}
-            </Typography>
-          </Box>
-          <Chip
-            label={statusConfig.label}
-            size="small"
-            sx={{
-              bgcolor: `${statusConfig.color}20`,
-              color: statusConfig.color,
-              fontWeight: 600,
-              fontSize: '0.7rem',
-            }}
-          />
-        </Box>
+      {/* Format icon */}
+      <Box
+        sx={{
+          width: 40,
+          height: 40,
+          borderRadius: '10px',
+          background: 'rgba(255,255,255,0.05)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mr: 1.5,
+          fontSize: '1.25rem',
+          flexShrink: 0,
+        }}
+      >
+        {FORMAT_ICONS[tournament.format] || '🏟️'}
+      </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            {FORMAT_ICONS[tournament.format]} {tournament.format.charAt(0).toUpperCase() + tournament.format.slice(1)}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            &bull; Created {new Date(tournament.created_at).toLocaleDateString()}
-          </Typography>
-        </Box>
-      </CardContent>
-    </GlassCard>
+      {/* Info */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="body1" fontWeight={600} noWrap>
+          {tournament.name}
+        </Typography>
+        <Typography variant="caption" sx={{ color: '#8E8E93' }}>
+          {tournament.format.charAt(0).toUpperCase() + tournament.format.slice(1)} &middot; {new Date(tournament.created_at).toLocaleDateString()}
+        </Typography>
+      </Box>
+
+      {/* Status chip */}
+      <Chip
+        label={statusConfig.label}
+        size="small"
+        sx={{
+          bgcolor: `${statusConfig.color}15`,
+          color: statusConfig.color,
+          fontWeight: 600,
+          fontSize: '0.7rem',
+          height: 24,
+          mr: 0.5,
+        }}
+      />
+
+      <ChevronRightIcon sx={{ color: '#48484A', fontSize: 20 }} />
+    </Box>
   );
 }

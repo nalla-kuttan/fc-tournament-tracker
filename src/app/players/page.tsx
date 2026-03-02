@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
 import Skeleton from '@mui/material/Skeleton';
 import AddIcon from '@mui/icons-material/Add';
 import PeopleIcon from '@mui/icons-material/People';
@@ -30,32 +29,57 @@ export default function PlayersPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Box>
-          <Typography variant="h4" fontWeight={700}>
-            Player Registry
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Registered players across all tournaments
-          </Typography>
-        </Box>
+      {/* iOS Large Title */}
+      <Typography
+        variant="h3"
+        sx={{
+          fontWeight: 700,
+          letterSpacing: '-0.5px',
+          mb: 3,
+          mt: 1,
+        }}
+      >
+        Players
+      </Typography>
+
+      {/* Section header */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, mb: 1 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: '#8E8E93',
+            textTransform: 'uppercase',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            letterSpacing: '0.5px',
+          }}
+        >
+          Registered Players
+        </Typography>
         <Button
-          variant="contained"
+          variant="text"
+          size="small"
           startIcon={<AddIcon />}
           onClick={() => router.push('/players/new')}
+          sx={{
+            color: '#0A84FF',
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            textTransform: 'none',
+            p: 0,
+            minWidth: 'auto',
+          }}
         >
-          Register Player
+          Add
         </Button>
       </Box>
 
       {loading ? (
-        <Grid container spacing={2}>
+        <Box sx={{ background: '#1C1C1E', borderRadius: '12px', p: 2 }}>
           {[1, 2, 3, 4].map((i) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
-              <Skeleton variant="rounded" height={80} sx={{ borderRadius: 3 }} />
-            </Grid>
+            <Skeleton key={i} variant="rounded" height={48} sx={{ borderRadius: 2, mb: i < 4 ? 1 : 0, bgcolor: 'rgba(255,255,255,0.05)' }} />
           ))}
-        </Grid>
+        </Box>
       ) : players.length === 0 ? (
         <EmptyState
           icon={<PeopleIcon sx={{ fontSize: 64 }} />}
@@ -68,13 +92,17 @@ export default function PlayersPage() {
           }
         />
       ) : (
-        <Grid container spacing={2}>
-          {players.map((p) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={p.id}>
-              <PlayerCard player={p} />
-            </Grid>
+        <Box
+          sx={{
+            background: '#1C1C1E',
+            borderRadius: '12px',
+            overflow: 'hidden',
+          }}
+        >
+          {players.map((p, index) => (
+            <PlayerCard key={p.id} player={p} showDivider={index < players.length - 1} />
           ))}
-        </Grid>
+        </Box>
       )}
     </Box>
   );

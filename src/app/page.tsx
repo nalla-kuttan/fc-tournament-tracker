@@ -7,14 +7,11 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Skeleton from '@mui/material/Skeleton';
-import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
-import CardContent from '@mui/material/CardContent';
 import AddIcon from '@mui/icons-material/Add';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import TournamentCard from '@/components/tournament/TournamentCard';
-import GlassCard from '@/components/shared/GlassCard';
 import EmptyState from '@/components/shared/EmptyState';
 import type { Tournament } from '@/lib/types';
 
@@ -50,120 +47,150 @@ export default function HomePage() {
 
   return (
     <Box>
-      {/* Hall of Fame */}
+      {/* iOS Large Title */}
+      <Typography
+        variant="h3"
+        sx={{
+          fontWeight: 700,
+          letterSpacing: '-0.5px',
+          mb: 3,
+          mt: 1,
+        }}
+      >
+        Tournaments
+      </Typography>
+
+      {/* Hall of Fame - iOS Grouped Section */}
       {hallOfFame.length > 0 && (
-        <Box sx={{ mb: 5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-            <MilitaryTechIcon sx={{ fontSize: 32, color: '#FF9F0A' }} />
-            <Typography variant="h5" fontWeight={700}>
-              Hall of Fame
-            </Typography>
-          </Box>
-          <Grid container spacing={2}>
-            {hallOfFame.map((entry) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={entry.tournament_id}>
-                <GlassCard
-                  sx={{
-                    background: 'linear-gradient(135deg, rgba(255,159,10,0.08) 0%, rgba(168,85,247,0.08) 100%)',
-                    borderColor: 'rgba(255,159,10,0.2)',
-                    cursor: 'pointer',
-                    '&:hover': { borderColor: 'rgba(255,159,10,0.4)', transform: 'translateY(-4px)' },
-                  }}
-                  onClick={() => router.push(`/tournaments/${entry.tournament_id}`)}
-                >
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-                      <Typography variant="caption" color="text.secondary" textTransform="uppercase" letterSpacing={1}>
-                        {entry.tournament_name}
-                      </Typography>
-                      <Chip
-                        label={entry.tournament_format}
-                        size="small"
-                        sx={{ bgcolor: 'rgba(255,159,10,0.15)', color: '#FF9F0A', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}
-                      />
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <EmojiEventsIcon sx={{ fontSize: 36, color: '#FF9F0A' }} />
-                      <Box>
-                        <Typography variant="h6" fontWeight={700} sx={{ color: '#FF9F0A' }}>
-                          {entry.winner_name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {entry.winner_team}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    {entry.stats.points != null && (
-                      <Box sx={{ display: 'flex', gap: 2, mt: 1.5 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          {entry.stats.played}P {entry.stats.wins}W {entry.stats.draws}D {entry.stats.losses}L
-                        </Typography>
-                        <Typography variant="caption" fontWeight={700} sx={{ color: '#FF9F0A' }}>
-                          {entry.stats.points} pts
-                        </Typography>
-                      </Box>
-                    )}
-                    {entry.stats.final_score && (
-                      <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>
-                        Final: {entry.stats.final_score}
-                      </Typography>
-                    )}
-                  </CardContent>
-                </GlassCard>
-              </Grid>
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: '#8E8E93',
+              textTransform: 'uppercase',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              letterSpacing: '0.5px',
+              px: 2,
+              mb: 1,
+            }}
+          >
+            Hall of Fame
+          </Typography>
+          <Box
+            sx={{
+              background: '#1C1C1E',
+              borderRadius: '12px',
+              overflow: 'hidden',
+            }}
+          >
+            {hallOfFame.map((entry, index) => (
+              <Box
+                key={entry.tournament_id}
+                onClick={() => router.push(`/tournaments/${entry.tournament_id}`)}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  px: 2,
+                  py: 1.5,
+                  cursor: 'pointer',
+                  borderBottom: index < hallOfFame.length - 1 ? '0.5px solid rgba(255,255,255,0.08)' : 'none',
+                  '&:active': { background: 'rgba(255,255,255,0.05)' },
+                }}
+              >
+                <EmojiEventsIcon sx={{ fontSize: 32, color: '#FF9F0A', mr: 1.5 }} />
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="body1" fontWeight={600} noWrap>
+                    {entry.winner_name}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#8E8E93' }}>
+                    {entry.tournament_name} &middot; {entry.winner_team}
+                  </Typography>
+                </Box>
+                {entry.stats.points != null && (
+                  <Chip
+                    label={`${entry.stats.points} pts`}
+                    size="small"
+                    sx={{
+                      bgcolor: 'rgba(255,159,10,0.15)',
+                      color: '#FF9F0A',
+                      fontWeight: 700,
+                      fontSize: '0.75rem',
+                      mr: 0.5,
+                    }}
+                  />
+                )}
+                <ChevronRightIcon sx={{ color: '#48484A', fontSize: 20 }} />
+              </Box>
             ))}
-          </Grid>
-          <Divider sx={{ mt: 4 }} />
+          </Box>
         </Box>
       )}
 
-      {/* Tournaments */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Box>
-          <Typography variant="h4" fontWeight={700}>
-            Tournaments
+      {/* Tournaments - iOS Grouped Section */}
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, mb: 1 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: '#8E8E93',
+              textTransform: 'uppercase',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              letterSpacing: '0.5px',
+            }}
+          >
+            Your Tournaments
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Manage your FC tournament competitions
-          </Typography>
+          <Button
+            variant="text"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={() => router.push('/tournaments/new')}
+            sx={{
+              color: '#0A84FF',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              textTransform: 'none',
+              p: 0,
+              minWidth: 'auto',
+            }}
+          >
+            New
+          </Button>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => router.push('/tournaments/new')}
-        >
-          New Tournament
-        </Button>
+
+        {loading ? (
+          <Box sx={{ background: '#1C1C1E', borderRadius: '12px', p: 2 }}>
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} variant="rounded" height={56} sx={{ borderRadius: 2, mb: i < 3 ? 1 : 0, bgcolor: 'rgba(255,255,255,0.05)' }} />
+            ))}
+          </Box>
+        ) : tournaments.length === 0 ? (
+          <EmptyState
+            icon={<EmojiEventsIcon sx={{ fontSize: 64 }} />}
+            title="No tournaments yet"
+            description="Create your first tournament to get started tracking matches and stats."
+            action={
+              <Button variant="contained" startIcon={<AddIcon />} onClick={() => router.push('/tournaments/new')}>
+                Create Tournament
+              </Button>
+            }
+          />
+        ) : (
+          <Box
+            sx={{
+              background: '#1C1C1E',
+              borderRadius: '12px',
+              overflow: 'hidden',
+            }}
+          >
+            {tournaments.map((t, index) => (
+              <TournamentCard key={t.id} tournament={t} showDivider={index < tournaments.length - 1} />
+            ))}
+          </Box>
+        )}
       </Box>
-
-      {loading ? (
-        <Grid container spacing={2}>
-          {[1, 2, 3].map((i) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
-              <Skeleton variant="rounded" height={100} sx={{ borderRadius: 3 }} />
-            </Grid>
-          ))}
-        </Grid>
-      ) : tournaments.length === 0 ? (
-        <EmptyState
-          icon={<EmojiEventsIcon sx={{ fontSize: 64 }} />}
-          title="No tournaments yet"
-          description="Create your first tournament to get started tracking matches and stats."
-          action={
-            <Button variant="contained" startIcon={<AddIcon />} onClick={() => router.push('/tournaments/new')}>
-              Create Tournament
-            </Button>
-          }
-        />
-      ) : (
-        <Grid container spacing={2}>
-          {tournaments.map((t) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={t.id}>
-              <TournamentCard tournament={t} />
-            </Grid>
-          ))}
-        </Grid>
-      )}
     </Box>
   );
 }

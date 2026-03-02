@@ -54,34 +54,73 @@ export default function MatchesPage() {
         Matches
       </Typography>
 
-      {/* Round Filter */}
-      <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
+      {/* iOS-style segmented filter */}
+      <Box sx={{
+        display: 'flex',
+        gap: 0.5,
+        mb: 3,
+        flexWrap: 'wrap',
+        background: '#1C1C1E',
+        borderRadius: '10px',
+        p: 0.5,
+      }}>
         <Chip
           label="All"
           onClick={() => setSelectedRound(null)}
-          color={selectedRound === null ? 'primary' : 'default'}
-          variant={selectedRound === null ? 'filled' : 'outlined'}
+          sx={{
+            bgcolor: selectedRound === null ? '#636366' : 'transparent',
+            color: selectedRound === null ? '#FFFFFF' : '#8E8E93',
+            fontWeight: 600,
+            fontSize: '0.85rem',
+            borderRadius: '8px',
+            border: 'none',
+            '&:hover': { bgcolor: selectedRound === null ? '#636366' : 'rgba(255,255,255,0.05)' },
+          }}
         />
         {rounds.map((r) => (
           <Chip
             key={r}
             label={`Round ${r}`}
             onClick={() => setSelectedRound(r)}
-            color={selectedRound === r ? 'primary' : 'default'}
-            variant={selectedRound === r ? 'filled' : 'outlined'}
+            sx={{
+              bgcolor: selectedRound === r ? '#636366' : 'transparent',
+              color: selectedRound === r ? '#FFFFFF' : '#8E8E93',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              borderRadius: '8px',
+              border: 'none',
+              '&:hover': { bgcolor: selectedRound === r ? '#636366' : 'rgba(255,255,255,0.05)' },
+            }}
           />
         ))}
       </Box>
 
-      {/* Matches by Round */}
+      {/* Matches by Round - iOS Grouped List */}
       {Object.entries(grouped)
         .sort(([a], [b]) => Number(a) - Number(b))
         .map(([round, roundMatches]) => (
           <Box key={round} sx={{ mb: 3 }}>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#8E8E93',
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                letterSpacing: '0.5px',
+                px: 2,
+                mb: 1,
+              }}
+            >
               Round {round}
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Box
+              sx={{
+                background: '#1C1C1E',
+                borderRadius: '12px',
+                overflow: 'hidden',
+              }}
+            >
               {roundMatches
                 .sort((a, b) => a.match_number - b.match_number)
                 .map((m) => (
@@ -92,7 +131,7 @@ export default function MatchesPage() {
         ))}
 
       {matches.length === 0 && (
-        <Typography color="text.secondary" textAlign="center" sx={{ py: 4 }}>
+        <Typography sx={{ color: '#8E8E93', textAlign: 'center', py: 4 }}>
           No matches scheduled yet. Generate the schedule from the dashboard.
         </Typography>
       )}
