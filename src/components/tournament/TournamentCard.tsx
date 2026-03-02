@@ -25,7 +25,7 @@ export default function TournamentCard({ tournament }: { tournament: Tournament 
       sx={{
         cursor: 'pointer',
         '&:hover': {
-          borderColor: 'rgba(0, 212, 255, 0.3)',
+          borderColor: 'rgba(10, 132, 255, 0.3)',
           transform: 'translateY(-4px)',
         },
       }}

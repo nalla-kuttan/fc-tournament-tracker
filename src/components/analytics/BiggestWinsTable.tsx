@@ -58,7 +58,7 @@ export default function BiggestWinsTable({ wins, title = 'Biggest Wins' }: Props
               <Typography
                 variant="body2"
                 fontWeight={w.home_score > w.away_score ? 700 : 400}
-                sx={{ color: w.home_score > w.away_score ? '#22c55e' : 'text.primary' }}
+                sx={{ color: w.home_score > w.away_score ? '#34C759' : 'text.primary' }}
                 noWrap
               >
                 {w.home_player}
@@ -71,7 +71,7 @@ export default function BiggestWinsTable({ wins, title = 'Biggest Wins' }: Props
                   fontSize: '0.75rem',
                   fontFamily: 'monospace',
                   bgcolor: 'rgba(0,212,255,0.12)',
-                  color: '#00d4ff',
+                  color: '#0A84FF',
                   minWidth: 56,
                   height: 24,
                 }}
@@ -79,7 +79,7 @@ export default function BiggestWinsTable({ wins, title = 'Biggest Wins' }: Props
               <Typography
                 variant="body2"
                 fontWeight={w.away_score > w.home_score ? 700 : 400}
-                sx={{ color: w.away_score > w.home_score ? '#22c55e' : 'text.primary' }}
+                sx={{ color: w.away_score > w.home_score ? '#34C759' : 'text.primary' }}
                 noWrap
               >
                 {w.away_player}

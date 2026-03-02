@@ -54,7 +54,7 @@ export default function HomePage() {
       {hallOfFame.length > 0 && (
         <Box sx={{ mb: 5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-            <MilitaryTechIcon sx={{ fontSize: 32, color: '#ffd700' }} />
+            <MilitaryTechIcon sx={{ fontSize: 32, color: '#FF9F0A' }} />
             <Typography variant="h5" fontWeight={700}>
               Hall of Fame
             </Typography>
@@ -64,10 +64,10 @@ export default function HomePage() {
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={entry.tournament_id}>
                 <GlassCard
                   sx={{
-                    background: 'linear-gradient(135deg, rgba(255,215,0,0.08) 0%, rgba(168,85,247,0.08) 100%)',
-                    borderColor: 'rgba(255,215,0,0.2)',
+                    background: 'linear-gradient(135deg, rgba(255,159,10,0.08) 0%, rgba(168,85,247,0.08) 100%)',
+                    borderColor: 'rgba(255,159,10,0.2)',
                     cursor: 'pointer',
-                    '&:hover': { borderColor: 'rgba(255,215,0,0.4)', transform: 'translateY(-4px)' },
+                    '&:hover': { borderColor: 'rgba(255,159,10,0.4)', transform: 'translateY(-4px)' },
                   }}
                   onClick={() => router.push(`/tournaments/${entry.tournament_id}`)}
                 >
@@ -79,13 +79,13 @@ export default function HomePage() {
                       <Chip
                         label={entry.tournament_format}
                         size="small"
-                        sx={{ bgcolor: 'rgba(255,215,0,0.15)', color: '#ffd700', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}
+                        sx={{ bgcolor: 'rgba(255,159,10,0.15)', color: '#FF9F0A', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}
                       />
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <EmojiEventsIcon sx={{ fontSize: 36, color: '#ffd700' }} />
+                      <EmojiEventsIcon sx={{ fontSize: 36, color: '#FF9F0A' }} />
                       <Box>
-                        <Typography variant="h6" fontWeight={700} sx={{ color: '#ffd700' }}>
+                        <Typography variant="h6" fontWeight={700} sx={{ color: '#FF9F0A' }}>
                           {entry.winner_name}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -98,7 +98,7 @@ export default function HomePage() {
                         <Typography variant="caption" color="text.secondary">
                           {entry.stats.played}P {entry.stats.wins}W {entry.stats.draws}D {entry.stats.losses}L
                         </Typography>
-                        <Typography variant="caption" fontWeight={700} sx={{ color: '#ffd700' }}>
+                        <Typography variant="caption" fontWeight={700} sx={{ color: '#FF9F0A' }}>
                           {entry.stats.points} pts
                         </Typography>
                       </Box>

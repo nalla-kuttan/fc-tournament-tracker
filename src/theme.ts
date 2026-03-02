@@ -77,8 +77,8 @@ const theme = createTheme({
         body: {
           background: '#000000',
           minHeight: '100vh',
-          '-webkit-font-smoothing': 'antialiased',
-          '-moz-osx-font-smoothing': 'grayscale',
+          WebkitFontSmoothing: 'antialiased',
+          MozOsxFontSmoothing: 'grayscale',
         },
       },
     },

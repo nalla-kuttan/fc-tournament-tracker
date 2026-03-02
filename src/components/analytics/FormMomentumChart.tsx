@@ -61,8 +61,8 @@ export default function FormMomentumChart({ matches, playerIds, title }: Props) 
       {
         label: 'Match Rating',
         data: ratings,
-        borderColor: '#00d4ff',
-        backgroundColor: 'rgba(0, 212, 255, 0.1)',
+        borderColor: '#0A84FF',
+        backgroundColor: 'rgba(10, 132, 255, 0.1)',
         fill: true,
         tension: 0.4,
         pointBackgroundColor: pointColors,
@@ -101,11 +101,11 @@ export default function FormMomentumChart({ matches, playerIds, title }: Props) 
         min: 0,
         max: 10,
         grid: { color: 'rgba(255,255,255,0.06)' },
-        ticks: { color: '#a1a1aa' },
+        ticks: { color: '#8E8E93' },
       },
       x: {
         grid: { color: 'rgba(255,255,255,0.06)' },
-        ticks: { color: '#a1a1aa', maxRotation: 45 },
+        ticks: { color: '#8E8E93', maxRotation: 45 },
       },
     },
   };

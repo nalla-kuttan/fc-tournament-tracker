@@ -20,7 +20,7 @@ interface Props {
   color?: string;
 }
 
-export default function SingleRadarChart({ stats, color = '#00d4ff' }: Props) {
+export default function SingleRadarChart({ stats, color = '#0A84FF' }: Props) {
   const normalized = normalizeForRadar(stats);
 
   const data = {
@@ -59,7 +59,7 @@ export default function SingleRadarChart({ stats, color = '#00d4ff' }: Props) {
       r: {
         angleLines: { color: 'rgba(255,255,255,0.1)' },
         grid: { color: 'rgba(255,255,255,0.08)' },
-        pointLabels: { color: '#a1a1aa', font: { size: 11 } },
+        pointLabels: { color: '#8E8E93', font: { size: 11 } },
         ticks: { display: false },
         suggestedMin: 0,
         suggestedMax: 100,

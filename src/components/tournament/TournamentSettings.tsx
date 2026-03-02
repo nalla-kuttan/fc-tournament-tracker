@@ -269,7 +269,7 @@ export default function TournamentSettings({ tournamentId }: Props) {
 
         {/* Delete Confirmation Dialog */}
         <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle sx={{ color: '#ef4444' }}>Delete Tournament</DialogTitle>
+          <DialogTitle sx={{ color: '#FF3B30' }}>Delete Tournament</DialogTitle>
           <DialogContent>
             <Typography variant="body2" sx={{ mb: 2 }}>
               This will permanently delete <strong>{tournament.name}</strong> and all its data.

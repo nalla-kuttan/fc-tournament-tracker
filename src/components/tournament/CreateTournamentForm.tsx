@@ -162,7 +162,7 @@ export default function CreateTournamentForm() {
             {registeredPlayers.length === 0 ? (
               <Alert severity="info">
                 No players registered yet.{' '}
-                <a href="/players/new" style={{ color: '#00d4ff' }}>
+                <a href="/players/new" style={{ color: '#0A84FF' }}>
                   Register players first
                 </a>
               </Alert>

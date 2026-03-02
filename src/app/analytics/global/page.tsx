@@ -170,7 +170,7 @@ export default function GlobalAnalyticsPage() {
             title="Top Scorers"
             valueLabel="Goals"
             entries={toLeaderboard(data.top_scorers, (s) => String(s.total_goals))}
-            accentColor="#22c55e"
+            accentColor="#34C759"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -178,7 +178,7 @@ export default function GlobalAnalyticsPage() {
             title="Win Rate"
             valueLabel="Rate"
             entries={toLeaderboard(data.win_rate_rankings, (s) => `${s.win_rate.toFixed(0)}%`)}
-            accentColor="#ffd700"
+            accentColor="#FF9F0A"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -186,7 +186,7 @@ export default function GlobalAnalyticsPage() {
             title="Goals Per Match"
             valueLabel="G/M"
             entries={toLeaderboard(data.goals_per_match_rankings, (s) => s.goals_per_match.toFixed(2))}
-            accentColor="#00d4ff"
+            accentColor="#0A84FF"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -194,7 +194,7 @@ export default function GlobalAnalyticsPage() {
             title="Avg xG"
             valueLabel="xG"
             entries={toLeaderboard(data.xg_rankings, (s) => s.avg_xg.toFixed(2))}
-            accentColor="#a855f7"
+            accentColor="#BF5AF2"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -202,7 +202,7 @@ export default function GlobalAnalyticsPage() {
             title="Possession"
             valueLabel="Avg%"
             entries={toLeaderboard(data.possession_rankings, (s) => `${s.avg_possession.toFixed(0)}%`)}
-            accentColor="#00d4ff"
+            accentColor="#0A84FF"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -210,7 +210,7 @@ export default function GlobalAnalyticsPage() {
             title="Avg Rating"
             valueLabel="Rtg"
             entries={toLeaderboard(data.rating_rankings, (s) => s.avg_rating.toFixed(1))}
-            accentColor="#ffd700"
+            accentColor="#FF9F0A"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -218,7 +218,7 @@ export default function GlobalAnalyticsPage() {
             title="Clean Sheets"
             valueLabel="CS"
             entries={toLeaderboard(data.clean_sheet_rankings, (s) => String(s.clean_sheets))}
-            accentColor="#22c55e"
+            accentColor="#34C759"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -226,7 +226,7 @@ export default function GlobalAnalyticsPage() {
             title="MOTM Awards"
             valueLabel="Awards"
             entries={toLeaderboard(data.motm_rankings, (s) => String(s.motm_awards))}
-            accentColor="#ffd700"
+            accentColor="#FF9F0A"
           />
         </Grid>
       </Grid>

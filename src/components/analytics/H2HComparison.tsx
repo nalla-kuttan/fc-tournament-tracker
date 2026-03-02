@@ -117,9 +117,9 @@ export default function H2HComparison({ data }: Props) {
                     bgcolor: 'rgba(0,212,255,0.08)',
                   }}
                 >
-                  <BigStat value={data.player1_wins} label="Wins" color="#00d4ff" />
-                  <BigStat value={data.draws} label="Draws" color="#a1a1aa" />
-                  <BigStat value={data.player2_wins} label="Wins" color="#a855f7" />
+                  <BigStat value={data.player1_wins} label="Wins" color="#0A84FF" />
+                  <BigStat value={data.draws} label="Draws" color="#8E8E93" />
+                  <BigStat value={data.player2_wins} label="Wins" color="#BF5AF2" />
                 </Box>
 
                 <Box sx={{ textAlign: 'center' }}>

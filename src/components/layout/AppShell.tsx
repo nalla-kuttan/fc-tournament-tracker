@@ -41,9 +41,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <AppBar
         position="sticky"
         sx={{
-          background: 'rgba(10, 10, 15, 0.8)',
-          backdropFilter: 'blur(16px)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: 'rgba(28, 28, 30, 0.85)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
           boxShadow: 'none',
         }}
       >
@@ -64,9 +65,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               flexGrow: 1,
               fontWeight: 700,
               cursor: 'pointer',
-              background: 'linear-gradient(135deg, #00d4ff, #a855f7)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: '#FFFFFF',
             }}
             onClick={() => router.push('/')}
           >
@@ -82,8 +81,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
         PaperProps={{
           sx: {
             width: 280,
-            background: '#12121a',
-            borderRight: '1px solid rgba(255,255,255,0.06)',
+            background: '#1C1C1E',
+            borderRight: '1px solid rgba(255,255,255,0.08)',
           },
         }}
       >
@@ -93,7 +92,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             FC Tracker
           </Typography>
         </Box>
-        <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)' }} />
+        <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)' }} />
         <List>
           {NAV_ITEMS.map((item) => (
             <ListItem key={item.path} disablePadding>
@@ -102,8 +101,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 selected={pathname === item.path}
                 sx={{
                   '&.Mui-selected': {
-                    backgroundColor: 'rgba(0, 212, 255, 0.1)',
-                    borderRight: '3px solid #00d4ff',
+                    backgroundColor: 'rgba(10, 132, 255, 0.1)',
+                    borderRight: '3px solid #0A84FF',
                   },
                 }}
               >

@@ -16,7 +16,7 @@ export default function PlayerCard({ player }: { player: RegisteredPlayer }) {
     <GlassCard
       sx={{
         cursor: 'pointer',
-        '&:hover': { borderColor: 'rgba(168, 85, 247, 0.3)' },
+        '&:hover': { borderColor: 'rgba(191, 90, 242, 0.3)' },
       }}
       onClick={() => router.push(`/players/${player.id}`)}
     >

@@ -24,16 +24,16 @@ export default function AnalyticsPage() {
     {
       title: 'Global Analytics',
       description: 'All-time career stats, leaderboards, and rankings',
-      icon: <PublicIcon sx={{ fontSize: 48, color: '#a855f7', mb: 2 }} />,
+      icon: <PublicIcon sx={{ fontSize: 48, color: '#BF5AF2', mb: 2 }} />,
       href: '/analytics/global',
       borderColor: 'rgba(168,85,247,0.3)',
     },
     {
       title: 'League Analytics',
       description: 'Tournament-specific stats and player rankings',
-      icon: <LeaderboardIcon sx={{ fontSize: 48, color: '#ffd700', mb: 2 }} />,
+      icon: <LeaderboardIcon sx={{ fontSize: 48, color: '#FF9F0A', mb: 2 }} />,
       href: '/analytics/league',
-      borderColor: 'rgba(255,215,0,0.3)',
+      borderColor: 'rgba(255,159,10,0.3)',
     },
   ];
 

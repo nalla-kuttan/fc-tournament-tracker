@@ -43,7 +43,7 @@ export default function MatchCard({ match }: MatchCardProps) {
     <GlassCard
       sx={{
         cursor: 'pointer',
-        '&:hover': { borderColor: 'rgba(0, 212, 255, 0.3)' },
+        '&:hover': { borderColor: 'rgba(10, 132, 255, 0.3)' },
         ...(match.is_played
           ? {}
           : { animation: 'glowPulse 2s infinite' }),
