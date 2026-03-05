@@ -14,6 +14,7 @@ import SeasonAwards from '@/components/analytics/SeasonAwards';
 import GoalDistributionChart from '@/components/analytics/GoalDistributionChart';
 import PerformanceTrendChart from '@/components/analytics/PerformanceTrendChart';
 import BackButton from '@/components/shared/BackButton';
+import AIStatQuery from '@/components/ai/AIStatQuery';
 import type { CareerStats, Match } from '@/lib/types';
 
 interface BigWin {
@@ -97,6 +98,8 @@ export default function GlobalAnalyticsPage() {
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
         All-time career stats and rankings across every tournament
       </Typography>
+
+      <AIStatQuery careerStats={data.career_stats} />
 
       {/* Season Awards */}
       <SeasonAwards stats={data.career_stats} />

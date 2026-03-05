@@ -13,6 +13,7 @@ import MatchResultForm from '@/components/tournament/MatchResultForm';
 import GlassCard from '@/components/shared/GlassCard';
 import CardContent from '@mui/material/CardContent';
 import EditIcon from '@mui/icons-material/Edit';
+import AIMatchReport from '@/components/ai/AIMatchReport';
 import type { MatchStats } from '@/lib/types';
 
 interface MatchDetail {
@@ -171,6 +172,8 @@ export default function MatchDetailPage() {
           )}
         </CardContent>
       </GlassCard>
+
+      <AIMatchReport match={match} stats={stats} />
 
       {/* Stats */}
       {(stats.home_xg != null || stats.home_possession != null) && (
