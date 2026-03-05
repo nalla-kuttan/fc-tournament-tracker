@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/fetcher';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
@@ -11,11 +12,20 @@ import GlassCard from '@/components/shared/GlassCard';
 import StatLeaderboard from '@/components/analytics/StatLeaderboard';
 import BiggestWinsTable from '@/components/analytics/BiggestWinsTable';
 import SeasonAwards from '@/components/analytics/SeasonAwards';
-import GoalDistributionChart from '@/components/analytics/GoalDistributionChart';
-import PerformanceTrendChart from '@/components/analytics/PerformanceTrendChart';
 import BackButton from '@/components/shared/BackButton';
 import AIStatQuery from '@/components/ai/AIStatQuery';
 import type { CareerStats, Match } from '@/lib/types';
+import dynamic from 'next/dynamic';
+
+const GoalDistributionChart = dynamic(() => import('@/components/analytics/GoalDistributionChart'), {
+  ssr: false,
+  loading: () => <CircularProgress size={24} sx={{ mx: 'auto', display: 'block' }} />
+});
+
+const PerformanceTrendChart = dynamic(() => import('@/components/analytics/PerformanceTrendChart'), {
+  ssr: false,
+  loading: () => <CircularProgress size={24} sx={{ mx: 'auto', display: 'block' }} />
+});
 
 interface BigWin {
   match_id: string;
@@ -56,18 +66,7 @@ function toLeaderboard(stats: CareerStats[], valueFn: (s: CareerStats) => string
 }
 
 export default function GlobalAnalyticsPage() {
-  const [data, setData] = useState<GlobalData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/analytics/global')
-      .then((r) => r.json())
-      .then((d) => {
-        setData(d);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  const { data, isLoading: loading } = useSWR<GlobalData>('/api/analytics/global', fetcher);
 
   if (loading) {
     return (
@@ -77,7 +76,7 @@ export default function GlobalAnalyticsPage() {
     );
   }
 
-  if (!data || data.career_stats.length === 0) {
+  if (!data || !data.career_stats || data.career_stats.length === 0) {
     return (
       <Box>
         <BackButton />

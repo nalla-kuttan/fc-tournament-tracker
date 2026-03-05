@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/fetcher';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
@@ -13,37 +15,27 @@ import GlassCard from '@/components/shared/GlassCard';
 import Button from '@mui/material/Button';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PlayerStatsGrid from '@/components/player/PlayerStatsGrid';
-import WDLDoughnut from '@/components/analytics/WDLDoughnut';
 import AIScoutModal from '@/components/ai/AIScoutModal';
-import SingleRadarChart from '@/components/analytics/SingleRadarChart';
-import FormMomentumChart from '@/components/analytics/FormMomentumChart';
 import BackButton from '@/components/shared/BackButton';
 import type { CareerStats, Match, RegisteredPlayer } from '@/lib/types';
+import dynamic from 'next/dynamic';
+
+const WDLDoughnut = dynamic(() => import('@/components/analytics/WDLDoughnut'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
+const SingleRadarChart = dynamic(() => import('@/components/analytics/SingleRadarChart'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
+const FormMomentumChart = dynamic(() => import('@/components/analytics/FormMomentumChart'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
 
 export default function PlayerProfilePage() {
   const params = useParams();
   const playerId = params.playerId as string;
-  const [player, setPlayer] = useState<RegisteredPlayer & { participations?: { tournament: { id: string; name: string; format: string; status: string } }[] } | null>(null);
-  const [stats, setStats] = useState<CareerStats | null>(null);
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [playerIds, setPlayerIds] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
   const [scoutOpen, setScoutOpen] = useState(false);
 
-  useEffect(() => {
-    Promise.all([
-      fetch(`/api/players/${playerId}`).then((r) => r.json()),
-      fetch(`/api/players/${playerId}/stats`).then((r) => r.json()),
-    ])
-      .then(([p, s]) => {
-        setPlayer(p);
-        setStats(s.stats);
-        setMatches(s.matches ?? []);
-        setPlayerIds(s.playerIds ?? []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [playerId]);
+  const { data: player, isLoading: loadingPlayer } = useSWR<RegisteredPlayer & { participations?: { tournament: { id: string; name: string; format: string; status: string } }[] }>(`/api/players/${playerId}`, fetcher);
+  const { data: statsData, isLoading: loadingStats } = useSWR<{ stats: CareerStats, matches: Match[], playerIds: string[] }>(`/api/players/${playerId}/stats`, fetcher);
+
+  const loading = loadingPlayer || loadingStats;
+  const stats = statsData?.stats || null;
+  const matches = statsData?.matches || [];
+  const playerIds = statsData?.playerIds || [];
 
   if (loading) {
     return (

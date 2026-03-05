@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import useSWR, { mutate } from 'swr';
+import { fetcher } from '@/lib/fetcher';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -26,35 +28,19 @@ export default function TournamentDashboard() {
   const tournamentId = params.tournamentId as string;
   const { getPinForTournament } = useAdmin();
 
-  const [tournament, setTournament] = useState<{
+  const { data: tournament, isLoading: loadingTournament } = useSWR<{
     format: string;
     status: string;
     matches: Match[];
     players: { id: string; name: string; team: string }[];
-  } | null>(null);
-  const [standings, setStandings] = useState<StandingRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  }>(`/api/tournaments/${tournamentId}`, fetcher);
+
+  const { data: standings = [], isLoading: loadingStandings } = useSWR<StandingRow[]>(`/api/tournaments/${tournamentId}/standings`, fetcher);
+
+  const loading = loadingTournament || loadingStandings;
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
   const [punditOpen, setPunditOpen] = useState(false);
-
-  const loadData = () => {
-    Promise.all([
-      fetch(`/api/tournaments/${tournamentId}`).then((r) => r.json()),
-      fetch(`/api/tournaments/${tournamentId}/standings`).then((r) => r.json()),
-    ])
-      .then(([t, s]) => {
-        setTournament(t);
-        setStandings(s);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tournamentId]);
 
   const handleGenerateSchedule = async () => {
     const pin = getPinForTournament(tournamentId);
@@ -72,7 +58,8 @@ export default function TournamentDashboard() {
         const data = await res.json();
         throw new Error(data.error || 'Failed to generate schedule');
       }
-      loadData();
+      mutate(`/api/tournaments/${tournamentId}`);
+      mutate(`/api/tournaments/${tournamentId}/standings`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {

@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/fetcher';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -36,25 +37,11 @@ interface AnalyticsData {
 
 export default function HomePage() {
   const router = useRouter();
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
-  const [hallOfFame, setHallOfFame] = useState<HallOfFameEntry[]>([]);
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: tournaments = [], isLoading: loadingTournaments } = useSWR<Tournament[]>('/api/tournaments', fetcher);
+  const { data: hallOfFame = [] } = useSWR<HallOfFameEntry[]>('/api/analytics/hall-of-fame', fetcher);
+  const { data: analytics = null } = useSWR<AnalyticsData>('/api/analytics/global', fetcher, { revalidateOnFocus: false });
 
-  useEffect(() => {
-    Promise.all([
-      fetch('/api/tournaments').then((r) => r.json()),
-      fetch('/api/analytics/hall-of-fame').then((r) => r.json()),
-      fetch('/api/analytics/global').then((r) => r.json()).catch(() => null),
-    ])
-      .then(([t, hof, globalData]) => {
-        setTournaments(t);
-        setHallOfFame(hof);
-        if (globalData) setAnalytics(globalData);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  const loading = loadingTournaments;
 
   return (
     <Box>
