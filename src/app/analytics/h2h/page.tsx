@@ -10,6 +10,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import PlayerSelector from '@/components/analytics/PlayerSelector';
 import H2HComparison from '@/components/analytics/H2HComparison';
+import BackButton from '@/components/shared/BackButton';
 import type { RegisteredPlayer, H2HData } from '@/lib/types';
 
 export default function H2HPage() {
@@ -42,6 +43,7 @@ export default function H2HPage() {
 
   return (
     <Box>
+      <BackButton />
       <Typography variant="h4" fontWeight={700} gutterBottom>
         Head-to-Head
       </Typography>

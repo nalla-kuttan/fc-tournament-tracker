@@ -6,12 +6,14 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import PeopleIcon from '@mui/icons-material/People';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import Paper from '@mui/material/Paper';
 
 const NAV_ITEMS = [
@@ -43,8 +45,30 @@ export default function AppShell({ children }: { children: ReactNode }) {
           boxShadow: 'none',
         }}
       >
-        <Toolbar sx={{ minHeight: { xs: 48, sm: 56 }, justifyContent: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Toolbar sx={{ minHeight: { xs: 48, sm: 56 }, px: { xs: 1, sm: 2 } }}>
+          {/* Back Button (Conditional) */}
+          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+            {!['/', '/players', '/analytics'].includes(pathname) && (
+              <Button
+                variant="text"
+                startIcon={<ArrowBackIosNewIcon sx={{ fontSize: '1.2rem', ml: 0.5 }} />}
+                onClick={() => router.back()}
+                sx={{
+                  color: '#0A84FF',
+                  textTransform: 'none',
+                  fontWeight: 400,
+                  fontSize: '1rem',
+                  p: 0,
+                  minWidth: 'auto',
+                }}
+              >
+                Back
+              </Button>
+            )}
+          </Box>
+
+          {/* Title */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
             <SportsSoccerIcon sx={{ fontSize: 20, color: '#0A84FF' }} />
             <Typography
               variant="body1"
@@ -58,9 +82,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
               }}
               onClick={() => router.push('/')}
             >
-              FC Tournament Tracker
+              FC Tracker
             </Typography>
           </Box>
+
+          {/* Right Spacer for balanced centering */}
+          <Box sx={{ flex: 1 }} />
         </Toolbar>
       </AppBar>
 

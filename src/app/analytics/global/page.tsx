@@ -13,6 +13,7 @@ import BiggestWinsTable from '@/components/analytics/BiggestWinsTable';
 import SeasonAwards from '@/components/analytics/SeasonAwards';
 import GoalDistributionChart from '@/components/analytics/GoalDistributionChart';
 import PerformanceTrendChart from '@/components/analytics/PerformanceTrendChart';
+import BackButton from '@/components/shared/BackButton';
 import type { CareerStats, Match } from '@/lib/types';
 
 interface BigWin {
@@ -78,6 +79,7 @@ export default function GlobalAnalyticsPage() {
   if (!data || data.career_stats.length === 0) {
     return (
       <Box>
+        <BackButton />
         <Typography variant="h4" fontWeight={700} gutterBottom>
           Global Analytics
         </Typography>
@@ -88,6 +90,7 @@ export default function GlobalAnalyticsPage() {
 
   return (
     <Box>
+      <BackButton />
       <Typography variant="h4" fontWeight={700} gutterBottom>
         Global Analytics
       </Typography>
@@ -130,44 +133,44 @@ export default function GlobalAnalyticsPage() {
               {data.career_stats
                 .sort((a, b) => b.win_rate - a.win_rate || b.total_matches - a.total_matches)
                 .map((s) => (
-                <Box
-                  key={s.registered_player_id}
-                  sx={{
-                    display: 'flex',
-                    py: 1,
-                    borderBottom: '1px solid rgba(255,255,255,0.04)',
-                    '&:hover': { bgcolor: 'rgba(0,212,255,0.04)' },
-                  }}
-                >
-                  <Box sx={{ width: 140, flexShrink: 0, px: 0.5 }}>
-                    <Typography variant="body2" fontWeight={600} noWrap>{s.player_name}</Typography>
-                    <Typography variant="caption" color="text.secondary" noWrap>{s.base_team}</Typography>
+                  <Box
+                    key={s.registered_player_id}
+                    sx={{
+                      display: 'flex',
+                      py: 1,
+                      borderBottom: '1px solid rgba(255,255,255,0.04)',
+                      '&:hover': { bgcolor: 'rgba(0,212,255,0.04)' },
+                    }}
+                  >
+                    <Box sx={{ width: 140, flexShrink: 0, px: 0.5 }}>
+                      <Typography variant="body2" fontWeight={600} noWrap>{s.player_name}</Typography>
+                      <Typography variant="caption" color="text.secondary" noWrap>{s.base_team}</Typography>
+                    </Box>
+                    {[
+                      s.total_matches,
+                      s.wins,
+                      s.draws,
+                      s.losses,
+                      s.total_goals,
+                      s.total_conceded,
+                      s.clean_sheets,
+                      `${s.win_rate.toFixed(0)}%`,
+                      s.goals_per_match.toFixed(2),
+                      s.avg_xg.toFixed(2),
+                      s.avg_rating.toFixed(1),
+                      `${s.avg_possession.toFixed(0)}%`,
+                      s.motm_awards,
+                    ].map((val, i) => (
+                      <Typography
+                        key={i}
+                        variant="body2"
+                        sx={{ width: 56, textAlign: 'center', fontFamily: 'monospace', px: 0.5 }}
+                      >
+                        {val}
+                      </Typography>
+                    ))}
                   </Box>
-                  {[
-                    s.total_matches,
-                    s.wins,
-                    s.draws,
-                    s.losses,
-                    s.total_goals,
-                    s.total_conceded,
-                    s.clean_sheets,
-                    `${s.win_rate.toFixed(0)}%`,
-                    s.goals_per_match.toFixed(2),
-                    s.avg_xg.toFixed(2),
-                    s.avg_rating.toFixed(1),
-                    `${s.avg_possession.toFixed(0)}%`,
-                    s.motm_awards,
-                  ].map((val, i) => (
-                    <Typography
-                      key={i}
-                      variant="body2"
-                      sx={{ width: 56, textAlign: 'center', fontFamily: 'monospace', px: 0.5 }}
-                    >
-                      {val}
-                    </Typography>
-                  ))}
-                </Box>
-              ))}
+                ))}
             </Box>
           </Box>
         </CardContent>

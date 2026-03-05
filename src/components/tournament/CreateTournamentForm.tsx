@@ -21,6 +21,11 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import GlassCard from '@/components/shared/GlassCard';
 import CardContent from '@mui/material/CardContent';
+import Autocomplete from '@mui/material/Autocomplete';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import { TEAMS } from '@/lib/constants';
 import type { RegisteredPlayer } from '@/lib/types';
 
@@ -39,11 +44,45 @@ export default function CreateTournamentForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [openAddPlayer, setOpenAddPlayer] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState('');
+  const [newPlayerTeam, setNewPlayerTeam] = useState('');
+  const [addingPlayer, setAddingPlayer] = useState(false);
+
+  const handleAddPlayer = async () => {
+    if (!newPlayerName || !newPlayerTeam) return;
+    setAddingPlayer(true);
+    try {
+      const res = await fetch('/api/players', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newPlayerName, base_team: newPlayerTeam }),
+      });
+      if (res.ok) {
+        const added = await res.json();
+        setRegisteredPlayers([...registeredPlayers, added]);
+        setSelectedPlayerIds((prev) => new Set(prev).add(added.id));
+        setOpenAddPlayer(false);
+        setNewPlayerName('');
+        setNewPlayerTeam('');
+      } else {
+        const data = await res.json();
+        setError(data.error);
+        setOpenAddPlayer(false);
+      }
+    } catch {
+      setError("Failed to add player");
+      setOpenAddPlayer(false);
+    } finally {
+      setAddingPlayer(false);
+    }
+  };
+
   useEffect(() => {
     fetch('/api/players')
       .then((r) => r.json())
       .then((data) => setRegisteredPlayers(data))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const togglePlayer = (id: string) => {
@@ -162,9 +201,9 @@ export default function CreateTournamentForm() {
             {registeredPlayers.length === 0 ? (
               <Alert severity="info">
                 No players registered yet.{' '}
-                <a href="/players/new" style={{ color: '#0A84FF' }}>
+                <span style={{ color: '#0A84FF', cursor: 'pointer' }} onClick={() => setOpenAddPlayer(true)}>
                   Register players first
-                </a>
+                </span>
               </Alert>
             ) : (
               registeredPlayers.map((player) => (
@@ -191,20 +230,21 @@ export default function CreateTournamentForm() {
                   />
                   {selectedPlayerIds.has(player.id) && (
                     <FormControl size="small" sx={{ minWidth: 150 }}>
-                      <InputLabel>Team</InputLabel>
-                      <Select
+                      <Autocomplete
+                        freeSolo
+                        size="small"
+                        options={TEAMS}
                         value={teamOverrides[player.id] || player.base_team}
-                        label="Team"
-                        onChange={(e) =>
-                          setTeamOverrides((prev) => ({ ...prev, [player.id]: e.target.value }))
-                        }
-                      >
-                        {TEAMS.map((t) => (
-                          <MenuItem key={t} value={t}>
-                            {t}
-                          </MenuItem>
-                        ))}
-                      </Select>
+                        onInputChange={(_, newValue) => {
+                          setTeamOverrides((prev) => ({ ...prev, [player.id]: newValue }));
+                        }}
+                        onChange={(_, newValue) => {
+                          if (newValue) {
+                            setTeamOverrides((prev) => ({ ...prev, [player.id]: newValue }));
+                          }
+                        }}
+                        renderInput={(params) => <TextField {...params} label="Team" />}
+                      />
                     </FormControl>
                   )}
                 </Box>
@@ -214,6 +254,9 @@ export default function CreateTournamentForm() {
             <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
               <Button variant="outlined" onClick={() => setActiveStep(0)} fullWidth>
                 Back
+              </Button>
+              <Button variant="outlined" onClick={() => setOpenAddPlayer(true)} fullWidth>
+                Enter Player
               </Button>
               <Button
                 variant="contained"
@@ -267,6 +310,41 @@ export default function CreateTournamentForm() {
           </CardContent>
         </GlassCard>
       )}
+
+      {/* Add Player Dialog */}
+      <Dialog open={openAddPlayer} onClose={() => setOpenAddPlayer(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Enter New Player</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+          <TextField
+            label="Player Name"
+            name="playerNameNew"
+            fullWidth
+            value={newPlayerName}
+            onChange={(e) => setNewPlayerName(e.target.value)}
+            sx={{ mt: 1 }}
+          />
+          <Autocomplete
+            freeSolo
+            options={TEAMS}
+            value={newPlayerTeam}
+            onInputChange={(_, newValue) => setNewPlayerTeam(newValue)}
+            onChange={(_, newValue) => {
+              if (newValue) setNewPlayerTeam(newValue);
+            }}
+            renderInput={(params) => <TextField {...params} label="Default Team" />}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAddPlayer(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleAddPlayer}
+            disabled={!newPlayerName || !newPlayerTeam || addingPlayer}
+          >
+            {addingPlayer ? <CircularProgress size={20} /> : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

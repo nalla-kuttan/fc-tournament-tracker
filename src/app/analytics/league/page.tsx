@@ -14,6 +14,7 @@ import Divider from '@mui/material/Divider';
 import GlassCard from '@/components/shared/GlassCard';
 import StatLeaderboard from '@/components/analytics/StatLeaderboard';
 import BiggestWinsTable from '@/components/analytics/BiggestWinsTable';
+import BackButton from '@/components/shared/BackButton';
 import type { Tournament } from '@/lib/types';
 
 interface PlayerStat {
@@ -114,6 +115,7 @@ export default function LeagueAnalyticsPage() {
   if (tournaments.length === 0) {
     return (
       <Box>
+        <BackButton />
         <Typography variant="h4" fontWeight={700} gutterBottom>
           League Analytics
         </Typography>
@@ -124,6 +126,7 @@ export default function LeagueAnalyticsPage() {
 
   return (
     <Box>
+      <BackButton />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4, flexWrap: 'wrap' }}>
         <Box>
           <Typography variant="h4" fontWeight={700}>

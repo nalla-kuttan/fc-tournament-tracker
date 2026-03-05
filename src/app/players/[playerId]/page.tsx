@@ -14,6 +14,7 @@ import GlassCard from '@/components/shared/GlassCard';
 import WDLDoughnut from '@/components/analytics/WDLDoughnut';
 import SingleRadarChart from '@/components/analytics/SingleRadarChart';
 import FormMomentumChart from '@/components/analytics/FormMomentumChart';
+import BackButton from '@/components/shared/BackButton';
 import type { CareerStats, Match, RegisteredPlayer } from '@/lib/types';
 
 export default function PlayerProfilePage() {
@@ -54,6 +55,7 @@ export default function PlayerProfilePage() {
 
   return (
     <Box>
+      <BackButton />
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
         <PersonIcon sx={{ fontSize: 48, color: 'secondary.main' }} />

@@ -8,6 +8,7 @@ import Chip from '@mui/material/Chip';
 import Skeleton from '@mui/material/Skeleton';
 import TournamentTabs from '@/components/layout/TournamentTabs';
 import RealtimeProvider from '@/components/shared/RealtimeProvider';
+import BackButton from '@/components/shared/BackButton';
 import { TOURNAMENT_STATUSES } from '@/lib/constants';
 import type { Tournament } from '@/lib/types';
 
@@ -46,6 +47,7 @@ export default function TournamentLayout({ children }: { children: ReactNode }) 
   return (
     <RealtimeProvider tournamentId={tournamentId}>
       <Box>
+        <BackButton />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
           <Typography variant="h4" fontWeight={700}>
             {tournament.name}

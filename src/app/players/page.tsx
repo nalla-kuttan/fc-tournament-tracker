@@ -10,6 +10,7 @@ import AddIcon from '@mui/icons-material/Add';
 import PeopleIcon from '@mui/icons-material/People';
 import PlayerCard from '@/components/player/PlayerCard';
 import EmptyState from '@/components/shared/EmptyState';
+import BackButton from '@/components/shared/BackButton';
 import type { RegisteredPlayer } from '@/lib/types';
 
 export default function PlayersPage() {
@@ -29,6 +30,7 @@ export default function PlayersPage() {
 
   return (
     <Box>
+      <BackButton />
       {/* iOS Large Title */}
       <Typography
         variant="h3"

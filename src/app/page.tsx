@@ -95,32 +95,56 @@ export default function HomePage() {
               overflow: 'hidden',
             }}
           >
-            {hallOfFame.map((entry, index) => (
-              <Box
-                key={entry.tournament_id}
-                onClick={() => router.push(`/tournaments/${entry.tournament_id}`)}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  px: 2,
-                  py: 1.5,
-                  cursor: 'pointer',
-                  borderBottom: index < hallOfFame.length - 1 ? '0.5px solid rgba(255,255,255,0.08)' : 'none',
-                  '&:active': { background: 'rgba(255,255,255,0.05)' },
-                }}
-              >
-                <EmojiEventsIcon sx={{ fontSize: 32, color: '#FF9F0A', mr: 1.5 }} />
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant="body1" fontWeight={600} noWrap>
-                    {entry.winner_name}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#8E8E93' }}>
-                    {entry.tournament_name} &middot; {entry.winner_team}
-                  </Typography>
-                </Box>
-                {entry.stats.points != null && (
+            {Object.values(
+              hallOfFame.reduce((acc, entry) => {
+                if (!acc[entry.winner_name]) {
+                  acc[entry.winner_name] = {
+                    name: entry.winner_name,
+                    team: entry.winner_team,
+                    tournaments: [],
+                    points: 0,
+                  };
+                }
+                acc[entry.winner_name].tournaments.push(entry.tournament_name);
+                acc[entry.winner_name].points += Number(entry.stats.points || 0);
+                return acc;
+              }, {} as Record<string, { name: string; team: string; tournaments: string[]; points: number }>)
+            )
+              .sort((a, b) => b.tournaments.length - a.tournaments.length || b.points - a.points)
+              .map((groupedEntry, index, arr) => (
+                <Box
+                  key={groupedEntry.name}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    px: 2,
+                    py: 1.5,
+                    borderBottom: index < arr.length - 1 ? '0.5px solid rgba(255,255,255,0.08)' : 'none',
+                  }}
+                >
+                  <EmojiEventsIcon sx={{ fontSize: 32, color: '#FF9F0A', mr: 1.5 }} />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="body1" fontWeight={600} noWrap>
+                      {groupedEntry.name}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#8E8E93' }}>
+                      {groupedEntry.tournaments.length} {groupedEntry.tournaments.length === 1 ? 'Win' : 'Wins'} &mdash; {
+                        (() => {
+                          const isAllSeasons = groupedEntry.tournaments.every((t: string) => /Season\s*\d+/i.test(t));
+                          if (isAllSeasons) {
+                            const numbers = groupedEntry.tournaments.map((t: string) => {
+                              const match = t.match(/Season\s*(\d+)/i);
+                              return match ? match[1] : t;
+                            });
+                            return groupedEntry.tournaments.length === 1 ? `Season ${numbers[0]}` : `Seasons ${numbers.join(', ')}`;
+                          }
+                          return groupedEntry.tournaments.join(', ');
+                        })()
+                      }
+                    </Typography>
+                  </Box>
                   <Chip
-                    label={`${entry.stats.points} pts`}
+                    label={`${groupedEntry.tournaments.length} 🏆`}
                     size="small"
                     sx={{
                       bgcolor: 'rgba(255,159,10,0.15)',
@@ -130,10 +154,8 @@ export default function HomePage() {
                       mr: 0.5,
                     }}
                   />
-                )}
-                <ChevronRightIcon sx={{ color: '#48484A', fontSize: 20 }} />
-              </Box>
-            ))}
+                </Box>
+              ))}
           </Box>
         </Box>
       )}
