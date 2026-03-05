@@ -13,7 +13,8 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import TournamentCard from '@/components/tournament/TournamentCard';
 import EmptyState from '@/components/shared/EmptyState';
-import type { Tournament } from '@/lib/types';
+import FunFactsSection from '@/components/analytics/FunFactsSection';
+import type { Tournament, Match } from '@/lib/types';
 
 interface HallOfFameEntry {
   tournament_id: string;
@@ -26,20 +27,30 @@ interface HallOfFameEntry {
   stats: Record<string, number | string>;
 }
 
+interface AnalyticsData {
+  all_matches: Match[];
+  all_goals: { player_id: string; minute: number | null; match_id: string }[];
+  registered_players: { id: string; name: string; base_team: string }[];
+  player_instances: { id: string; registered_player_id: string; name: string; team: string }[];
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [hallOfFame, setHallOfFame] = useState<HallOfFameEntry[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       fetch('/api/tournaments').then((r) => r.json()),
       fetch('/api/analytics/hall-of-fame').then((r) => r.json()),
+      fetch('/api/analytics/global').then((r) => r.json()).catch(() => null),
     ])
-      .then(([t, hof]) => {
+      .then(([t, hof, globalData]) => {
         setTournaments(t);
         setHallOfFame(hof);
+        if (globalData) setAnalytics(globalData);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -125,6 +136,16 @@ export default function HomePage() {
             ))}
           </Box>
         </Box>
+      )}
+
+      {/* Records & Milestones */}
+      {analytics && (
+        <FunFactsSection
+          matches={analytics.all_matches}
+          goals={analytics.all_goals}
+          registeredPlayers={analytics.registered_players}
+          playerInstances={analytics.player_instances}
+        />
       )}
 
       {/* Tournaments - iOS Grouped Section */}

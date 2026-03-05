@@ -32,10 +32,10 @@ export async function GET() {
     .eq('is_bye', false)
     .order('played_at', { ascending: false });
 
-  // Get all goals
+  // Get all goals (include minute and match_id for analytics)
   const { data: allGoals } = await supabase
     .from('goal')
-    .select('player_id');
+    .select('player_id, minute, match_id');
 
   const matches = (allMatches ?? []) as Match[];
   const players = allPlayers ?? [];
@@ -123,5 +123,10 @@ export async function GET() {
     rating_rankings: ratingRankings,
     motm_rankings: motmRankings,
     clean_sheet_rankings: cleanSheetRankings,
+    // Raw data for visual analytics
+    all_matches: matches,
+    all_goals: goals,
+    registered_players: registeredPlayers,
+    player_instances: players,
   });
 }

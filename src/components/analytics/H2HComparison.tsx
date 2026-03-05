@@ -9,6 +9,7 @@ import GlassCard from '@/components/shared/GlassCard';
 import CardContent from '@mui/material/CardContent';
 import RadarChartComponent from './RadarChart';
 import WDLDoughnut from './WDLDoughnut';
+import RivalryCard from './RivalryCard';
 import dayjs from 'dayjs';
 import { FORM_COLORS } from '@/lib/constants';
 import type { H2HData, Match } from '@/lib/types';
@@ -172,6 +173,9 @@ export default function H2HComparison({ data }: Props) {
           )}
         </CardContent>
       </GlassCard>
+
+      {/* Rivalry Intensity */}
+      <RivalryCard data={data} />
 
       {/* Radar Chart */}
       <GlassCard>

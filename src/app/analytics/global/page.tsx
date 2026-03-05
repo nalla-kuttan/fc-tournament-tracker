@@ -10,7 +10,10 @@ import Divider from '@mui/material/Divider';
 import GlassCard from '@/components/shared/GlassCard';
 import StatLeaderboard from '@/components/analytics/StatLeaderboard';
 import BiggestWinsTable from '@/components/analytics/BiggestWinsTable';
-import type { CareerStats } from '@/lib/types';
+import SeasonAwards from '@/components/analytics/SeasonAwards';
+import GoalDistributionChart from '@/components/analytics/GoalDistributionChart';
+import PerformanceTrendChart from '@/components/analytics/PerformanceTrendChart';
+import type { CareerStats, Match } from '@/lib/types';
 
 interface BigWin {
   match_id: string;
@@ -35,6 +38,10 @@ interface GlobalData {
   rating_rankings: CareerStats[];
   motm_rankings: CareerStats[];
   clean_sheet_rankings: CareerStats[];
+  all_matches: Match[];
+  all_goals: { player_id: string; minute: number | null; match_id: string }[];
+  registered_players: { id: string; name: string; base_team: string }[];
+  player_instances: { id: string; registered_player_id: string; name: string; team: string }[];
 }
 
 function toLeaderboard(stats: CareerStats[], valueFn: (s: CareerStats) => string) {
@@ -87,6 +94,9 @@ export default function GlobalAnalyticsPage() {
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
         All-time career stats and rankings across every tournament
       </Typography>
+
+      {/* Season Awards */}
+      <SeasonAwards stats={data.career_stats} />
 
       {/* Career Overview Table */}
       <GlassCard sx={{ mb: 4 }}>
@@ -230,6 +240,39 @@ export default function GlobalAnalyticsPage() {
           />
         </Grid>
       </Grid>
+
+      {/* Goal Distribution by Minute */}
+      {data.all_goals && data.all_goals.length > 0 && (
+        <GlassCard sx={{ mb: 4 }}>
+          <CardContent>
+            <Typography variant="h6" fontWeight={600} gutterBottom>
+              Goal Distribution by Minute
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <GoalDistributionChart goals={data.all_goals} />
+          </CardContent>
+        </GlassCard>
+      )}
+
+      {/* Performance Trend */}
+      {data.all_matches && data.all_matches.length > 0 && (
+        <GlassCard sx={{ mb: 4 }}>
+          <CardContent>
+            <Typography variant="h6" fontWeight={600} gutterBottom>
+              Performance Trend
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+              Match ratings over time for each player
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <PerformanceTrendChart
+              matches={data.all_matches}
+              registeredPlayers={data.registered_players ?? []}
+              playerInstances={data.player_instances ?? []}
+            />
+          </CardContent>
+        </GlassCard>
+      )}
 
       {/* Biggest Wins */}
       <BiggestWinsTable wins={data.biggest_wins} title="Biggest Wins (All Time)" />
