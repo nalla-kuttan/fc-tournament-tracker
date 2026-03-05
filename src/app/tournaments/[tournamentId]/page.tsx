@@ -15,6 +15,8 @@ import BracketView from '@/components/tournament/BracketView';
 import AdminGate from '@/components/auth/AdminGate';
 import GlassCard from '@/components/shared/GlassCard';
 import CardContent from '@mui/material/CardContent';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import AIPunditModal from '@/components/ai/AIPunditModal';
 import { useAdmin } from '@/contexts/AdminContext';
 import type { Match, StandingRow } from '@/lib/types';
 
@@ -34,6 +36,7 @@ export default function TournamentDashboard() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
+  const [punditOpen, setPunditOpen] = useState(false);
 
   const loadData = () => {
     Promise.all([
@@ -50,7 +53,7 @@ export default function TournamentDashboard() {
 
   useEffect(() => {
     loadData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tournamentId]);
 
   const handleGenerateSchedule = async () => {
@@ -134,16 +137,38 @@ export default function TournamentDashboard() {
           <Grid size={{ xs: 12, md: 8 }}>
             {tournament.format !== 'knockout' ? (
               <Box>
-                <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-                  Standings
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6" fontWeight={600}>
+                    Standings
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<AutoAwesomeIcon />}
+                    onClick={() => setPunditOpen(true)}
+                    sx={{ color: '#FF9F0A', borderColor: 'rgba(255,159,10,0.5)', '&:hover': { borderColor: '#FF9F0A', bgcolor: 'rgba(255,159,10,0.1)' } }}
+                  >
+                    AI Summary
+                  </Button>
+                </Box>
                 <StandingsTable standings={standings} />
               </Box>
             ) : (
               <Box>
-                <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-                  Bracket
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6" fontWeight={600}>
+                    Bracket
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<AutoAwesomeIcon />}
+                    onClick={() => setPunditOpen(true)}
+                    sx={{ color: '#FF9F0A', borderColor: 'rgba(255,159,10,0.5)', '&:hover': { borderColor: '#FF9F0A', bgcolor: 'rgba(255,159,10,0.1)' } }}
+                  >
+                    AI Summary
+                  </Button>
+                </Box>
                 <BracketView
                   matches={tournament.matches as never[]}
                   onMatchClick={(id) => router.push(`/tournaments/${tournamentId}/matches/${id}`)}
@@ -182,6 +207,15 @@ export default function TournamentDashboard() {
           </Grid>
         </Grid>
       )}
+
+      {/* AI Pundit Modal */}
+      <AIPunditModal
+        open={punditOpen}
+        onClose={() => setPunditOpen(false)}
+        tournament={tournament}
+        standings={standings}
+        matches={tournament.matches}
+      />
     </Box>
   );
 }

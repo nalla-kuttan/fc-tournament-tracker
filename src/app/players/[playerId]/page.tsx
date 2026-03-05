@@ -9,9 +9,12 @@ import Grid from '@mui/material/Grid';
 import CircularProgress from '@mui/material/CircularProgress';
 import CardContent from '@mui/material/CardContent';
 import PersonIcon from '@mui/icons-material/Person';
-import PlayerStatsGrid from '@/components/player/PlayerStatsGrid';
 import GlassCard from '@/components/shared/GlassCard';
+import Button from '@mui/material/Button';
+import DescriptionIcon from '@mui/icons-material/Description';
+import PlayerStatsGrid from '@/components/player/PlayerStatsGrid';
 import WDLDoughnut from '@/components/analytics/WDLDoughnut';
+import AIScoutModal from '@/components/ai/AIScoutModal';
 import SingleRadarChart from '@/components/analytics/SingleRadarChart';
 import FormMomentumChart from '@/components/analytics/FormMomentumChart';
 import BackButton from '@/components/shared/BackButton';
@@ -25,6 +28,7 @@ export default function PlayerProfilePage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [playerIds, setPlayerIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [scoutOpen, setScoutOpen] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -70,9 +74,20 @@ export default function PlayerProfilePage() {
       {/* Career Stats */}
       {stats && (
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            Career Stats
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" fontWeight={600}>
+              Career Stats
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<DescriptionIcon />}
+              onClick={() => setScoutOpen(true)}
+              sx={{ color: '#0A84FF', borderColor: 'rgba(10,132,255,0.5)', '&:hover': { borderColor: '#0A84FF', bgcolor: 'rgba(10,132,255,0.1)' } }}
+            >
+              AI Scout Report
+            </Button>
+          </Box>
           <PlayerStatsGrid stats={stats} />
         </Box>
       )}
@@ -139,6 +154,16 @@ export default function PlayerProfilePage() {
             ))}
           </Box>
         </Box>
+      )}
+
+      {/* AI Scout Modal */}
+      {player && stats && (
+        <AIScoutModal
+          open={scoutOpen}
+          onClose={() => setScoutOpen(false)}
+          player={player}
+          stats={stats}
+        />
       )}
     </Box>
   );

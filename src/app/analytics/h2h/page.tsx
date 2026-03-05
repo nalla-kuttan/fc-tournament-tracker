@@ -8,9 +8,11 @@ import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import PlayerSelector from '@/components/analytics/PlayerSelector';
 import H2HComparison from '@/components/analytics/H2HComparison';
 import BackButton from '@/components/shared/BackButton';
+import AIH2HModal from '@/components/ai/AIH2HModal';
 import type { RegisteredPlayer, H2HData } from '@/lib/types';
 
 export default function H2HPage() {
@@ -19,6 +21,7 @@ export default function H2HPage() {
   const [h2hData, setH2hData] = useState<H2HData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [h2hModalOpen, setH2hModalOpen] = useState(false);
 
   const handleCompare = async () => {
     if (!player1 || !player2) return;
@@ -44,12 +47,27 @@ export default function H2HPage() {
   return (
     <Box>
       <BackButton />
-      <Typography variant="h4" fontWeight={700} gutterBottom>
-        Head-to-Head
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-        Compare career stats and direct encounters between two players
-      </Typography>
+      {/* Header */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
+        <Box>
+          <Typography variant="h4" fontWeight={700} gutterBottom>
+            Head-to-Head
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Compare career stats and direct encounters between two players
+          </Typography>
+        </Box>
+        {h2hData && player1 && player2 && (
+          <Button
+            variant="outlined"
+            onClick={() => setH2hModalOpen(true)}
+            startIcon={<AutoAwesomeIcon />}
+            sx={{ color: '#34C759', borderColor: 'rgba(52,199,89,0.5)', '&:hover': { borderColor: '#34C759', bgcolor: 'rgba(52,199,89,0.1)' } }}
+          >
+            AI Analyst
+          </Button>
+        )}
+      </Box>
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -92,6 +110,17 @@ export default function H2HPage() {
 
       {/* Results */}
       {h2hData && <H2HComparison data={h2hData} />}
+
+      {/* AI Analyst Modal */}
+      {player1 && player2 && h2hData && (
+        <AIH2HModal
+          open={h2hModalOpen}
+          onClose={() => setH2hModalOpen(false)}
+          player1={player1}
+          player2={player2}
+          h2hData={h2hData}
+        />
+      )}
     </Box>
   );
 }

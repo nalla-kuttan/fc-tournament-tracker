@@ -12,6 +12,7 @@
     "@ducanh2912/next-pwa": "^10.2.9",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@google/genai": "^1.44.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.8",
@@ -24,7 +25,8 @@
     "next": "16.1.6",
     "react": "19.2.3",
     "react-chartjs-2": "^5.3.1",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
