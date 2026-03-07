@@ -31,29 +31,33 @@ export default function PlayersPage() {
   return (
     <Box>
       <BackButton />
-      {/* iOS Large Title */}
-      <Typography
-        variant="h3"
-        sx={{
-          fontWeight: 700,
-          letterSpacing: '-0.5px',
-          mb: 3,
-          mt: 1,
-        }}
-      >
-        Players
-      </Typography>
+      {/* Gradient Title */}
+      <Box className="animate-section" sx={{ mb: 4, mt: 1 }}>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 700,
+            letterSpacing: '-0.5px',
+            background: 'linear-gradient(135deg, #F8FAFC 0%, #94A3B8 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
+          Players
+        </Typography>
+      </Box>
 
       {/* Section header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, mb: 1 }}>
+      <Box className="animate-section" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 1, mb: 1.5 }}>
         <Typography
           variant="body2"
           sx={{
-            color: '#8E8E93',
+            color: '#64748B',
             textTransform: 'uppercase',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            letterSpacing: '0.5px',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            letterSpacing: '0.1em',
           }}
         >
           Registered Players
@@ -64,12 +68,15 @@ export default function PlayersPage() {
           startIcon={<AddIcon />}
           onClick={() => router.push('/players/new')}
           sx={{
-            color: '#0A84FF',
+            color: '#22C55E',
             fontWeight: 600,
-            fontSize: '0.9rem',
+            fontSize: '0.875rem',
             textTransform: 'none',
             p: 0,
             minWidth: 'auto',
+            '&:hover': {
+              background: 'rgba(34, 197, 94, 0.08)',
+            },
           }}
         >
           Add
@@ -77,9 +84,15 @@ export default function PlayersPage() {
       </Box>
 
       {loading ? (
-        <Box sx={{ background: '#1C1C1E', borderRadius: '12px', p: 2 }}>
+        <Box sx={{
+          background: 'rgba(15, 23, 42, 0.6)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(148, 163, 184, 0.08)',
+          borderRadius: '16px',
+          p: 2,
+        }}>
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} variant="rounded" height={48} sx={{ borderRadius: 2, mb: i < 4 ? 1 : 0, bgcolor: 'rgba(255,255,255,0.05)' }} />
+            <Skeleton key={i} variant="rounded" height={56} sx={{ borderRadius: 2, mb: i < 4 ? 1 : 0, bgcolor: 'rgba(148, 163, 184, 0.05)' }} />
           ))}
         </Box>
       ) : players.length === 0 ? (
@@ -95,9 +108,12 @@ export default function PlayersPage() {
         />
       ) : (
         <Box
+          className="animate-section"
           sx={{
-            background: '#1C1C1E',
-            borderRadius: '12px',
+            background: 'rgba(15, 23, 42, 0.6)',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid rgba(148, 163, 184, 0.08)',
+            borderRadius: '16px',
             overflow: 'hidden',
           }}
         >

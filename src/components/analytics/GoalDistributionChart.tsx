@@ -53,7 +53,7 @@ export default function GoalDistributionChart({ goals }: { goals: GoalData[] }) 
         label: 'Goals',
         data: bucketCounts,
         backgroundColor: 'rgba(10, 132, 255, 0.6)',
-        borderColor: '#0A84FF',
+        borderColor: '#22C55E',
         borderWidth: 1,
         borderRadius: 4,
       },
@@ -74,11 +74,11 @@ export default function GoalDistributionChart({ goals }: { goals: GoalData[] }) 
     scales: {
       x: {
         grid: { color: 'rgba(255,255,255,0.06)' },
-        ticks: { color: '#8E8E93', stepSize: 1 },
+        ticks: { color: '#64748B', stepSize: 1 },
       },
       y: {
         grid: { display: false },
-        ticks: { color: '#8E8E93', font: { weight: 600 as const } },
+        ticks: { color: '#64748B', font: { weight: 600 as const } },
       },
     },
   };

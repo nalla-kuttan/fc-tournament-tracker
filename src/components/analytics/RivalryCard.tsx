@@ -108,7 +108,7 @@ export default function RivalryCard({ data }: { data: H2HData }) {
         {/* Win Ratio Bar */}
         <Box sx={{ mb: 2.5 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="caption" sx={{ color: '#0A84FF', fontWeight: 600 }}>
+            <Typography variant="caption" sx={{ color: '#22C55E', fontWeight: 600 }}>
               {data.player1.name}
             </Typography>
             <Typography variant="caption" sx={{ color: '#BF5AF2', fontWeight: 600 }}>
@@ -121,29 +121,29 @@ export default function RivalryCard({ data }: { data: H2HData }) {
               height: 8,
               borderRadius: 4,
               overflow: 'hidden',
-              bgcolor: 'rgba(255,255,255,0.05)',
+              bgcolor: 'rgba(148, 163, 184, 0.04)',
             }}
           >
             {p1Pct > 0 && (
-              <Box sx={{ width: `${p1Pct}%`, bgcolor: '#0A84FF', transition: 'width 0.5s ease' }} />
+              <Box sx={{ width: `${p1Pct}%`, bgcolor: '#22C55E', transition: 'width 0.5s ease' }} />
             )}
             {drawPct > 0 && (
-              <Box sx={{ width: `${drawPct}%`, bgcolor: '#8E8E93', transition: 'width 0.5s ease' }} />
+              <Box sx={{ width: `${drawPct}%`, bgcolor: '#64748B', transition: 'width 0.5s ease' }} />
             )}
             {p2Pct > 0 && (
               <Box sx={{ width: `${p2Pct}%`, bgcolor: '#BF5AF2', transition: 'width 0.5s ease' }} />
             )}
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-            <Typography variant="caption" sx={{ color: '#8E8E93' }}>
+            <Typography variant="caption" sx={{ color: '#64748B' }}>
               {data.player1_wins}W
             </Typography>
             {data.draws > 0 && (
-              <Typography variant="caption" sx={{ color: '#8E8E93' }}>
+              <Typography variant="caption" sx={{ color: '#64748B' }}>
                 {data.draws}D
               </Typography>
             )}
-            <Typography variant="caption" sx={{ color: '#8E8E93' }}>
+            <Typography variant="caption" sx={{ color: '#64748B' }}>
               {data.player2_wins}W
             </Typography>
           </Box>
@@ -162,7 +162,7 @@ export default function RivalryCard({ data }: { data: H2HData }) {
             <Typography variant="body1" fontWeight={700} sx={{ color: '#FF9F0A' }}>
               {avgMargin}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#8E8E93', fontSize: '0.65rem' }}>
+            <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.65rem' }}>
               Avg Margin
             </Typography>
           </Box>
@@ -170,7 +170,7 @@ export default function RivalryCard({ data }: { data: H2HData }) {
             <Typography variant="body1" fontWeight={700} sx={{ color: '#34C759' }}>
               {closestMatch}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#8E8E93', fontSize: '0.65rem' }}>
+            <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.65rem' }}>
               Closest
             </Typography>
           </Box>
@@ -178,7 +178,7 @@ export default function RivalryCard({ data }: { data: H2HData }) {
             <Typography variant="body1" fontWeight={700} sx={{ color: '#FF3B30' }}>
               {biggestWin}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#8E8E93', fontSize: '0.65rem' }}>
+            <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.65rem' }}>
               Biggest Win
             </Typography>
           </Box>
@@ -187,7 +187,7 @@ export default function RivalryCard({ data }: { data: H2HData }) {
         {/* Last 5 Results */}
         {last5.length > 0 && (
           <Box>
-            <Typography variant="caption" sx={{ color: '#8E8E93', fontSize: '0.65rem', mb: 0.5, display: 'block' }}>
+            <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.65rem', mb: 0.5, display: 'block' }}>
               Last {last5.length} ({data.player1.name}&apos;s perspective)
             </Typography>
             <Box sx={{ display: 'flex', gap: 0.75 }}>

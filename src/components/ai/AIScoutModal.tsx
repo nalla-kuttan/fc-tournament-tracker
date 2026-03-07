@@ -67,7 +67,7 @@ export default function AIScoutModal({
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <DescriptionIcon sx={{ color: '#0A84FF' }} />
+                <DescriptionIcon sx={{ color: '#22C55E' }} />
                 <Typography variant="h6" fontWeight={700}>
                     AI Scouting Report
                 </Typography>
@@ -75,7 +75,7 @@ export default function AIScoutModal({
             <DialogContent dividers>
                 {loading ? (
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4, gap: 2 }}>
-                        <CircularProgress sx={{ color: '#0A84FF' }} />
+                        <CircularProgress sx={{ color: '#22C55E' }} />
                         <Typography variant="body2" color="text.secondary">
                             Scouting the player...
                         </Typography>
@@ -103,7 +103,7 @@ export default function AIScoutModal({
                     onClick={generateReport}
                     disabled={loading}
                     variant="contained"
-                    sx={{ bgcolor: '#0A84FF', '&:hover': { bgcolor: '#0062cc' } }}
+                    sx={{ bgcolor: '#22C55E', '&:hover': { bgcolor: '#0062cc' } }}
                 >
                     Regenerate
                 </Button>

@@ -71,7 +71,7 @@ export default function BiggestWinsTable({ wins, title = 'Biggest Wins' }: Props
                   fontSize: '0.75rem',
                   fontFamily: 'monospace',
                   bgcolor: 'rgba(0,212,255,0.12)',
-                  color: '#0A84FF',
+                  color: '#22C55E',
                   minWidth: 56,
                   height: 24,
                 }}

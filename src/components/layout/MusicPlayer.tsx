@@ -31,7 +31,7 @@ export default function MusicPlayer() {
           setTracks(data);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const currentTrack = tracks[currentIndex];
@@ -66,10 +66,10 @@ export default function MusicPlayer() {
     if (audioRef.current && currentTrack) {
       audioRef.current.src = currentTrack.url;
       if (isPlaying) {
-        audioRef.current.play().catch(() => {});
+        audioRef.current.play().catch(() => { });
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, currentTrack]);
 
   useEffect(() => {
@@ -108,25 +108,41 @@ export default function MusicPlayer() {
           bottom: 0,
           left: 0,
           right: 0,
-          bgcolor: 'rgba(10, 10, 15, 0.95)',
-          backdropFilter: 'blur(16px)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          bgcolor: 'rgba(2, 6, 23, 0.92)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderTop: '1px solid rgba(148, 163, 184, 0.06)',
           px: 2,
           py: 1,
           display: 'flex',
           alignItems: 'center',
           gap: 2,
           zIndex: 1300,
+          boxShadow: '0 -4px 30px rgba(0, 0, 0, 0.4)',
         }}
       >
         {/* Track Info */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 200 }}>
-          <MusicNoteIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 200 }}>
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: '10px',
+              background: 'rgba(34, 197, 94, 0.1)',
+              border: '1px solid rgba(34, 197, 94, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <MusicNoteIcon sx={{ color: '#22C55E', fontSize: 18 }} />
+          </Box>
           <Box sx={{ overflow: 'hidden' }}>
-            <Typography variant="body2" fontWeight={600} noWrap>
+            <Typography variant="body2" fontWeight={600} noWrap sx={{ fontSize: '0.875rem' }}>
               {currentTrack?.title ?? 'No track'}
             </Typography>
-            <Typography variant="caption" color="text.secondary" noWrap>
+            <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.75rem' }} noWrap>
               {currentTrack?.artist ?? ''}
             </Typography>
           </Box>
@@ -134,27 +150,49 @@ export default function MusicPlayer() {
 
         {/* Controls */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <IconButton onClick={prevTrack} size="small" sx={{ color: 'text.primary' }}>
+          <IconButton
+            onClick={prevTrack}
+            size="small"
+            sx={{
+              color: '#94A3B8',
+              transition: 'color 150ms ease',
+              '&:hover': { color: '#F8FAFC' },
+            }}
+          >
             <SkipPreviousIcon />
           </IconButton>
           <IconButton
             onClick={isPlaying ? pause : play}
             sx={{
-              color: 'primary.main',
-              border: '1px solid',
-              borderColor: 'primary.main',
+              color: '#020617',
+              bgcolor: '#22C55E',
+              width: 36,
+              height: 36,
+              transition: 'all 200ms ease',
+              '&:hover': {
+                bgcolor: '#4ADE80',
+                boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)',
+              },
             }}
           >
-            {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+            {isPlaying ? <PauseIcon sx={{ fontSize: 20 }} /> : <PlayArrowIcon sx={{ fontSize: 20 }} />}
           </IconButton>
-          <IconButton onClick={nextTrack} size="small" sx={{ color: 'text.primary' }}>
+          <IconButton
+            onClick={nextTrack}
+            size="small"
+            sx={{
+              color: '#94A3B8',
+              transition: 'color 150ms ease',
+              '&:hover': { color: '#F8FAFC' },
+            }}
+          >
             <SkipNextIcon />
           </IconButton>
         </Box>
 
         {/* Progress */}
         <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
+          <Typography variant="caption" sx={{ color: '#64748B', minWidth: 40, fontSize: '0.7rem' }}>
             {formatTime(progress)}
           </Typography>
           <Slider
@@ -166,9 +204,24 @@ export default function MusicPlayer() {
               }
             }}
             size="small"
-            sx={{ color: 'primary.main' }}
+            sx={{
+              color: '#22C55E',
+              '& .MuiSlider-track': {
+                background: 'linear-gradient(90deg, #22C55E, #3B82F6)',
+              },
+              '& .MuiSlider-thumb': {
+                width: 12,
+                height: 12,
+                '&:hover': {
+                  boxShadow: '0 0 0 6px rgba(34, 197, 94, 0.15)',
+                },
+              },
+              '& .MuiSlider-rail': {
+                opacity: 0.15,
+              },
+            }}
           />
-          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
+          <Typography variant="caption" sx={{ color: '#64748B', minWidth: 40, fontSize: '0.7rem' }}>
             {formatTime(duration)}
           </Typography>
         </Box>
@@ -178,7 +231,11 @@ export default function MusicPlayer() {
           <IconButton
             onClick={() => setVolume((v) => (v === 0 ? 0.5 : 0))}
             size="small"
-            sx={{ color: 'text.secondary' }}
+            sx={{
+              color: '#64748B',
+              transition: 'color 150ms ease',
+              '&:hover': { color: '#94A3B8' },
+            }}
           >
             {volume === 0 ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
           </IconButton>
@@ -188,7 +245,16 @@ export default function MusicPlayer() {
             step={0.05}
             onChange={(_, v) => setVolume(v as number)}
             size="small"
-            sx={{ color: 'text.secondary' }}
+            sx={{
+              color: '#64748B',
+              '& .MuiSlider-thumb': {
+                width: 10,
+                height: 10,
+              },
+              '& .MuiSlider-rail': {
+                opacity: 0.15,
+              },
+            }}
           />
         </Box>
       </Box>

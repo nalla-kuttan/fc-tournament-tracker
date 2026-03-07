@@ -13,44 +13,47 @@ export default function PlayerCard({ player, showDivider = true }: { player: Reg
   return (
     <Box
       onClick={() => router.push(`/players/${player.id}`)}
+      className="list-row"
       sx={{
         display: 'flex',
         alignItems: 'center',
         px: 2,
-        py: 1.5,
+        py: 2,
         cursor: 'pointer',
-        borderBottom: showDivider ? '0.5px solid rgba(255,255,255,0.08)' : 'none',
-        '&:active': { background: 'rgba(255,255,255,0.05)' },
+        borderBottom: showDivider ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
+        transition: 'background 150ms ease',
       }}
     >
       {/* Avatar */}
       <Box
         sx={{
-          width: 40,
-          height: 40,
+          width: 44,
+          height: 44,
           borderRadius: '50%',
-          background: 'rgba(10,132,255,0.15)',
+          background: 'rgba(34, 197, 94, 0.1)',
+          border: '1px solid rgba(34, 197, 94, 0.15)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          mr: 1.5,
+          mr: 2,
           flexShrink: 0,
+          transition: 'all 200ms ease',
         }}
       >
-        <PersonIcon sx={{ color: '#0A84FF', fontSize: 22 }} />
+        <PersonIcon sx={{ color: '#22C55E', fontSize: 22 }} />
       </Box>
 
       {/* Info */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="body1" fontWeight={600} noWrap>
+        <Typography variant="body1" fontWeight={600} noWrap sx={{ letterSpacing: '0.01em' }}>
           {player.name}
         </Typography>
-        <Typography variant="caption" sx={{ color: '#8E8E93' }}>
+        <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem' }}>
           {player.base_team}
         </Typography>
       </Box>
 
-      <ChevronRightIcon sx={{ color: '#48484A', fontSize: 20 }} />
+      <ChevronRightIcon sx={{ color: '#334155', fontSize: 20 }} />
     </Box>
   );
 }

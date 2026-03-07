@@ -96,11 +96,27 @@ export default function TournamentDashboard() {
 
       {!hasMatches && (
         <GlassCard sx={{ mb: 3 }}>
-          <CardContent sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="h6" gutterBottom>
+          <CardContent sx={{ textAlign: 'center', py: 5 }}>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                background: 'rgba(34, 197, 94, 0.1)',
+                border: '1px solid rgba(34, 197, 94, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2,
+              }}
+            >
+              <PlayArrowIcon sx={{ fontSize: 32, color: '#22C55E' }} />
+            </Box>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
               Ready to start?
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography variant="body2" sx={{ color: '#64748B', mb: 3 }}>
               {tournament.players?.length ?? 0} players registered. Generate the schedule to begin.
             </Typography>
             <AdminGate tournamentId={tournamentId}>
@@ -123,9 +139,9 @@ export default function TournamentDashboard() {
           {/* Standings / Bracket Preview */}
           <Grid size={{ xs: 12, md: 8 }}>
             {tournament.format !== 'knockout' ? (
-              <Box>
+              <Box className="animate-section">
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" fontWeight={600}>
+                  <Typography variant="h6" fontWeight={600} sx={{ letterSpacing: '0.01em' }}>
                     Standings
                   </Typography>
                   <Button
@@ -133,7 +149,14 @@ export default function TournamentDashboard() {
                     size="small"
                     startIcon={<AutoAwesomeIcon />}
                     onClick={() => setPunditOpen(true)}
-                    sx={{ color: '#FF9F0A', borderColor: 'rgba(255,159,10,0.5)', '&:hover': { borderColor: '#FF9F0A', bgcolor: 'rgba(255,159,10,0.1)' } }}
+                    sx={{
+                      color: '#F59E0B',
+                      borderColor: 'rgba(245, 158, 11, 0.3)',
+                      '&:hover': {
+                        borderColor: '#F59E0B',
+                        bgcolor: 'rgba(245, 158, 11, 0.08)',
+                      },
+                    }}
                   >
                     AI Summary
                   </Button>
@@ -141,9 +164,9 @@ export default function TournamentDashboard() {
                 <StandingsTable standings={standings} />
               </Box>
             ) : (
-              <Box>
+              <Box className="animate-section">
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" fontWeight={600}>
+                  <Typography variant="h6" fontWeight={600} sx={{ letterSpacing: '0.01em' }}>
                     Bracket
                   </Typography>
                   <Button
@@ -151,7 +174,14 @@ export default function TournamentDashboard() {
                     size="small"
                     startIcon={<AutoAwesomeIcon />}
                     onClick={() => setPunditOpen(true)}
-                    sx={{ color: '#FF9F0A', borderColor: 'rgba(255,159,10,0.5)', '&:hover': { borderColor: '#FF9F0A', bgcolor: 'rgba(255,159,10,0.1)' } }}
+                    sx={{
+                      color: '#F59E0B',
+                      borderColor: 'rgba(245, 158, 11, 0.3)',
+                      '&:hover': {
+                        borderColor: '#F59E0B',
+                        bgcolor: 'rgba(245, 158, 11, 0.08)',
+                      },
+                    }}
                   >
                     AI Summary
                   </Button>
@@ -167,8 +197,18 @@ export default function TournamentDashboard() {
           {/* Recent & Upcoming */}
           <Grid size={{ xs: 12, md: 4 }}>
             {upcomingMatches.length > 0 && (
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+              <Box className="animate-section" sx={{ mb: 3 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#64748B',
+                    textTransform: 'uppercase',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.1em',
+                    mb: 1.5,
+                  }}
+                >
                   Upcoming
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -180,8 +220,18 @@ export default function TournamentDashboard() {
             )}
 
             {recentMatches.length > 0 && (
-              <Box>
-                <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+              <Box className="animate-section">
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#64748B',
+                    textTransform: 'uppercase',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.1em',
+                    mb: 1.5,
+                  }}
+                >
                   Recent Results
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

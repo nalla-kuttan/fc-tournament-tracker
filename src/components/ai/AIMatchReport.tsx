@@ -61,7 +61,7 @@ export default function AIMatchReport({ match, stats }: AIMatchReportProps) {
                             color="primary"
                             onClick={generateReport}
                             startIcon={<NewspaperIcon />}
-                            sx={{ color: '#0A84FF', borderColor: 'rgba(10,132,255,0.5)' }}
+                            sx={{ color: '#22C55E', borderColor: 'rgba(10,132,255,0.5)' }}
                         >
                             Generate Report
                         </Button>
@@ -70,7 +70,7 @@ export default function AIMatchReport({ match, stats }: AIMatchReportProps) {
 
                 {loading && (
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 2, gap: 2 }}>
-                        <CircularProgress sx={{ color: '#0A84FF' }} />
+                        <CircularProgress sx={{ color: '#22C55E' }} />
                         <Typography variant="body2" color="text.secondary">
                             Writing the headline...
                         </Typography>

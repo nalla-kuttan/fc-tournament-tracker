@@ -31,9 +31,9 @@ export default function TournamentLayout({ children }: { children: ReactNode }) 
   if (loading) {
     return (
       <Box>
-        <Skeleton variant="text" width={300} height={40} />
-        <Skeleton variant="rounded" height={48} sx={{ mt: 2, mb: 3 }} />
-        <Skeleton variant="rounded" height={400} />
+        <Skeleton variant="text" width={300} height={40} sx={{ bgcolor: 'rgba(148, 163, 184, 0.05)' }} />
+        <Skeleton variant="rounded" height={48} sx={{ mt: 2, mb: 3, bgcolor: 'rgba(148, 163, 184, 0.05)' }} />
+        <Skeleton variant="rounded" height={400} sx={{ bgcolor: 'rgba(148, 163, 184, 0.05)' }} />
       </Box>
     );
   }
@@ -48,17 +48,28 @@ export default function TournamentLayout({ children }: { children: ReactNode }) 
     <RealtimeProvider tournamentId={tournamentId}>
       <Box>
         <BackButton />
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <Typography variant="h4" fontWeight={700}>
+        <Box className="animate-section" sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            sx={{
+              background: 'linear-gradient(135deg, #F8FAFC 0%, #CBD5E1 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
             {tournament.name}
           </Typography>
           <Chip
             label={statusConfig.label}
             size="small"
             sx={{
-              bgcolor: `${statusConfig.color}20`,
+              bgcolor: `${statusConfig.color}15`,
               color: statusConfig.color,
               fontWeight: 600,
+              border: `1px solid ${statusConfig.color}25`,
+              letterSpacing: '0.02em',
             }}
           />
         </Box>

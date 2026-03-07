@@ -19,7 +19,7 @@ export default function WDLDoughnut({ stats, title }: Props) {
     datasets: [
       {
         data: [stats.wins, stats.draws, stats.losses],
-        backgroundColor: ['#0A84FF', '#BF5AF2', '#FF9F0A'],
+        backgroundColor: ['#22C55E', '#BF5AF2', '#FF9F0A'],
         borderColor: ['#009fcc', '#7c3aed', '#ccac00'],
         borderWidth: 2,
       },

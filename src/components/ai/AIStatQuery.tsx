@@ -77,7 +77,7 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
                             disabled={loading}
                             sx={{
                                 '& .MuiOutlinedInput-root': {
-                                    bgcolor: 'rgba(255,255,255,0.03)',
+                                    bgcolor: 'rgba(148, 163, 184, 0.03)',
                                 }
                             }}
                         />
@@ -98,7 +98,7 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
                 </form>
 
                 <Collapse in={!!answer || !!error}>
-                    <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                    <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid rgba(148, 163, 184, 0.08)' }}>
                         {error ? (
                             <Typography color="error">{error}</Typography>
                         ) : (

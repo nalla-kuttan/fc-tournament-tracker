@@ -34,32 +34,35 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* iOS-style top bar */}
+      {/* Premium frosted glass top bar */}
       <AppBar
         position="sticky"
         sx={{
-          background: 'rgba(0, 0, 0, 0.72)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '0.5px solid rgba(255, 255, 255, 0.15)',
-          boxShadow: 'none',
+          background: 'rgba(2, 6, 23, 0.8)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderBottom: '1px solid rgba(148, 163, 184, 0.06)',
+          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
         }}
       >
-        <Toolbar sx={{ minHeight: { xs: 48, sm: 56 }, px: { xs: 1, sm: 2 } }}>
+        <Toolbar sx={{ minHeight: { xs: 52, sm: 60 }, px: { xs: 1.5, sm: 2.5 } }}>
           {/* Back Button (Conditional) */}
           <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
             {!['/', '/players', '/analytics'].includes(pathname) && (
               <Button
                 variant="text"
-                startIcon={<ArrowBackIosNewIcon sx={{ fontSize: '1.2rem', ml: 0.5 }} />}
+                startIcon={<ArrowBackIosNewIcon sx={{ fontSize: '1rem !important' }} />}
                 onClick={() => router.back()}
                 sx={{
-                  color: '#0A84FF',
+                  color: '#22C55E',
                   textTransform: 'none',
-                  fontWeight: 400,
-                  fontSize: '1rem',
+                  fontWeight: 500,
+                  fontSize: '0.9375rem',
                   p: 0,
                   minWidth: 'auto',
+                  '&:hover': {
+                    background: 'rgba(34, 197, 94, 0.08)',
+                  },
                 }}
               >
                 Back
@@ -67,18 +70,26 @@ export default function AppShell({ children }: { children: ReactNode }) {
             )}
           </Box>
 
-          {/* Title */}
+          {/* Title with gradient accent */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
-            <SportsSoccerIcon sx={{ fontSize: 20, color: '#0A84FF' }} />
+            <SportsSoccerIcon
+              sx={{
+                fontSize: 22,
+                color: '#22C55E',
+                filter: 'drop-shadow(0 0 6px rgba(34, 197, 94, 0.4))',
+              }}
+            />
             <Typography
               variant="body1"
               component="div"
               sx={{
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: '1.1rem',
                 cursor: 'pointer',
-                color: '#FFFFFF',
-                letterSpacing: '-0.3px',
+                color: '#F8FAFC',
+                letterSpacing: '0.02em',
+                transition: 'color 200ms ease',
+                '&:hover': { color: '#22C55E' },
               }}
               onClick={() => router.push('/')}
             >
@@ -96,9 +107,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
         component="main"
         sx={{
           flexGrow: 1,
-          px: { xs: 2, sm: 2.5 },
-          pt: 2,
-          pb: 12, // Space for bottom nav
+          px: { xs: 2, sm: 3 },
+          pt: 2.5,
+          pb: 14,
           maxWidth: 960,
           mx: 'auto',
           width: '100%',
@@ -107,7 +118,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         {children}
       </Box>
 
-      {/* iOS-style bottom tab bar */}
+      {/* Premium frosted glass bottom tab bar */}
       <Paper
         sx={{
           position: 'fixed',
@@ -115,13 +126,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
           left: 0,
           right: 0,
           zIndex: 1200,
-          background: 'rgba(0, 0, 0, 0.72)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderTop: '0.5px solid rgba(255, 255, 255, 0.15)',
-          border: 'none',
+          background: 'rgba(2, 6, 23, 0.85)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderTop: '1px solid rgba(148, 163, 184, 0.06)',
+          boxShadow: '0 -4px 30px rgba(0, 0, 0, 0.3)',
           borderRadius: 0,
-          boxShadow: 'none',
         }}
         elevation={0}
       >
@@ -135,16 +145,18 @@ export default function AppShell({ children }: { children: ReactNode }) {
             height: 80,
             pb: 2,
             '& .MuiBottomNavigationAction-root': {
-              color: '#8E8E93',
+              color: '#475569',
               minWidth: 'auto',
               gap: 0,
               pt: 1,
+              transition: 'color 200ms ease',
               '&.Mui-selected': {
-                color: '#0A84FF',
+                color: '#22C55E',
               },
               '& .MuiBottomNavigationAction-label': {
                 fontSize: '0.65rem',
-                fontWeight: 500,
+                fontWeight: 600,
+                letterSpacing: '0.04em',
                 mt: 0.25,
                 '&.Mui-selected': {
                   fontSize: '0.65rem',
@@ -152,6 +164,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
               },
               '& .MuiSvgIcon-root': {
                 fontSize: 26,
+                transition: 'transform 200ms ease',
+              },
+              '&.Mui-selected .MuiSvgIcon-root': {
+                filter: 'drop-shadow(0 0 4px rgba(34, 197, 94, 0.3))',
               },
             },
           }}

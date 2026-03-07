@@ -114,7 +114,7 @@ function computeFunFacts(
         title: 'Goal Fest',
         value: `${maxGoals} goals`,
         subtitle: `${maxGoalsMatch.home_player?.name ?? 'TBD'} ${maxGoalsMatch.home_score}-${maxGoalsMatch.away_score} ${maxGoalsMatch.away_player?.name ?? 'TBD'}`,
-        color: '#0A84FF',
+        color: '#22C55E',
       });
     }
   } catch { /* skip */ }
@@ -378,26 +378,25 @@ export default function FunFactsSection({ matches, goals, registeredPlayers, pla
       <Typography
         variant="body2"
         sx={{
-          color: '#8E8E93',
+          color: '#64748B',
           textTransform: 'uppercase',
-          fontSize: '0.8rem',
-          fontWeight: 600,
-          letterSpacing: '0.5px',
-          px: 2,
+          fontSize: '0.75rem',
+          fontWeight: 700,
+          letterSpacing: '0.1em',
+          px: 1,
           mb: 1.5,
         }}
       >
-        Records & Milestones
+        Records &amp; Milestones
       </Typography>
       <Box
+        className="hide-scrollbar"
         sx={{
           display: 'flex',
           gap: 1.5,
           overflowX: 'auto',
           pb: 1,
           px: 0.5,
-          '&::-webkit-scrollbar': { height: 0 },
-          scrollbarWidth: 'none',
         }}
       >
         {facts.map((fact) => (

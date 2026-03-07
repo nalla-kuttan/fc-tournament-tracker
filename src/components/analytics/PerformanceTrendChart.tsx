@@ -18,7 +18,7 @@ import type { Match, MatchStats } from '@/lib/types';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 const PLAYER_COLORS = [
-  '#0A84FF',
+  '#22C55E',
   '#BF5AF2',
   '#FF9F0A',
   '#34C759',
@@ -137,16 +137,16 @@ export default function PerformanceTrendChart({ matches, registeredPlayers, play
         min: 0,
         max: 10,
         grid: { color: 'rgba(255,255,255,0.06)' },
-        ticks: { color: '#8E8E93' },
+        ticks: { color: '#64748B' },
         title: {
           display: true,
           text: 'Rating',
-          color: '#8E8E93',
+          color: '#64748B',
         },
       },
       x: {
         grid: { color: 'rgba(255,255,255,0.06)' },
-        ticks: { color: '#8E8E93', maxRotation: 45 },
+        ticks: { color: '#64748B', maxRotation: 45 },
       },
     },
     interaction: {

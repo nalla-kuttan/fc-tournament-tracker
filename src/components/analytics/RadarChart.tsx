@@ -31,9 +31,9 @@ export default function RadarChartComponent({ player1Stats, player2Stats }: Prop
         label: player1Stats.player_name,
         data: [p1.goals, p1.cleanSheets, p1.winRate, p1.avgRating, p1.possession],
         backgroundColor: 'rgba(10, 132, 255, 0.2)',
-        borderColor: '#0A84FF',
+        borderColor: '#22C55E',
         borderWidth: 2,
-        pointBackgroundColor: '#0A84FF',
+        pointBackgroundColor: '#22C55E',
       },
       {
         label: player2Stats.player_name,
@@ -56,9 +56,9 @@ export default function RadarChartComponent({ player1Stats, player2Stats }: Prop
     },
     scales: {
       r: {
-        angleLines: { color: 'rgba(255,255,255,0.1)' },
-        grid: { color: 'rgba(255,255,255,0.08)' },
-        pointLabels: { color: '#8E8E93', font: { size: 12 } },
+        angleLines: { color: 'rgba(148, 163, 184, 0.08)' },
+        grid: { color: 'rgba(148, 163, 184, 0.06)' },
+        pointLabels: { color: '#64748B', font: { size: 12 } },
         ticks: { display: false },
         suggestedMin: 0,
         suggestedMax: 100,

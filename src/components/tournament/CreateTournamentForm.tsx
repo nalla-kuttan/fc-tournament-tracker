@@ -26,6 +26,9 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
+import StadiumIcon from '@mui/icons-material/Stadium';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import { TEAMS } from '@/lib/constants';
 import type { RegisteredPlayer } from '@/lib/types';
 
@@ -173,9 +176,9 @@ export default function CreateTournamentForm() {
                 onChange={(_, v) => v && setFormat(v)}
                 fullWidth
               >
-                <ToggleButton value="league">🏟️ League</ToggleButton>
-                <ToggleButton value="knockout">🏆 Knockout</ToggleButton>
-                <ToggleButton value="cup">🏅 Cup</ToggleButton>
+                <ToggleButton value="league"><StadiumIcon sx={{ fontSize: 18, mr: 0.75 }} /> League</ToggleButton>
+                <ToggleButton value="knockout"><EmojiEventsIcon sx={{ fontSize: 18, mr: 0.75 }} /> Knockout</ToggleButton>
+                <ToggleButton value="cup"><MilitaryTechIcon sx={{ fontSize: 18, mr: 0.75 }} /> Cup</ToggleButton>
               </ToggleButtonGroup>
             </Box>
             <Button
@@ -201,7 +204,7 @@ export default function CreateTournamentForm() {
             {registeredPlayers.length === 0 ? (
               <Alert severity="info">
                 No players registered yet.{' '}
-                <span style={{ color: '#0A84FF', cursor: 'pointer' }} onClick={() => setOpenAddPlayer(true)}>
+                <span style={{ color: '#22C55E', cursor: 'pointer' }} onClick={() => setOpenAddPlayer(true)}>
                   Register players first
                 </span>
               </Alert>
@@ -215,7 +218,7 @@ export default function CreateTournamentForm() {
                     gap: 2,
                     p: 1,
                     borderRadius: 1,
-                    bgcolor: selectedPlayerIds.has(player.id) ? 'rgba(0,212,255,0.08)' : 'transparent',
+                    bgcolor: selectedPlayerIds.has(player.id) ? 'rgba(34, 197, 94, 0.06)' : 'transparent',
                   }}
                 >
                   <FormControlLabel

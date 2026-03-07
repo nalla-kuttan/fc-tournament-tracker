@@ -75,7 +75,7 @@ export default function PlayerProfilePage() {
               size="small"
               startIcon={<DescriptionIcon />}
               onClick={() => setScoutOpen(true)}
-              sx={{ color: '#0A84FF', borderColor: 'rgba(10,132,255,0.5)', '&:hover': { borderColor: '#0A84FF', bgcolor: 'rgba(10,132,255,0.1)' } }}
+              sx={{ color: '#22C55E', borderColor: 'rgba(10,132,255,0.5)', '&:hover': { borderColor: '#22C55E', bgcolor: 'rgba(10,132,255,0.1)' } }}
             >
               AI Scout Report
             </Button>

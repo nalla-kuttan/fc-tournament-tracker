@@ -60,7 +60,7 @@ export default function MatchesPage() {
         gap: 0.5,
         mb: 3,
         flexWrap: 'wrap',
-        background: '#1C1C1E',
+        background: 'rgba(15, 23, 42, 0.6)',
         borderRadius: '10px',
         p: 0.5,
       }}>
@@ -69,12 +69,12 @@ export default function MatchesPage() {
           onClick={() => setSelectedRound(null)}
           sx={{
             bgcolor: selectedRound === null ? '#636366' : 'transparent',
-            color: selectedRound === null ? '#FFFFFF' : '#8E8E93',
+            color: selectedRound === null ? '#FFFFFF' : '#64748B',
             fontWeight: 600,
             fontSize: '0.85rem',
             borderRadius: '8px',
             border: 'none',
-            '&:hover': { bgcolor: selectedRound === null ? '#636366' : 'rgba(255,255,255,0.05)' },
+            '&:hover': { bgcolor: selectedRound === null ? '#636366' : 'rgba(148, 163, 184, 0.04)' },
           }}
         />
         {rounds.map((r) => (
@@ -84,12 +84,12 @@ export default function MatchesPage() {
             onClick={() => setSelectedRound(r)}
             sx={{
               bgcolor: selectedRound === r ? '#636366' : 'transparent',
-              color: selectedRound === r ? '#FFFFFF' : '#8E8E93',
+              color: selectedRound === r ? '#FFFFFF' : '#64748B',
               fontWeight: 600,
               fontSize: '0.85rem',
               borderRadius: '8px',
               border: 'none',
-              '&:hover': { bgcolor: selectedRound === r ? '#636366' : 'rgba(255,255,255,0.05)' },
+              '&:hover': { bgcolor: selectedRound === r ? '#636366' : 'rgba(148, 163, 184, 0.04)' },
             }}
           />
         ))}
@@ -103,7 +103,7 @@ export default function MatchesPage() {
             <Typography
               variant="body2"
               sx={{
-                color: '#8E8E93',
+                color: '#64748B',
                 textTransform: 'uppercase',
                 fontSize: '0.8rem',
                 fontWeight: 600,
@@ -116,7 +116,7 @@ export default function MatchesPage() {
             </Typography>
             <Box
               sx={{
-                background: '#1C1C1E',
+                background: 'rgba(15, 23, 42, 0.6)',
                 borderRadius: '12px',
                 overflow: 'hidden',
               }}
@@ -131,7 +131,7 @@ export default function MatchesPage() {
         ))}
 
       {matches.length === 0 && (
-        <Typography sx={{ color: '#8E8E93', textAlign: 'center', py: 4 }}>
+        <Typography sx={{ color: '#64748B', textAlign: 'center', py: 4 }}>
           No matches scheduled yet. Generate the schedule from the dashboard.
         </Typography>
       )}

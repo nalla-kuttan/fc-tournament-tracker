@@ -39,7 +39,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
     awards.push({
       emoji: '⭐',
       title: 'Best Manager',
-      color: '#0A84FF',
+      color: '#22C55E',
       winner: bestRated.player_name,
       team: bestRated.base_team,
       value: `${bestRated.avg_rating.toFixed(1)} avg rating`,
@@ -111,7 +111,7 @@ export default function SeasonAwards({ stats }: { stats: CareerStats[] }) {
       <Typography
         variant="body2"
         sx={{
-          color: '#8E8E93',
+          color: '#64748B',
           textTransform: 'uppercase',
           fontSize: '0.8rem',
           fontWeight: 600,
@@ -127,7 +127,7 @@ export default function SeasonAwards({ stats }: { stats: CareerStats[] }) {
           <Grid key={award.title} size={{ xs: 6, sm: 4, md: 4 }}>
             <Box
               sx={{
-                background: '#1C1C1E',
+                background: 'rgba(15, 23, 42, 0.6)',
                 borderRadius: '12px',
                 p: 2,
                 display: 'flex',
@@ -162,7 +162,7 @@ export default function SeasonAwards({ stats }: { stats: CareerStats[] }) {
                 <Typography variant="body2" fontWeight={600} noWrap>
                   {award.winner}
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#8E8E93' }} noWrap>
+                <Typography variant="caption" sx={{ color: '#64748B' }} noWrap>
                   {award.value}
                 </Typography>
               </Box>

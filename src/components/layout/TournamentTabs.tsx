@@ -38,13 +38,28 @@ export default function TournamentTabs({ tournamentId, format }: Props) {
   const currentTab = tabs.findIndex((t) => pathname === t.path);
 
   return (
-    <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+    <Box
+      sx={{
+        borderBottom: '1px solid rgba(148, 163, 184, 0.08)',
+        mb: 3,
+        background: 'rgba(15, 23, 42, 0.3)',
+        borderRadius: '12px 12px 0 0',
+        mx: -1,
+        px: 1,
+      }}
+    >
       <Tabs
         value={currentTab >= 0 ? currentTab : 0}
         onChange={(_, idx) => router.push(tabs[idx].path)}
         variant="scrollable"
         scrollButtons="auto"
         allowScrollButtonsMobile
+        sx={{
+          '& .MuiTab-root': {
+            minHeight: 56,
+            transition: 'color 200ms ease',
+          },
+        }}
       >
         {tabs.map((tab) => (
           <Tab key={tab.path} label={tab.label} icon={tab.icon} iconPosition="start" />

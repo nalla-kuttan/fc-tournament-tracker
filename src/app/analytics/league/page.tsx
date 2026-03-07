@@ -167,7 +167,7 @@ export default function LeagueAnalyticsPage() {
               <Divider sx={{ mb: 2 }} />
               <Box sx={{ overflowX: 'auto' }}>
                 <Box sx={{ minWidth: 650 }}>
-                  <Box sx={{ display: 'flex', py: 1, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                  <Box sx={{ display: 'flex', py: 1, borderBottom: '1px solid rgba(148, 163, 184, 0.06)' }}>
                     {['Player', 'P', 'W', 'D', 'L', 'GF', 'GA', 'CS', 'Pts', 'Win%', 'G/M', 'xG', 'Rtg', 'Poss%'].map((h) => (
                       <Typography
                         key={h}
@@ -252,7 +252,7 @@ export default function LeagueAnalyticsPage() {
                 title="Goals Per Match"
                 valueLabel="G/M"
                 entries={toLeaderboard(data.goals_per_match_rankings, (s) => s.goals_per_match.toFixed(2))}
-                accentColor="#0A84FF"
+                accentColor="#22C55E"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -268,7 +268,7 @@ export default function LeagueAnalyticsPage() {
                 title="Possession"
                 valueLabel="Avg%"
                 entries={toLeaderboard(data.possession_rankings, (s) => `${s.avg_possession.toFixed(0)}%`)}
-                accentColor="#0A84FF"
+                accentColor="#22C55E"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>

@@ -15,46 +15,56 @@ export default function AnalyticsPage() {
     {
       title: 'Head-to-Head',
       description: 'Compare two players across all tournaments',
-      icon: <CompareArrowsIcon sx={{ fontSize: 24, color: '#0A84FF' }} />,
-      iconBg: 'rgba(10,132,255,0.15)',
+      icon: <CompareArrowsIcon sx={{ fontSize: 24, color: '#3B82F6' }} />,
+      iconBg: 'rgba(59, 130, 246, 0.1)',
+      iconBorder: 'rgba(59, 130, 246, 0.15)',
       href: '/analytics/h2h',
     },
     {
       title: 'Global Analytics',
       description: 'All-time career stats and rankings',
-      icon: <PublicIcon sx={{ fontSize: 24, color: '#BF5AF2' }} />,
-      iconBg: 'rgba(191,90,242,0.15)',
+      icon: <PublicIcon sx={{ fontSize: 24, color: '#A855F7' }} />,
+      iconBg: 'rgba(168, 85, 247, 0.1)',
+      iconBorder: 'rgba(168, 85, 247, 0.15)',
       href: '/analytics/global',
     },
     {
       title: 'League Analytics',
       description: 'Tournament-specific stats and rankings',
-      icon: <LeaderboardIcon sx={{ fontSize: 24, color: '#FF9F0A' }} />,
-      iconBg: 'rgba(255,159,10,0.15)',
+      icon: <LeaderboardIcon sx={{ fontSize: 24, color: '#F59E0B' }} />,
+      iconBg: 'rgba(245, 158, 11, 0.1)',
+      iconBorder: 'rgba(245, 158, 11, 0.15)',
       href: '/analytics/league',
     },
   ];
 
   return (
     <Box>
-      {/* iOS Large Title */}
-      <Typography
-        variant="h3"
-        sx={{
-          fontWeight: 700,
-          letterSpacing: '-0.5px',
-          mb: 3,
-          mt: 1,
-        }}
-      >
-        Analytics
-      </Typography>
+      {/* Gradient Title */}
+      <Box className="animate-section" sx={{ mb: 4, mt: 1 }}>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 700,
+            letterSpacing: '-0.5px',
+            background: 'linear-gradient(135deg, #F8FAFC 0%, #94A3B8 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
+          Analytics
+        </Typography>
+      </Box>
 
-      {/* iOS Grouped List */}
+      {/* Glass List */}
       <Box
+        className="animate-section"
         sx={{
-          background: '#1C1C1E',
-          borderRadius: '12px',
+          background: 'rgba(15, 23, 42, 0.6)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(148, 163, 184, 0.08)',
+          borderRadius: '16px',
           overflow: 'hidden',
         }}
       >
@@ -62,27 +72,29 @@ export default function AnalyticsPage() {
           <Box
             key={item.title}
             onClick={() => router.push(item.href)}
+            className="list-row"
             sx={{
               display: 'flex',
               alignItems: 'center',
               px: 2,
-              py: 1.5,
+              py: 2,
               cursor: 'pointer',
-              borderBottom: index < items.length - 1 ? '0.5px solid rgba(255,255,255,0.08)' : 'none',
-              '&:active': { background: 'rgba(255,255,255,0.05)' },
+              borderBottom: index < items.length - 1 ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
+              transition: 'background 150ms ease',
             }}
           >
             {/* Icon */}
             <Box
               sx={{
-                width: 40,
-                height: 40,
-                borderRadius: '10px',
+                width: 44,
+                height: 44,
+                borderRadius: '12px',
                 background: item.iconBg,
+                border: `1px solid ${item.iconBorder}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                mr: 1.5,
+                mr: 2,
                 flexShrink: 0,
               }}
             >
@@ -91,15 +103,15 @@ export default function AnalyticsPage() {
 
             {/* Text */}
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="body1" fontWeight={600}>
+              <Typography variant="body1" fontWeight={600} sx={{ letterSpacing: '0.01em' }}>
                 {item.title}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#8E8E93' }}>
+              <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem' }}>
                 {item.description}
               </Typography>
             </Box>
 
-            <ChevronRightIcon sx={{ color: '#48484A', fontSize: 20 }} />
+            <ChevronRightIcon sx={{ color: '#334155', fontSize: 20 }} />
           </Box>
         ))}
       </Box>

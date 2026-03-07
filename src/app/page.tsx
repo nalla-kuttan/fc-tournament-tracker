@@ -45,40 +45,50 @@ export default function HomePage() {
 
   return (
     <Box>
-      {/* iOS Large Title */}
-      <Typography
-        variant="h3"
-        sx={{
-          fontWeight: 700,
-          letterSpacing: '-0.5px',
-          mb: 3,
-          mt: 1,
-        }}
-      >
-        Tournaments
-      </Typography>
+      {/* Hero Title with gradient */}
+      <Box className="animate-section" sx={{ mb: 4, mt: 1 }}>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 700,
+            letterSpacing: '-0.5px',
+            background: 'linear-gradient(135deg, #F8FAFC 0%, #94A3B8 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
+          Tournaments
+        </Typography>
+      </Box>
 
-      {/* Hall of Fame - iOS Grouped Section */}
+      {/* Hall of Fame */}
       {hallOfFame.length > 0 && (
-        <Box sx={{ mb: 4 }}>
+        <Box className="animate-section" sx={{ mb: 4 }}>
           <Typography
             variant="body2"
             sx={{
-              color: '#8E8E93',
+              color: '#64748B',
               textTransform: 'uppercase',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              letterSpacing: '0.5px',
-              px: 2,
-              mb: 1,
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.1em',
+              px: 1,
+              mb: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
             }}
           >
+            <EmojiEventsIcon sx={{ fontSize: 16, color: '#F59E0B' }} />
             Hall of Fame
           </Typography>
           <Box
             sx={{
-              background: '#1C1C1E',
-              borderRadius: '12px',
+              background: 'rgba(15, 23, 42, 0.6)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(148, 163, 184, 0.08)',
+              borderRadius: '16px',
               overflow: 'hidden',
             }}
           >
@@ -101,20 +111,38 @@ export default function HomePage() {
               .map((groupedEntry, index, arr) => (
                 <Box
                   key={groupedEntry.name}
+                  className="list-row"
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
                     px: 2,
-                    py: 1.5,
-                    borderBottom: index < arr.length - 1 ? '0.5px solid rgba(255,255,255,0.08)' : 'none',
+                    py: 2,
+                    borderBottom: index < arr.length - 1 ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
+                    transition: 'background 150ms ease',
                   }}
                 >
-                  <EmojiEventsIcon sx={{ fontSize: 32, color: '#FF9F0A', mr: 1.5 }} />
+                  {/* Trophy with glow */}
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: '12px',
+                      background: 'rgba(245, 158, 11, 0.1)',
+                      border: '1px solid rgba(245, 158, 11, 0.15)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mr: 2,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <EmojiEventsIcon sx={{ fontSize: 24, color: '#F59E0B', filter: 'drop-shadow(0 0 4px rgba(245, 158, 11, 0.3))' }} />
+                  </Box>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="body1" fontWeight={600} noWrap>
+                    <Typography variant="body1" fontWeight={600} noWrap sx={{ letterSpacing: '0.01em' }}>
                       {groupedEntry.name}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: '#8E8E93' }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem' }}>
                       {groupedEntry.tournaments.length} {groupedEntry.tournaments.length === 1 ? 'Win' : 'Wins'} &mdash; {
                         (() => {
                           const isAllSeasons = groupedEntry.tournaments.every((t: string) => /Season\s*\d+/i.test(t));
@@ -131,14 +159,17 @@ export default function HomePage() {
                     </Typography>
                   </Box>
                   <Chip
-                    label={`${groupedEntry.tournaments.length} 🏆`}
+                    label={`${groupedEntry.tournaments.length}`}
+                    icon={<EmojiEventsIcon sx={{ fontSize: 14, color: '#F59E0B !important' }} />}
                     size="small"
                     sx={{
-                      bgcolor: 'rgba(255,159,10,0.15)',
-                      color: '#FF9F0A',
+                      bgcolor: 'rgba(245, 158, 11, 0.12)',
+                      color: '#F59E0B',
                       fontWeight: 700,
-                      fontSize: '0.75rem',
+                      fontSize: '0.8rem',
+                      border: '1px solid rgba(245, 158, 11, 0.2)',
                       mr: 0.5,
+                      '& .MuiChip-icon': { ml: 0.5 },
                     }}
                   />
                 </Box>
@@ -149,25 +180,27 @@ export default function HomePage() {
 
       {/* Records & Milestones */}
       {analytics && (
-        <FunFactsSection
-          matches={analytics.all_matches}
-          goals={analytics.all_goals}
-          registeredPlayers={analytics.registered_players}
-          playerInstances={analytics.player_instances}
-        />
+        <Box className="animate-section">
+          <FunFactsSection
+            matches={analytics.all_matches}
+            goals={analytics.all_goals}
+            registeredPlayers={analytics.registered_players}
+            playerInstances={analytics.player_instances}
+          />
+        </Box>
       )}
 
-      {/* Tournaments - iOS Grouped Section */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, mb: 1 }}>
+      {/* Tournaments Section */}
+      <Box className="animate-section" sx={{ mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 1, mb: 1.5 }}>
           <Typography
             variant="body2"
             sx={{
-              color: '#8E8E93',
+              color: '#64748B',
               textTransform: 'uppercase',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              letterSpacing: '0.5px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.1em',
             }}
           >
             Your Tournaments
@@ -178,12 +211,15 @@ export default function HomePage() {
             startIcon={<AddIcon />}
             onClick={() => router.push('/tournaments/new')}
             sx={{
-              color: '#0A84FF',
+              color: '#22C55E',
               fontWeight: 600,
-              fontSize: '0.9rem',
+              fontSize: '0.875rem',
               textTransform: 'none',
               p: 0,
               minWidth: 'auto',
+              '&:hover': {
+                background: 'rgba(34, 197, 94, 0.08)',
+              },
             }}
           >
             New
@@ -191,9 +227,24 @@ export default function HomePage() {
         </Box>
 
         {loading ? (
-          <Box sx={{ background: '#1C1C1E', borderRadius: '12px', p: 2 }}>
+          <Box sx={{
+            background: 'rgba(15, 23, 42, 0.6)',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid rgba(148, 163, 184, 0.08)',
+            borderRadius: '16px',
+            p: 2,
+          }}>
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} variant="rounded" height={56} sx={{ borderRadius: 2, mb: i < 3 ? 1 : 0, bgcolor: 'rgba(255,255,255,0.05)' }} />
+              <Skeleton
+                key={i}
+                variant="rounded"
+                height={64}
+                sx={{
+                  borderRadius: 2,
+                  mb: i < 3 ? 1 : 0,
+                  bgcolor: 'rgba(148, 163, 184, 0.05)',
+                }}
+              />
             ))}
           </Box>
         ) : tournaments.length === 0 ? (
@@ -210,8 +261,10 @@ export default function HomePage() {
         ) : (
           <Box
             sx={{
-              background: '#1C1C1E',
-              borderRadius: '12px',
+              background: 'rgba(15, 23, 42, 0.6)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(148, 163, 184, 0.08)',
+              borderRadius: '16px',
               overflow: 'hidden',
             }}
           >
