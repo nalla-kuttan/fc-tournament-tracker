@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import { motion } from 'framer-motion';
+import Tilt from 'react-parallax-tilt';
 
 const MotionBox = motion.create(Box);
 
@@ -52,15 +53,22 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
   }
 
   return (
-    <MotionBox
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
-      onClick={() => router.push(`/tournaments/${match.tournament_id}/matches/${match.id}`)}
-      className="list-row"
+    <Tilt
+      tiltMaxAngleX={3}
+      tiltMaxAngleY={3}
+      perspective={1000}
+      transitionSpeed={400}
+      scale={1.01}
+      gyroscope={true}
+    >
+      <MotionBox
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: index * 0.05 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => router.push(`/tournaments/${match.tournament_id}/matches/${match.id}`)}
+        className="list-row"
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -73,6 +81,7 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
         borderRadius: '12px',
         border: '1px solid rgba(148, 163, 184, 0.06)',
         transition: 'all 200ms ease',
+        transformStyle: 'preserve-3d',
         '&:hover': {
           borderColor: 'rgba(34, 197, 94, 0.15)',
           background: 'rgba(15, 23, 42, 0.6)',
@@ -80,7 +89,7 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
       }}
     >
       {/* Home */}
-      <Box sx={{ flex: 1, textAlign: 'right', pr: 1.5, minWidth: 0 }}>
+      <Box sx={{ flex: 1, textAlign: 'right', pr: 1.5, minWidth: 0, transform: 'translateZ(10px)' }}>
         <Typography variant="body1" fontWeight={600} noWrap sx={{ letterSpacing: '0.01em' }}>
           {match.home_player?.name ?? 'TBD'}
         </Typography>
@@ -99,6 +108,8 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
           borderRadius: '10px',
           bgcolor: match.is_played ? 'rgba(34, 197, 94, 0.08)' : 'rgba(148, 163, 184, 0.04)',
           border: match.is_played ? '1px solid rgba(34, 197, 94, 0.12)' : '1px solid rgba(148, 163, 184, 0.06)',
+          transform: 'translateZ(20px)',
+          boxShadow: match.is_played ? '0 4px 12px rgba(34, 197, 94, 0.1)' : 'none',
         }}
       >
         {match.is_played ? (
@@ -121,7 +132,7 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
       </Box>
 
       {/* Away */}
-      <Box sx={{ flex: 1, textAlign: 'left', pl: 1.5, minWidth: 0 }}>
+      <Box sx={{ flex: 1, textAlign: 'left', pl: 1.5, minWidth: 0, transform: 'translateZ(10px)' }}>
         <Typography variant="body1" fontWeight={600} noWrap sx={{ letterSpacing: '0.01em' }}>
           {match.away_player?.name ?? 'TBD'}
         </Typography>
@@ -147,5 +158,6 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
         />
       )}
     </MotionBox>
+  </Tilt>
   );
 }

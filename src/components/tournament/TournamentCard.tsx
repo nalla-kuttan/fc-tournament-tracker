@@ -12,6 +12,7 @@ import { TOURNAMENT_STATUSES } from '@/lib/constants';
 import type { Tournament } from '@/lib/types';
 
 import { motion } from 'framer-motion';
+import Tilt from 'react-parallax-tilt';
 
 const FORMAT_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   league: {
@@ -39,25 +40,34 @@ export default function TournamentCard({ tournament, showDivider = true, index =
   const formatConfig = FORMAT_CONFIG[tournament.format] || FORMAT_CONFIG.league;
 
   return (
-    <MotionBox
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
-      onClick={() => router.push(`/tournaments/${tournament.id}`)}
-      className="list-row"
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        px: 2,
-        py: 2,
-        cursor: 'pointer',
-        borderBottom: showDivider ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
-        transition: 'background 150ms ease',
-      }}
+    <Tilt
+      tiltMaxAngleX={4}
+      tiltMaxAngleY={4}
+      perspective={1000}
+      transitionSpeed={400}
+      scale={1.02}
+      gyroscope={true}
+      className="parallax-effect-glare-scale"
     >
+      <MotionBox
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: index * 0.05 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => router.push(`/tournaments/${tournament.id}`)}
+        className="list-row"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          px: 2,
+          py: 2,
+          cursor: 'pointer',
+          borderBottom: showDivider ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
+          transition: 'background 150ms ease',
+          transformStyle: 'preserve-3d', // For 3D floating effect on children
+        }}
+      >
       {/* Format icon - SVG instead of emoji */}
       <Box
         sx={{
@@ -72,13 +82,14 @@ export default function TournamentCard({ tournament, showDivider = true, index =
           mr: 2,
           flexShrink: 0,
           transition: 'all 200ms ease',
+          transform: 'translateZ(20px)', // Pop out effect
         }}
       >
         {formatConfig.icon}
       </Box>
 
       {/* Info */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box sx={{ flex: 1, minWidth: 0, transform: 'translateZ(10px)' }}>
         <Typography variant="body1" fontWeight={600} noWrap sx={{ letterSpacing: '0.01em' }}>
           {tournament.name}
         </Typography>
@@ -88,22 +99,25 @@ export default function TournamentCard({ tournament, showDivider = true, index =
       </Box>
 
       {/* Status chip */}
-      <Chip
-        label={statusConfig.label}
-        size="small"
-        sx={{
-          bgcolor: `${statusConfig.color}12`,
-          color: statusConfig.color,
-          fontWeight: 600,
-          fontSize: '0.7rem',
-          height: 26,
-          mr: 0.5,
-          border: `1px solid ${statusConfig.color}25`,
-          letterSpacing: '0.02em',
-        }}
-      />
+      <Box sx={{ transform: 'translateZ(15px)', display: 'flex', alignItems: 'center' }}>
+        <Chip
+          label={statusConfig.label}
+          size="small"
+          sx={{
+            bgcolor: `${statusConfig.color}12`,
+            color: statusConfig.color,
+            fontWeight: 600,
+            fontSize: '0.7rem',
+            height: 26,
+            mr: 1,
+            border: `1px solid ${statusConfig.color}25`,
+            letterSpacing: '0.02em',
+          }}
+        />
 
-      <ChevronRightIcon sx={{ color: '#334155', fontSize: 20 }} />
+        <ChevronRightIcon sx={{ color: '#334155', fontSize: 20 }} />
+      </Box>
     </MotionBox>
+  </Tilt>
   );
 }

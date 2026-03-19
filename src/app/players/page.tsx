@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import Skeleton from '@mui/material/Skeleton';
 import AddIcon from '@mui/icons-material/Add';
 import PeopleIcon from '@mui/icons-material/People';
+import Tilt from 'react-parallax-tilt';
 import PlayerCard from '@/components/player/PlayerCard';
 import EmptyState from '@/components/shared/EmptyState';
 import BackButton from '@/components/shared/BackButton';
@@ -31,21 +32,45 @@ export default function PlayersPage() {
   return (
     <Box>
       <BackButton />
-      {/* Gradient Title */}
-      <Box className="animate-section" sx={{ mb: 4, mt: 1 }}>
-        <Typography
-          variant="h3"
-          sx={{
-            fontWeight: 700,
-            letterSpacing: '-0.5px',
-            background: 'linear-gradient(135deg, #F8FAFC 0%, #94A3B8 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
+      {/* Spatial Info Panel instead of flat floating text */}
+      <Box className="animate-section" sx={{ mb: 4, mt: 1, perspective: 1000 }}>
+        <Tilt
+          tiltMaxAngleX={10}
+          tiltMaxAngleY={10}
+          perspective={800}
+          scale={1.02}
+          transitionSpeed={600}
+          gyroscope={true}
         >
-          Players
-        </Typography>
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 2,
+              background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(15, 23, 42, 0.4) 100%)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(34, 197, 94, 0.2)',
+              borderRadius: '16px',
+              padding: '12px 24px',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            <PeopleIcon sx={{ fontSize: 32, color: '#22C55E', transform: 'translateZ(30px)', filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.5))' }} />
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 800,
+                letterSpacing: '-0.5px',
+                color: '#F8FAFC',
+                textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+                transform: 'translateZ(20px)',
+              }}
+            >
+              Players
+            </Typography>
+          </Box>
+        </Tilt>
       </Box>
 
       {/* Section header */}
