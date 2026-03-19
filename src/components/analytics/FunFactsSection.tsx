@@ -399,7 +399,7 @@ export default function FunFactsSection({ matches, goals, registeredPlayers, pla
           px: 0.5,
         }}
       >
-        {facts.map((fact) => (
+        {facts.map((fact, idx) => (
           <FunFactCard
             key={fact.title}
             emoji={fact.emoji}
@@ -407,6 +407,7 @@ export default function FunFactsSection({ matches, goals, registeredPlayers, pla
             value={fact.value}
             subtitle={fact.subtitle}
             color={fact.color}
+            index={idx}
           />
         ))}
       </Box>

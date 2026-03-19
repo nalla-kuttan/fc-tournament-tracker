@@ -2,6 +2,9 @@
 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { motion } from 'framer-motion';
+
+const MotionBox = motion.create(Box);
 
 interface Props {
   emoji: string;
@@ -9,11 +12,16 @@ interface Props {
   value: string;
   subtitle: string;
   color: string;
+  index?: number;
 }
 
-export default function FunFactCard({ emoji, title, value, subtitle, color }: Props) {
+export default function FunFactCard({ emoji, title, value, subtitle, color, index = 0 }: Props) {
   return (
-    <Box
+    <MotionBox
+      layout
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1, type: "spring", stiffness: 100 }}
       className="stat-card"
       sx={{
         minWidth: 160,
@@ -78,6 +86,6 @@ export default function FunFactCard({ emoji, title, value, subtitle, color }: Pr
       <Typography variant="caption" sx={{ color: '#64748B', lineHeight: 1.2, fontSize: '0.75rem' }} noWrap>
         {subtitle}
       </Typography>
-    </Box>
+    </MotionBox>
   );
 }

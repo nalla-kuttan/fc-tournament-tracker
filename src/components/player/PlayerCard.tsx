@@ -5,13 +5,22 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import PersonIcon from '@mui/icons-material/Person';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { motion } from 'framer-motion';
 import type { RegisteredPlayer } from '@/lib/types';
 
-export default function PlayerCard({ player, showDivider = true }: { player: RegisteredPlayer; showDivider?: boolean }) {
+const MotionBox = motion.create(Box);
+
+export default function PlayerCard({ player, showDivider = true, index = 0 }: { player: RegisteredPlayer; showDivider?: boolean; index?: number }) {
   const router = useRouter();
 
   return (
-    <Box
+    <MotionBox
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
       onClick={() => router.push(`/players/${player.id}`)}
       className="list-row"
       sx={{
@@ -54,6 +63,6 @@ export default function PlayerCard({ player, showDivider = true }: { player: Reg
       </Box>
 
       <ChevronRightIcon sx={{ color: '#334155', fontSize: 20 }} />
-    </Box>
+    </MotionBox>
   );
 }

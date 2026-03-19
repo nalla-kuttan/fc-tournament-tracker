@@ -269,7 +269,7 @@ export default function HomePage() {
             }}
           >
             {tournaments.map((t, index) => (
-              <TournamentCard key={t.id} tournament={t} showDivider={index < tournaments.length - 1} />
+              <TournamentCard key={t.id} tournament={t} showDivider={index < tournaments.length - 1} index={index} />
             ))}
           </Box>
         )}

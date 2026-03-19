@@ -4,6 +4,9 @@ import { useRouter } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
+import { motion } from 'framer-motion';
+
+const MotionBox = motion.create(Box);
 
 interface MatchCardProps {
   match: {
@@ -18,14 +21,19 @@ interface MatchCardProps {
     round_number: number;
     stage: string | null;
   };
+  index?: number;
 }
 
-export default function MatchCard({ match }: MatchCardProps) {
+export default function MatchCard({ match, index = 0 }: MatchCardProps) {
   const router = useRouter();
 
   if (match.is_bye) {
     return (
-      <Box
+      <MotionBox
+        layout
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: index * 0.05 }}
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -39,12 +47,18 @@ export default function MatchCard({ match }: MatchCardProps) {
         <Typography variant="body2" sx={{ color: '#64748B' }}>
           {match.home_player?.name ?? 'TBD'} — BYE
         </Typography>
-      </Box>
+      </MotionBox>
     );
   }
 
   return (
-    <Box
+    <MotionBox
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
       onClick={() => router.push(`/tournaments/${match.tournament_id}/matches/${match.id}`)}
       className="list-row"
       sx={{
@@ -132,6 +146,6 @@ export default function MatchCard({ match }: MatchCardProps) {
           }}
         />
       )}
-    </Box>
+    </MotionBox>
   );
 }

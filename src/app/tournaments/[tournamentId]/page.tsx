@@ -212,8 +212,8 @@ export default function TournamentDashboard() {
                   Upcoming
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {upcomingMatches.map((m) => (
-                    <MatchCard key={m.id} match={m as never} />
+                  {upcomingMatches.map((m, idx) => (
+                    <MatchCard key={m.id} match={m as never} index={idx} />
                   ))}
                 </Box>
               </Box>
@@ -235,8 +235,8 @@ export default function TournamentDashboard() {
                   Recent Results
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {recentMatches.map((m) => (
-                    <MatchCard key={m.id} match={m as never} />
+                  {recentMatches.map((m, idx) => (
+                    <MatchCard key={m.id} match={m as never} index={idx} />
                   ))}
                 </Box>
               </Box>

@@ -11,6 +11,8 @@ import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import { TOURNAMENT_STATUSES } from '@/lib/constants';
 import type { Tournament } from '@/lib/types';
 
+import { motion } from 'framer-motion';
+
 const FORMAT_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   league: {
     icon: <StadiumIcon sx={{ fontSize: 22, color: '#3B82F6' }} />,
@@ -29,13 +31,21 @@ const FORMAT_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: 
   },
 };
 
-export default function TournamentCard({ tournament, showDivider = true }: { tournament: Tournament; showDivider?: boolean }) {
+const MotionBox = motion.create(Box);
+
+export default function TournamentCard({ tournament, showDivider = true, index = 0 }: { tournament: Tournament; showDivider?: boolean; index?: number }) {
   const router = useRouter();
   const statusConfig = TOURNAMENT_STATUSES[tournament.status];
   const formatConfig = FORMAT_CONFIG[tournament.format] || FORMAT_CONFIG.league;
 
   return (
-    <Box
+    <MotionBox
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
       onClick={() => router.push(`/tournaments/${tournament.id}`)}
       className="list-row"
       sx={{
@@ -94,6 +104,6 @@ export default function TournamentCard({ tournament, showDivider = true }: { tou
       />
 
       <ChevronRightIcon sx={{ color: '#334155', fontSize: 20 }} />
-    </Box>
+    </MotionBox>
   );
 }

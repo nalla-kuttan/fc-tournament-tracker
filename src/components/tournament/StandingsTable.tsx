@@ -9,8 +9,11 @@ import TableRow from '@mui/material/TableRow';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FORM_COLORS } from '@/lib/constants';
 import type { StandingRow } from '@/lib/types';
+
+const MotionTableRow = motion.create(TableRow);
 
 function FormDot({ result }: { result: 'W' | 'D' | 'L' }) {
   return (
@@ -64,10 +67,16 @@ export default function StandingsTable({ standings }: { standings: StandingRow[]
           </TableRow>
         </TableHead>
         <TableBody>
-          {standings.map((row, idx) => (
-            <TableRow
-              key={row.player_id}
-              sx={{
+          <AnimatePresence>
+            {standings.map((row, idx) => (
+              <MotionTableRow
+                layout
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.25, delay: idx * 0.03 }}
+                key={row.player_id}
+                sx={{
                 bgcolor:
                   idx === 0
                     ? 'rgba(245, 158, 11, 0.04)'
@@ -143,8 +152,9 @@ export default function StandingsTable({ standings }: { standings: StandingRow[]
                   ))}
                 </Box>
               </TableCell>
-            </TableRow>
+            </MotionTableRow>
           ))}
+          </AnimatePresence>
         </TableBody>
       </Table>
     </TableContainer>

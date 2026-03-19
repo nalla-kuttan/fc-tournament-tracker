@@ -118,7 +118,7 @@ export default function PlayersPage() {
           }}
         >
           {players.map((p, index) => (
-            <PlayerCard key={p.id} player={p} showDivider={index < players.length - 1} />
+            <PlayerCard key={p.id} player={p} showDivider={index < players.length - 1} index={index} />
           ))}
         </Box>
       )}
