@@ -123,23 +123,33 @@ export default function PlayerProfilePage() {
 
   const avatarColor = getAvatarColor(player.id);
   const imagePath = getPlayerImagePath(player.name);
+  const archetypeHighlight = highlights.find((highlight) => highlight.label === 'Archetype');
 
   return (
     <Box>
       <BackButton />
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: 2, mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+      <GlassCard sx={{ mb: 4, overflow: 'hidden' }}>
+        <CardContent
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: '230px 1fr' },
+            gap: { xs: 2, md: 3 },
+            p: { xs: 2, sm: 2.5 },
+          }}
+        >
           <Box
             sx={{
-              width: 58,
-              height: 58,
-              borderRadius: '18px',
-              display: 'grid',
-              placeItems: 'center',
+              position: 'relative',
+              width: '100%',
+              maxWidth: { xs: 360, md: 'none' },
+              mx: { xs: 'auto', md: 0 },
+              aspectRatio: { xs: '4 / 3', md: '4 / 5' },
+              borderRadius: '22px',
+              overflow: 'hidden',
               bgcolor: `${avatarColor}18`,
               border: `1px solid ${avatarColor}35`,
-              flexShrink: 0,
+              boxShadow: `0 20px 60px ${avatarColor}20`,
             }}
           >
             {imagePath ? (
@@ -150,64 +160,135 @@ export default function PlayerProfilePage() {
                 sx={{
                   width: '100%',
                   height: '100%',
-                  borderRadius: 'inherit',
                   objectFit: 'cover',
+                  objectPosition: 'center top',
+                  display: 'block',
                 }}
               />
             ) : stats && stats.total_matches > 0 ? (
-              <Typography fontWeight={900} sx={{ color: avatarColor, fontSize: '1.05rem' }}>
-                {getInitials(player.name)}
-              </Typography>
+              <Box sx={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center' }}>
+                <Typography fontWeight={900} sx={{ color: avatarColor, fontSize: '3rem' }}>
+                  {getInitials(player.name)}
+                </Typography>
+              </Box>
             ) : (
-              <PersonIcon sx={{ fontSize: 30, color: avatarColor }} />
+              <Box sx={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center' }}>
+                <PersonIcon sx={{ fontSize: 74, color: avatarColor }} />
+              </Box>
+            )}
+            {archetypeHighlight && (
+              <Box sx={{ position: 'absolute', left: 12, bottom: 12, display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75, borderRadius: '14px', bgcolor: 'rgba(2, 6, 23, 0.78)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <ArchetypeIcon archetype={archetypeHighlight.value} size={32} showTooltip={false} />
+                <Typography variant="caption" fontWeight={800} sx={{ color: getArchetypeMeta(archetypeHighlight.value).color }}>
+                  {archetypeHighlight.value}
+                </Typography>
+              </Box>
             )}
           </Box>
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="h4" fontWeight={800} noWrap>
-              {player.name}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 0.75 }}>
-              <Chip label={player.base_team} variant="outlined" />
-              {form.map((result, index) => (
-                <Chip
-                  key={`${result}-${index}`}
-                  label={result}
+
+          <Box sx={{ minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 2 }}>
+            <Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'flex-start', mb: 1 }}>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="h3" fontWeight={900} noWrap sx={{ fontSize: { xs: '2rem', sm: '2.5rem' } }}>
+                    {player.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {stats?.total_matches ? `${stats.total_matches} career matches` : 'Ready for first match'}
+                  </Typography>
+                </Box>
+                <Button variant="outlined" size="small" startIcon={<EditIcon />} onClick={openEdit}>
+                  Edit
+                </Button>
+              </Box>
+
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1.5 }}>
+                <Chip label={player.base_team} variant="outlined" />
+                {form.map((result, index) => (
+                  <Chip
+                    key={`${result}-${index}`}
+                    label={result}
+                    size="small"
+                    sx={{
+                      bgcolor: result === 'W' ? '#22C55E' : result === 'D' ? '#94A3B8' : '#EF4444',
+                      color: '#020617',
+                      fontWeight: 900,
+                      minWidth: 32,
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+
+            {stats && (
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+                  gap: 1,
+                }}
+              >
+                {[
+                  { label: 'Win Rate', value: `${stats.win_rate.toFixed(0)}%`, color: '#22C55E' },
+                  { label: 'Goals', value: stats.total_goals, color: '#F59E0B' },
+                  { label: 'G/M', value: stats.goals_per_match.toFixed(2), color: '#3B82F6' },
+                  { label: 'MOTM', value: stats.motm_awards, color: '#A855F7' },
+                ].map((item) => (
+                  <Box
+                    key={item.label}
+                    sx={{
+                      p: 1.25,
+                      borderRadius: '14px',
+                      bgcolor: `${item.color}12`,
+                      border: `1px solid ${item.color}22`,
+                    }}
+                  >
+                    <Typography variant="h6" fontWeight={900} sx={{ color: item.color, lineHeight: 1 }}>
+                      {item.value}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {item.label}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            )}
+
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<DescriptionIcon />}
+                onClick={() => setScoutOpen(true)}
+                disabled={!stats}
+                sx={{ color: '#22C55E', borderColor: 'rgba(34,197,94,0.35)' }}
+              >
+                AI Scout Report
+              </Button>
+              {rivals.length > 0 && (
+                <Button
+                  variant="outlined"
                   size="small"
-                  sx={{
-                    bgcolor: result === 'W' ? '#22C55E' : result === 'D' ? '#94A3B8' : '#EF4444',
-                    color: '#020617',
-                    fontWeight: 900,
-                    minWidth: 32,
+                  startIcon={<CompareArrowsIcon />}
+                  onClick={() => {
+                    const firstRival = rivals[0];
+                    if (firstRival) router.push(`/analytics/h2h?p1=${playerId}&p2=${firstRival.id}`);
                   }}
-                />
-              ))}
+                >
+                  Compare
+                </Button>
+              )}
             </Box>
           </Box>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <Button variant="outlined" size="small" startIcon={<EditIcon />} onClick={openEdit}>
-            Edit
-          </Button>
-        </Box>
-      </Box>
+        </CardContent>
+      </GlassCard>
 
       {/* Career Stats */}
       {stats && (
         <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" fontWeight={600}>
-              Career Stats
-            </Typography>
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<DescriptionIcon />}
-              onClick={() => setScoutOpen(true)}
-              sx={{ color: '#22C55E', borderColor: 'rgba(10,132,255,0.5)', '&:hover': { borderColor: '#22C55E', bgcolor: 'rgba(10,132,255,0.1)' } }}
-            >
-              AI Scout Report
-            </Button>
-          </Box>
+          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+            Career Stats
+          </Typography>
           <PlayerStatsGrid stats={stats} />
         </Box>
       )}
