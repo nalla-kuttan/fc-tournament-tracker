@@ -14,6 +14,7 @@ import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import PeopleIcon from '@mui/icons-material/People';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Grid';
 import GlassCard from '@/components/shared/GlassCard';
@@ -58,6 +59,14 @@ export default function AnalyticsPage() {
       iconBg: 'rgba(245, 158, 11, 0.1)',
       iconBorder: 'rgba(245, 158, 11, 0.15)',
       href: '/analytics/league',
+    },
+    {
+      title: 'AI Analyst',
+      description: 'Ask natural language questions about player stats, rankings, form, and records',
+      icon: <AutoAwesomeIcon sx={{ fontSize: 24, color: '#BF5AF2' }} />,
+      iconBg: 'rgba(191, 90, 242, 0.1)',
+      iconBorder: 'rgba(191, 90, 242, 0.15)',
+      href: '/analytics/ai',
     },
   ];
 

@@ -20,7 +20,6 @@ import StatLeaderboard from '@/components/analytics/StatLeaderboard';
 import BiggestWinsTable from '@/components/analytics/BiggestWinsTable';
 import SeasonAwards from '@/components/analytics/SeasonAwards';
 import BackButton from '@/components/shared/BackButton';
-import AIStatQuery from '@/components/ai/AIStatQuery';
 import type { CareerStats, Match } from '@/lib/types';
 import {
   getClutchRankings,
@@ -203,8 +202,6 @@ export default function GlobalAnalyticsPage() {
         <Chip size="small" label={`${filteredGoals.length} goals`} />
         <Chip size="small" label={`${filteredStats.length} ranked players`} />
       </Box>
-
-      <AIStatQuery careerStats={filteredStats} />
 
       {/* Season Awards */}
       <SeasonAwards stats={filteredStats} />

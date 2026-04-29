@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
+import Avatar from '@mui/material/Avatar';
 import CircularProgress from '@mui/material/CircularProgress';
 import CardContent from '@mui/material/CardContent';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
@@ -17,6 +18,7 @@ import BackButton from '@/components/shared/BackButton';
 import AIH2HModal from '@/components/ai/AIH2HModal';
 import GlassCard from '@/components/shared/GlassCard';
 import { getRivalries, type GoalLite, type RivalrySummary } from '@/lib/analytics-insights';
+import { getPlayerImagePath } from '@/lib/player-images';
 import type { RegisteredPlayer, H2HData, CareerStats, Match } from '@/lib/types';
 
 interface GlobalData {
@@ -36,6 +38,7 @@ function H2HPageContent() {
   const [error, setError] = useState('');
   const [h2hModalOpen, setH2hModalOpen] = useState(false);
   const [rivalries, setRivalries] = useState<RivalrySummary[]>([]);
+  const [players, setPlayers] = useState<RegisteredPlayer[]>([]);
 
   const loadComparison = useCallback(async (first: RegisteredPlayer | null, second: RegisteredPlayer | null) => {
     if (!first || !second) return;
@@ -67,40 +70,31 @@ function H2HPageContent() {
     const p2 = searchParams.get('p2');
     if (!p1 || !p2) return;
 
-    fetch('/api/players')
-      .then((response) => response.json())
-      .then((players: RegisteredPlayer[]) => {
-        const first = players.find((player) => player.id === p1) ?? null;
-        const second = players.find((player) => player.id === p2) ?? null;
-        setPlayer1(first);
-        setPlayer2(second);
-        if (first && second) {
-          void loadComparison(first, second);
-        }
-      })
-      .catch(() => {});
-  }, [loadComparison, searchParams]);
+    const first = players.find((player) => player.id === p1) ?? null;
+    const second = players.find((player) => player.id === p2) ?? null;
+    setPlayer1(first);
+    setPlayer2(second);
+    if (first && second) {
+      void loadComparison(first, second);
+    }
+  }, [loadComparison, players, searchParams]);
 
   useEffect(() => {
     fetch('/api/analytics/global')
       .then((response) => response.json())
       .then((data: GlobalData) => {
+        setPlayers(data.registered_players);
         setRivalries(getRivalries(data.registered_players, data.player_instances, data.all_matches));
       })
       .catch(() => {});
   }, []);
 
   const chooseRivalry = (rivalry: RivalrySummary) => {
-    fetch('/api/players')
-      .then((response) => response.json())
-      .then((players: RegisteredPlayer[]) => {
-        const first = players.find((player) => player.id === rivalry.p1Id) ?? null;
-        const second = players.find((player) => player.id === rivalry.p2Id) ?? null;
-        setPlayer1(first);
-        setPlayer2(second);
-        if (first && second) void loadComparison(first, second);
-      })
-      .catch(() => {});
+    const first = players.find((player) => player.id === rivalry.p1Id) ?? null;
+    const second = players.find((player) => player.id === rivalry.p2Id) ?? null;
+    setPlayer1(first);
+    setPlayer2(second);
+    if (first && second) void loadComparison(first, second);
   };
 
   return (
@@ -180,17 +174,41 @@ function H2HPageContent() {
               <Grid key={`${rivalry.p1Id}-${rivalry.p2Id}`} size={{ xs: 12, md: 6 }}>
                 <GlassCard sx={{ height: '100%', cursor: 'pointer' }}>
                   <CardContent onClick={() => chooseRivalry(rivalry)}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, mb: 1 }}>
-                      <Typography fontWeight={800} noWrap>
-                        {rivalry.p1Name} vs {rivalry.p2Name}
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 1.25, mb: 1.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                        <Avatar
+                          src={getPlayerImagePath(rivalry.p1Name)}
+                          sx={{ width: 46, height: 46, border: '1px solid rgba(34, 197, 94, 0.45)' }}
+                        >
+                          {rivalry.p1Name.slice(0, 1)}
+                        </Avatar>
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography fontWeight={900} noWrap>{rivalry.p1Name}</Typography>
+                          <Typography variant="caption" color="text.secondary">Home</Typography>
+                        </Box>
+                      </Box>
+                      <Typography sx={{ color: '#94A3B8', fontSize: '0.72rem', fontWeight: 900 }}>VS</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1, minWidth: 0 }}>
+                        <Box sx={{ minWidth: 0, textAlign: 'right' }}>
+                          <Typography fontWeight={900} noWrap>{rivalry.p2Name}</Typography>
+                          <Typography variant="caption" color="text.secondary">Away</Typography>
+                        </Box>
+                        <Avatar
+                          src={getPlayerImagePath(rivalry.p2Name)}
+                          sx={{ width: 46, height: 46, border: '1px solid rgba(96, 165, 250, 0.45)' }}
+                        >
+                          {rivalry.p2Name.slice(0, 1)}
+                        </Avatar>
+                      </Box>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, mb: 0.5 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {rivalry.p1Wins}-{rivalry.draws}-{rivalry.p2Wins} record · {rivalry.totalGoals} goals
                       </Typography>
                       <Typography variant="caption" sx={{ color: '#22C55E', fontWeight: 800 }}>
                         {rivalry.matches.length}x
                       </Typography>
                     </Box>
-                    <Typography variant="body2" color="text.secondary">
-                      {rivalry.p1Wins}-{rivalry.draws}-{rivalry.p2Wins} · {rivalry.totalGoals} goals
-                    </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Avg margin {(rivalry.closeness / Math.max(rivalry.matches.length, 1)).toFixed(1)}
                     </Typography>

@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const prompt = `
-      You are the "AI Oracle" for the FC Tournament Tracker app.
+      You are the "AI Analyst" for the FC Tournament Tracker app.
       A user has asked you a natural language question about the global career stats.
 
       User Question: "${query.trim()}"
