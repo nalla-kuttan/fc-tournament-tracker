@@ -7,7 +7,8 @@ import Chip from '@mui/material/Chip';
 import PersonIcon from '@mui/icons-material/Person';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import type { CareerStats, RegisteredPlayer } from '@/lib/types';
-import { getAvatarColor, getInitials } from '@/lib/player-insights';
+import { getAvatarColor, getInitials, getPlayerArchetype } from '@/lib/player-insights';
+import ArchetypeIcon from '@/components/player/ArchetypeIcon';
 
 export default function PlayerCard({
   player,
@@ -28,6 +29,7 @@ export default function PlayerCard({
 }) {
   const router = useRouter();
   const avatarColor = getAvatarColor(player.id || player.name);
+  const archetype = stats ? getPlayerArchetype(stats) : null;
 
   return (
       <Box
@@ -117,6 +119,12 @@ export default function PlayerCard({
           )}
         </Box>
       </Box>
+
+      {archetype && (
+        <Box sx={{ display: { xs: 'none', sm: 'block' }, mx: 1 }}>
+          <ArchetypeIcon archetype={archetype} size={32} />
+        </Box>
+      )}
 
       {form.length > 0 && (
         <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 0.4, mx: 1.5 }}>

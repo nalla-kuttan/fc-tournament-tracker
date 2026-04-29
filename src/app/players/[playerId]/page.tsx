@@ -25,6 +25,7 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Divider from '@mui/material/Divider';
 import PlayerStatsGrid from '@/components/player/PlayerStatsGrid';
+import ArchetypeIcon, { getArchetypeMeta } from '@/components/player/ArchetypeIcon';
 import AIScoutModal from '@/components/ai/AIScoutModal';
 import BackButton from '@/components/shared/BackButton';
 import type { CareerStats, Match, RegisteredPlayer } from '@/lib/types';
@@ -207,16 +208,26 @@ export default function PlayerProfilePage() {
             {highlights.map((highlight) => (
               <Grid key={highlight.label} size={{ xs: 6, md: 4 }}>
                 <GlassCard sx={{ height: '100%' }}>
-                  <CardContent sx={{ py: 2 }}>
-                    <Typography variant="caption" color="text.secondary" textTransform="uppercase" letterSpacing="0.05em">
-                      {highlight.label}
-                    </Typography>
-                    <Typography variant="h6" fontWeight={800} sx={{ mt: 0.5 }} noWrap>
-                      {highlight.value}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" noWrap>
-                      {highlight.detail}
-                    </Typography>
+                  <CardContent sx={{ py: 2, display: 'flex', gap: 1.5, alignItems: 'center' }}>
+                    {highlight.label === 'Archetype' && (
+                      <ArchetypeIcon archetype={highlight.value} size={42} showTooltip={false} />
+                    )}
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="caption" color="text.secondary" textTransform="uppercase" letterSpacing="0.05em">
+                        {highlight.label}
+                      </Typography>
+                      <Typography
+                        variant="h6"
+                        fontWeight={800}
+                        sx={{ mt: 0.5, color: highlight.label === 'Archetype' ? getArchetypeMeta(highlight.value).color : undefined }}
+                        noWrap
+                      >
+                        {highlight.value}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" noWrap>
+                        {highlight.detail}
+                      </Typography>
+                    </Box>
                   </CardContent>
                 </GlassCard>
               </Grid>
