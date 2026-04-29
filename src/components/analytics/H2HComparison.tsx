@@ -86,6 +86,16 @@ function MatchHistoryRow({ match, player1Name }: { match: Match; player1Name: st
 
 export default function H2HComparison({ data }: Props) {
   const hasEncounters = data.total_encounters > 0;
+  const p1Recent = data.player1_career.win_rate;
+  const p2Recent = data.player2_career.win_rate;
+  const p1Prediction = p1Recent + data.player1_wins * 4 + data.player1_goals;
+  const p2Prediction = p2Recent + data.player2_wins * 4 + data.player2_goals;
+  const predictedWinner =
+    Math.abs(p1Prediction - p2Prediction) < 4
+      ? 'Too close to call'
+      : p1Prediction > p2Prediction
+        ? data.player1.name
+        : data.player2.name;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -176,6 +186,44 @@ export default function H2HComparison({ data }: Props) {
 
       {/* Rivalry Intensity */}
       <RivalryCard data={data} />
+
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <GlassCard sx={{ height: '100%' }}>
+            <CardContent>
+              <Typography variant="h6" fontWeight={600} gutterBottom>
+                H2H Prediction
+              </Typography>
+              <Typography variant="h4" fontWeight={900} sx={{ color: '#22C55E' }}>
+                {predictedWinner}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Based on career win rate, direct wins, and direct goals.
+              </Typography>
+            </CardContent>
+          </GlassCard>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <GlassCard sx={{ height: '100%' }}>
+            <CardContent>
+              <Typography variant="h6" fontWeight={600} gutterBottom>
+                Style Edge
+              </Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 1, alignItems: 'center' }}>
+                <Typography variant="body2" textAlign="right">{data.player1_career.goals_per_match.toFixed(2)}</Typography>
+                <Typography variant="caption" color="text.secondary" textAlign="center">G/M</Typography>
+                <Typography variant="body2">{data.player2_career.goals_per_match.toFixed(2)}</Typography>
+                <Typography variant="body2" textAlign="right">{data.player1_career.clean_sheets}</Typography>
+                <Typography variant="caption" color="text.secondary" textAlign="center">CS</Typography>
+                <Typography variant="body2">{data.player2_career.clean_sheets}</Typography>
+                <Typography variant="body2" textAlign="right">{data.player1_career.avg_possession.toFixed(0)}%</Typography>
+                <Typography variant="caption" color="text.secondary" textAlign="center">Poss</Typography>
+                <Typography variant="body2">{data.player2_career.avg_possession.toFixed(0)}%</Typography>
+              </Box>
+            </CardContent>
+          </GlassCard>
+        </Grid>
+      </Grid>
 
       {/* Radar Chart */}
       <GlassCard>

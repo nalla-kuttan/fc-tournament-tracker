@@ -27,7 +27,7 @@ export async function GET() {
   // Get all played matches with stats
   const { data: allMatches } = await supabase
     .from('match')
-    .select('*, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team), tournament:tournament_id(id, name)')
+    .select('*, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team), tournament:tournament_id(id, name, format)')
     .eq('is_played', true)
     .eq('is_bye', false)
     .order('played_at', { ascending: false });

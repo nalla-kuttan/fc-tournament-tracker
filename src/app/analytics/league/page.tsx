@@ -16,6 +16,7 @@ import StatLeaderboard from '@/components/analytics/StatLeaderboard';
 import BiggestWinsTable from '@/components/analytics/BiggestWinsTable';
 import BackButton from '@/components/shared/BackButton';
 import type { Tournament } from '@/lib/types';
+import { getLeagueStory, getTitleRace } from '@/lib/analytics-insights';
 
 interface PlayerStat {
   player_id: string;
@@ -161,6 +162,75 @@ export default function LeagueAnalyticsPage() {
         </Box>
       ) : data ? (
         <>
+          {/* Tournament Story */}
+          <Grid container spacing={2} sx={{ mb: 4 }}>
+            {(() => {
+              const story = getLeagueStory(data.player_stats, data.biggest_wins);
+              return [
+                { label: data.tournament.status === 'completed' ? 'Champion' : 'Leader', value: story.champion ?? 'TBD', detail: `${data.tournament.format} · ${data.tournament.status}` },
+                { label: 'Best Attack', value: story.bestAttack ?? 'TBD', detail: `${story.averageGoals.toFixed(1)} avg goals/match` },
+                { label: 'Best Defense', value: story.bestDefense ?? 'TBD', detail: 'Fewest conceded per match' },
+                { label: 'Biggest Win', value: story.biggestWin ?? 'TBD', detail: 'Most dominant scoreline' },
+              ].map((item) => (
+                <Grid key={item.label} size={{ xs: 6, md: 3 }}>
+                  <GlassCard sx={{ height: '100%' }}>
+                    <CardContent sx={{ py: 2 }}>
+                      <Typography variant="caption" color="text.secondary" textTransform="uppercase" letterSpacing="0.05em">
+                        {item.label}
+                      </Typography>
+                      <Typography variant="h6" fontWeight={800} sx={{ mt: 0.5 }} noWrap>
+                        {item.value}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" noWrap>
+                        {item.detail}
+                      </Typography>
+                    </CardContent>
+                  </GlassCard>
+                </Grid>
+              ));
+            })()}
+          </Grid>
+
+          <GlassCard sx={{ mb: 4 }}>
+            <CardContent>
+              <Typography variant="h6" fontWeight={600} gutterBottom>
+                Title Race Projection
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                Projects remaining league points from current win rate. Knockout and cup formats show current pace.
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                {getTitleRace(data.player_stats, data.tournament).slice(0, 8).map((row, index) => (
+                  <Box
+                    key={row.playerName}
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: '32px 1fr auto auto',
+                      gap: 1.5,
+                      alignItems: 'center',
+                      py: 1,
+                      borderBottom: index < Math.min(7, data.player_stats.length - 1) ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
+                    }}
+                  >
+                    <Typography variant="body2" fontWeight={800} color="text.secondary">
+                      {index + 1}
+                    </Typography>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="body2" fontWeight={700} noWrap>{row.playerName}</Typography>
+                      <Typography variant="caption" color="text.secondary" noWrap>{row.team}</Typography>
+                    </Box>
+                    <Typography variant="body2" fontFamily="monospace">
+                      {row.currentPoints} pts
+                    </Typography>
+                    <Typography variant="body2" fontWeight={800} sx={{ color: '#22C55E', fontFamily: 'monospace' }}>
+                      {row.projectedPoints}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </CardContent>
+          </GlassCard>
+
           {/* Player Stats Table */}
           <GlassCard sx={{ mb: 4 }}>
             <CardContent>

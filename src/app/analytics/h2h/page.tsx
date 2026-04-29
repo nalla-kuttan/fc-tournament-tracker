@@ -8,13 +8,24 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
+import CardContent from '@mui/material/CardContent';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import PlayerSelector from '@/components/analytics/PlayerSelector';
 import H2HComparison from '@/components/analytics/H2HComparison';
 import BackButton from '@/components/shared/BackButton';
 import AIH2HModal from '@/components/ai/AIH2HModal';
-import type { RegisteredPlayer, H2HData } from '@/lib/types';
+import GlassCard from '@/components/shared/GlassCard';
+import { getRivalries, type GoalLite, type RivalrySummary } from '@/lib/analytics-insights';
+import type { RegisteredPlayer, H2HData, CareerStats, Match } from '@/lib/types';
+
+interface GlobalData {
+  career_stats: CareerStats[];
+  all_matches: Match[];
+  all_goals: GoalLite[];
+  registered_players: RegisteredPlayer[];
+  player_instances: { id: string; registered_player_id: string; name: string; team: string }[];
+}
 
 function H2HPageContent() {
   const searchParams = useSearchParams();
@@ -24,6 +35,7 @@ function H2HPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [h2hModalOpen, setH2hModalOpen] = useState(false);
+  const [rivalries, setRivalries] = useState<RivalrySummary[]>([]);
 
   const loadComparison = useCallback(async (first: RegisteredPlayer | null, second: RegisteredPlayer | null) => {
     if (!first || !second) return;
@@ -68,6 +80,28 @@ function H2HPageContent() {
       })
       .catch(() => {});
   }, [loadComparison, searchParams]);
+
+  useEffect(() => {
+    fetch('/api/analytics/global')
+      .then((response) => response.json())
+      .then((data: GlobalData) => {
+        setRivalries(getRivalries(data.registered_players, data.player_instances, data.all_matches));
+      })
+      .catch(() => {});
+  }, []);
+
+  const chooseRivalry = (rivalry: RivalrySummary) => {
+    fetch('/api/players')
+      .then((response) => response.json())
+      .then((players: RegisteredPlayer[]) => {
+        const first = players.find((player) => player.id === rivalry.p1Id) ?? null;
+        const second = players.find((player) => player.id === rivalry.p2Id) ?? null;
+        setPlayer1(first);
+        setPlayer2(second);
+        if (first && second) void loadComparison(first, second);
+      })
+      .catch(() => {});
+  };
 
   return (
     <Box>
@@ -135,6 +169,38 @@ function H2HPageContent() {
 
       {/* Results */}
       {h2hData && <H2HComparison data={h2hData} />}
+
+      {!h2hData && rivalries.length > 0 && (
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+            Rivalry Discovery
+          </Typography>
+          <Grid container spacing={2}>
+            {rivalries.slice(0, 6).map((rivalry) => (
+              <Grid key={`${rivalry.p1Id}-${rivalry.p2Id}`} size={{ xs: 12, md: 6 }}>
+                <GlassCard sx={{ height: '100%', cursor: 'pointer' }}>
+                  <CardContent onClick={() => chooseRivalry(rivalry)}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, mb: 1 }}>
+                      <Typography fontWeight={800} noWrap>
+                        {rivalry.p1Name} vs {rivalry.p2Name}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#22C55E', fontWeight: 800 }}>
+                        {rivalry.matches.length}x
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary">
+                      {rivalry.p1Wins}-{rivalry.draws}-{rivalry.p2Wins} · {rivalry.totalGoals} goals
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Avg margin {(rivalry.closeness / Math.max(rivalry.matches.length, 1)).toFixed(1)}
+                    </Typography>
+                  </CardContent>
+                </GlassCard>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
 
       {/* AI Analyst Modal */}
       {player1 && player2 && h2hData && (
