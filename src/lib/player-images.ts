@@ -3,7 +3,7 @@ const PLAYER_IMAGE_BY_SLUG: Record<string, string> = {
   arshad: '/players/arshad.png',
   basil: '/players/basil.png',
   moamen: '/players/moamen.png',
-  ruban: '/players/ruban.png',
+  ruban: '/players/ruban-profile.png',
 };
 
 function slugifyPlayerName(name: string) {
