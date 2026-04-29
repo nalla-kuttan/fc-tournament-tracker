@@ -11,12 +11,19 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ReactMarkdown from 'react-markdown';
-import type { Tournament, StandingRow, Match } from '@/lib/types';
+import type { StandingRow, Match } from '@/lib/types';
+
+interface PunditTournament {
+    id?: string;
+    name?: string;
+    format: string;
+    status: string;
+}
 
 interface AIPunditModalProps {
     open: boolean;
     onClose: () => void;
-    tournament: any;
+    tournament: PunditTournament;
     standings: StandingRow[];
     matches?: Match[];
 }
@@ -51,8 +58,8 @@ export default function AIPunditModal({
             }
 
             setSummary(data.summary);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to generate summary');
         } finally {
             setLoading(false);
         }

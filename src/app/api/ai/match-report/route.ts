@@ -1,10 +1,25 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { getErrorMessage, rateLimit, readJsonBody } from '@/lib/api-guards';
+import type { MatchStats } from '@/lib/types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+type MatchReportRequest = {
+    match?: {
+        home_player?: { name?: string; team?: string } | null;
+        away_player?: { name?: string; team?: string } | null;
+        home_score: number | null;
+        away_score: number | null;
+        round_number: number;
+        goals?: { player?: { name?: string } | null; minute: number | null }[];
+    };
+    stats?: MatchStats;
+};
 
 export async function POST(request: Request) {
     try {
+        const limited = rateLimit(request, 'ai:match-report', 8);
+        if (limited) return limited;
+
         if (!process.env.GEMINI_API_KEY) {
             return NextResponse.json(
                 { error: 'Gemini API key is not configured' },
@@ -12,7 +27,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const { match, stats } = await request.json();
+        const { match, stats } = await readJsonBody<MatchReportRequest>(request);
 
         if (!match) {
             return NextResponse.json(
@@ -20,6 +35,11 @@ export async function POST(request: Request) {
                 { status: 400 }
             );
         }
+
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        const goalDescriptions = match.goals
+            ? match.goals.map((goal) => `${goal.player?.name ?? 'Unknown'} at ${goal.minute ?? 'unknown minute'}'`)
+            : [];
 
         const prompt = `
       You are a sports journalist for the "FC Tournament Tracker" app.
@@ -34,9 +54,7 @@ export async function POST(request: Request) {
       ${JSON.stringify(stats, null, 2)}
       
       Goals Info (if any):
-      ${JSON.stringify(match.goals // ensure only basic info is passed if available
-            ? match.goals.map((g: any) => `${g.player?.name} at ${g.minute}'`)
-            : [], null, 2)}
+      ${JSON.stringify(goalDescriptions, null, 2)}
 
       First, write a **Bold Headline**.
       Then, write a dynamic summary of how the match unfolded considering the score and stats (e.g. if xG was high but score was low, mention the lack of finishing. Or if possession was heavily skewed).
@@ -48,10 +66,10 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json({ report: response.text });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Gemini API Error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to generate match report' },
+            { error: getErrorMessage(error, 'Failed to generate match report') },
             { status: 500 }
         );
     }

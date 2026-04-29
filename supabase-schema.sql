@@ -59,6 +59,7 @@ CREATE INDEX idx_match_tournament ON match(tournament_id);
 CREATE INDEX idx_match_round ON match(tournament_id, round_number);
 CREATE INDEX idx_match_home ON match(home_player_id);
 CREATE INDEX idx_match_away ON match(away_player_id);
+CREATE UNIQUE INDEX idx_match_tournament_match_number_unique ON match(tournament_id, match_number);
 
 -- GOAL
 CREATE TABLE goal (

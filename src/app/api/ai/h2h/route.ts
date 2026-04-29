@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { getErrorMessage, rateLimit, readJsonBody } from '@/lib/api-guards';
+import type { H2HData, RegisteredPlayer } from '@/lib/types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+type H2HRequest = {
+    player1?: RegisteredPlayer;
+    player2?: RegisteredPlayer;
+    h2hData?: H2HData;
+};
 
 export async function POST(request: Request) {
     try {
+        const limited = rateLimit(request, 'ai:h2h', 8);
+        if (limited) return limited;
+
         if (!process.env.GEMINI_API_KEY) {
             return NextResponse.json(
                 { error: 'Gemini API key is not configured' },
@@ -12,7 +21,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const { player1, player2, h2hData } = await request.json();
+        const { player1, player2, h2hData } = await readJsonBody<H2HRequest>(request);
 
         if (!player1 || !player2 || !h2hData) {
             return NextResponse.json(
@@ -21,6 +30,7 @@ export async function POST(request: Request) {
             );
         }
 
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const prompt = `
       You are an expert football analyst discussing a rivalry on the "FC Tournament Tracker" app.
       
@@ -42,10 +52,10 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json({ analysis: response.text });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Gemini API Error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to generate H2H analysis' },
+            { error: getErrorMessage(error, 'Failed to generate H2H analysis') },
             { status: 500 }
         );
     }

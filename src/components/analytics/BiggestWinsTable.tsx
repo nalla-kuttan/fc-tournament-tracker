@@ -40,7 +40,7 @@ export default function BiggestWinsTable({ wins, title = 'Biggest Wins' }: Props
             <Typography variant="caption" sx={{ width: 120, textAlign: 'right', flexShrink: 0 }}>Tournament</Typography>
           )}
         </Box>
-        {wins.map((w, i) => (
+        {wins.map((w) => (
           <Box
             key={w.match_id}
             sx={{

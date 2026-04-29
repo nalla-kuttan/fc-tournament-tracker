@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerClient, createAdminClient } from '@/lib/supabase/server';
-import { verifyPin } from '@/lib/auth';
+import { readJsonBody, verifyTournamentPin } from '@/lib/api-guards';
 
 export async function GET(
   _request: Request,
@@ -29,28 +29,45 @@ export async function POST(
   const { matchId } = await params;
 
   try {
-    const { goals, pin, tournamentId } = await request.json();
-    // goals: [{player_id, minute}]
+    const { goals, pin } = await readJsonBody<{
+      goals?: { player_id: string; minute?: number | null }[];
+      pin?: string;
+    }>(request);
 
-    if (!pin || !tournamentId) {
-      return NextResponse.json({ error: 'PIN and tournamentId required' }, { status: 400 });
+    if (!pin) {
+      return NextResponse.json({ error: 'PIN is required' }, { status: 400 });
     }
 
-    // Verify admin
     const supabase = createServerClient();
-    const { data: tournament } = await supabase
-      .from('tournament')
-      .select('pin')
-      .eq('id', tournamentId)
+    const { data: match, error: matchError } = await supabase
+      .from('match')
+      .select('id, tournament_id, home_player_id, away_player_id, is_bye')
+      .eq('id', matchId)
       .single();
 
-    if (!tournament) {
-      return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
+    if (matchError || !match) {
+      return NextResponse.json({ error: 'Match not found' }, { status: 404 });
     }
 
-    const isValid = await verifyPin(pin, tournament.pin);
-    if (!isValid) {
-      return NextResponse.json({ error: 'Invalid PIN' }, { status: 403 });
+    if (match.is_bye) {
+      return NextResponse.json({ error: 'BYE matches cannot have goals' }, { status: 400 });
+    }
+
+    const pinCheck = await verifyTournamentPin(supabase, match.tournament_id, pin);
+    if (!pinCheck.ok) {
+      return pinCheck.response;
+    }
+
+    const submittedGoals = goals ?? [];
+    const validScorers = new Set([match.home_player_id, match.away_player_id].filter(Boolean));
+    const hasInvalidGoal = submittedGoals.some(
+      (goal) =>
+        !validScorers.has(goal.player_id) ||
+        (goal.minute != null && (!Number.isInteger(goal.minute) || goal.minute < 1 || goal.minute > 130))
+    );
+
+    if (hasInvalidGoal) {
+      return NextResponse.json({ error: 'Goals must use match players and valid minutes' }, { status: 400 });
     }
 
     const adminClient = createAdminClient();
@@ -58,8 +75,8 @@ export async function POST(
     // Delete existing goals for this match (replace all)
     await adminClient.from('goal').delete().eq('match_id', matchId);
 
-    if (goals && goals.length > 0) {
-      const goalRows = goals.map((g: { player_id: string; minute?: number }) => ({
+    if (submittedGoals.length > 0) {
+      const goalRows = submittedGoals.map((g) => ({
         match_id: matchId,
         player_id: g.player_id,
         minute: g.minute ?? null,

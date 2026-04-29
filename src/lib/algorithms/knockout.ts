@@ -52,7 +52,6 @@ export function generateKnockoutBracket(playerIds: string[]): ScheduledMatch[] {
   }
 
   const bracketSize = nextPowerOf2(n);
-  const numByes = bracketSize - n;
   const totalRounds = Math.log2(bracketSize);
 
   // Generate seeded positions (1-based seed indices)

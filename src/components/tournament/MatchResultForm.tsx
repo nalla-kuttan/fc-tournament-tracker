@@ -23,6 +23,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import GlassCard from '@/components/shared/GlassCard';
 import CardContent from '@mui/material/CardContent';
 import { useAdmin } from '@/contexts/AdminContext';
+import type { MatchStats } from '@/lib/types';
 
 interface Player {
   id: string;
@@ -46,7 +47,7 @@ interface Props {
     home_score?: number | null;
     away_score?: number | null;
     is_played?: boolean;
-    stats?: Record<string, any>;
+    stats?: MatchStats;
     goals?: Array<{ id: string; player: { id: string; name: string } | null; minute: number | null }>;
   };
   isEditing?: boolean;
@@ -91,15 +92,9 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
   useEffect(() => {
     const targetHomeGoals = typeof homeScore === 'number' ? homeScore : 0;
     const targetAwayGoals = typeof awayScore === 'number' ? awayScore : 0;
-    const targetTotalGoals = targetHomeGoals + targetAwayGoals;
-
-    // Count current home and away goals
-    const currentHomeGoals = goals.filter(g => g.player_id === homePlayerId).length;
-    const currentAwayGoals = goals.filter(g => g.player_id === awayPlayerId).length;
-
     setGoals((prev) => {
-      let updated = [...prev];
-
+      const updated = [...prev];
+      const currentHomeGoals = updated.filter(g => g.player_id === homePlayerId).length;
       // Add home goals if needed
       if (currentHomeGoals < targetHomeGoals) {
         const goalsToAdd = targetHomeGoals - currentHomeGoals;
@@ -121,7 +116,6 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
       }
 
       // Count again after home goal updates
-      const newHomeGoals = updated.filter(g => g.player_id === homePlayerId).length;
       const newAwayGoals = updated.filter(g => g.player_id === awayPlayerId).length;
 
       // Add away goals if needed
@@ -196,7 +190,6 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
           away_score: awayScore,
           stats,
           pin,
-          tournamentId: match.tournament_id,
         }),
       });
 
@@ -217,7 +210,6 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
               minute: g.minute !== '' ? g.minute : null,
             })),
             pin,
-            tournamentId: match.tournament_id,
           }),
         });
 

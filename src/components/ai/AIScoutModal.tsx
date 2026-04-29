@@ -49,8 +49,8 @@ export default function AIScoutModal({
             }
 
             setReport(data.report);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to generate report');
         } finally {
             setLoading(false);
         }

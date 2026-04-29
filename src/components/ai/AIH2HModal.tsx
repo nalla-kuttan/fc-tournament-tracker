@@ -51,8 +51,8 @@ export default function AIH2HModal({
             }
 
             setAnalysis(data.analysis);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to generate analysis');
         } finally {
             setLoading(false);
         }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { aggregateCareerStats } from '@/lib/algorithms/stats';
-import type { Match, MatchStats } from '@/lib/types';
+import type { Match } from '@/lib/types';
 
 export async function GET() {
   const supabase = createServerClient();

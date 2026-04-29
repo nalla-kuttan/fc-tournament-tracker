@@ -33,7 +33,7 @@ function computeRivalryIntensity(data: H2HData): number {
   return Math.max(1, Math.min(5, Math.round(rawScore * 5)));
 }
 
-function getClosestMatch(matches: Match[], p1Wins: number, p2Wins: number): string {
+function getClosestMatch(matches: Match[]): string {
   if (matches.length === 0) return '-';
   let minDiff = Infinity;
   let closest = '';
@@ -82,7 +82,7 @@ export default function RivalryCard({ data }: { data: H2HData }) {
 
   const intensity = computeRivalryIntensity(data);
   const fires = '🔥'.repeat(intensity);
-  const closestMatch = getClosestMatch(data.matches, data.player1_wins, data.player2_wins);
+  const closestMatch = getClosestMatch(data.matches);
   const biggestWin = getBiggestWin(data.matches);
   const avgMargin = getAvgGoalMargin(data.matches);
   const last5 = getLast5Results(data.matches, data.player1.name);

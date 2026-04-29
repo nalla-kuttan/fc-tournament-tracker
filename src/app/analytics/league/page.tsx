@@ -78,6 +78,17 @@ export default function LeagueAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [dataLoading, setDataLoading] = useState(false);
 
+  const loadLeagueData = async (tournamentId: string) => {
+    setDataLoading(true);
+    try {
+      const res = await fetch(`/api/analytics/league/${tournamentId}`);
+      const nextData = await res.json();
+      setData(nextData);
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetch('/api/tournaments')
       .then((r) => r.json())
@@ -86,23 +97,12 @@ export default function LeagueAnalyticsPage() {
         setTournaments(active);
         if (active.length > 0) {
           setSelectedId(active[0].id);
+          loadLeagueData(active[0].id);
         }
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    if (!selectedId) return;
-    setDataLoading(true);
-    fetch(`/api/analytics/league/${selectedId}`)
-      .then((r) => r.json())
-      .then((d) => {
-        setData(d);
-        setDataLoading(false);
-      })
-      .catch(() => setDataLoading(false));
-  }, [selectedId]);
 
   if (loading) {
     return (
@@ -141,7 +141,10 @@ export default function LeagueAnalyticsPage() {
           <Select
             value={selectedId}
             label="Tournament"
-            onChange={(e) => setSelectedId(e.target.value)}
+            onChange={(e) => {
+              setSelectedId(e.target.value);
+              loadLeagueData(e.target.value);
+            }}
           >
             {tournaments.map((t) => (
               <MenuItem key={t.id} value={t.id}>

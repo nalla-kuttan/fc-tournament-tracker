@@ -34,6 +34,7 @@ export async function POST(
       .from('match')
       .select('*')
       .eq('id', matchId)
+      .eq('tournament_id', tournamentId)
       .single();
 
     if (!match || !match.is_played) {

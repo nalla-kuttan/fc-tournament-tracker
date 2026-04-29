@@ -81,6 +81,9 @@ export async function POST(
       .select();
 
     if (insertError) {
+      if (insertError.code === '23505') {
+        return NextResponse.json({ error: 'Schedule already generated' }, { status: 409 });
+      }
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 

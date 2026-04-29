@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Chakra_Petch } from 'next/font/google';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -7,6 +8,11 @@ import { AdminProvider } from '@/contexts/AdminContext';
 import AppShell from '@/components/layout/AppShell';
 import MusicPlayer from '@/components/layout/MusicPlayer';
 import './globals.css';
+
+const chakraPetch = Chakra_Petch({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+});
 
 export const metadata: Metadata = {
   title: 'FC Tournament Tracker',
@@ -38,15 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body>
+      <body className={chakraPetch.className}>
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>
             <CssBaseline />

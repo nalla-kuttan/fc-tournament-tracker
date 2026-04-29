@@ -46,8 +46,8 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
             }
 
             setAnswer(data.answer);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to query Oracle');
         } finally {
             setLoading(false);
         }
@@ -63,7 +63,7 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
                     </Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Ask natural language questions about all-time player stats. E.g., "Who has the best win rate but the worst xG?"
+                    Ask natural language questions about all-time player stats. E.g., &quot;Who has the best win rate but the worst xG?&quot;
                 </Typography>
 
                 <form onSubmit={handleSearch}>

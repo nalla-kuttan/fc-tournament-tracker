@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerClient, createAdminClient } from '@/lib/supabase/server';
-import { verifyPin } from '@/lib/auth';
+import { readJsonBody, verifyTournamentPin } from '@/lib/api-guards';
+import type { MatchStats } from '@/lib/types';
 
 export async function GET(
   _request: Request,
@@ -36,27 +37,39 @@ export async function PATCH(
   const { matchId } = await params;
 
   try {
-    const { home_score, away_score, stats, pin, tournamentId } = await request.json();
+    const { home_score, away_score, stats, pin } = await readJsonBody<{
+      home_score: number;
+      away_score: number;
+      stats?: MatchStats;
+      pin?: string;
+    }>(request);
 
-    // Verify admin
     const supabase = createServerClient();
-    const { data: tournament } = await supabase
-      .from('tournament')
-      .select('pin')
-      .eq('id', tournamentId)
+    const { data: existingMatch, error: matchError } = await supabase
+      .from('match')
+      .select('id, tournament_id, is_bye')
+      .eq('id', matchId)
       .single();
 
-    if (!tournament) {
-      return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
+    if (matchError || !existingMatch) {
+      return NextResponse.json({ error: 'Match not found' }, { status: 404 });
     }
 
-    const isValid = await verifyPin(pin, tournament.pin);
-    if (!isValid) {
-      return NextResponse.json({ error: 'Invalid PIN' }, { status: 403 });
+    if (!pin) {
+      return NextResponse.json({ error: 'PIN is required' }, { status: 400 });
     }
 
-    if (home_score == null || away_score == null) {
-      return NextResponse.json({ error: 'Scores are required' }, { status: 400 });
+    const pinCheck = await verifyTournamentPin(supabase, existingMatch.tournament_id, pin);
+    if (!pinCheck.ok) {
+      return pinCheck.response;
+    }
+
+    if (!Number.isInteger(home_score) || !Number.isInteger(away_score) || home_score < 0 || away_score < 0) {
+      return NextResponse.json({ error: 'Scores must be non-negative whole numbers' }, { status: 400 });
+    }
+
+    if (existingMatch.is_bye) {
+      return NextResponse.json({ error: 'BYE matches cannot be edited' }, { status: 400 });
     }
 
     const adminClient = createAdminClient();
@@ -70,6 +83,7 @@ export async function PATCH(
         played_at: new Date().toISOString(),
       })
       .eq('id', matchId)
+      .eq('tournament_id', existingMatch.tournament_id)
       .select()
       .single();
 

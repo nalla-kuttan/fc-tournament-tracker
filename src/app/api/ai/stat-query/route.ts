@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { getErrorMessage, rateLimit, readJsonBody } from '@/lib/api-guards';
+import type { CareerStats } from '@/lib/types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+type StatQueryRequest = {
+    query?: string;
+    careerStats?: CareerStats[];
+};
 
 export async function POST(request: Request) {
     try {
+        const limited = rateLimit(request, 'ai:stat-query', 8);
+        if (limited) return limited;
+
         if (!process.env.GEMINI_API_KEY) {
             return NextResponse.json(
                 { error: 'Gemini API key is not configured' },
@@ -12,20 +20,21 @@ export async function POST(request: Request) {
             );
         }
 
-        const { query, careerStats } = await request.json();
+        const { query, careerStats } = await readJsonBody<StatQueryRequest>(request);
 
-        if (!query || !careerStats) {
+        if (!query?.trim() || !careerStats) {
             return NextResponse.json(
                 { error: 'Query and career stats are required' },
                 { status: 400 }
             );
         }
 
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const prompt = `
       You are the "AI Oracle" for the FC Tournament Tracker app.
       A user has asked you a natural language question about the global career stats.
 
-      User Question: "${query}"
+      User Question: "${query.trim()}"
 
       Here is the raw global career stats data:
       ${JSON.stringify(careerStats, null, 2)}
@@ -41,10 +50,10 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json({ answer: response.text });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Gemini API Error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to answer query' },
+            { error: getErrorMessage(error, 'Failed to answer query') },
             { status: 500 }
         );
     }

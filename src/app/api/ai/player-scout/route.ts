@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { getErrorMessage, rateLimit, readJsonBody } from '@/lib/api-guards';
+import type { CareerStats, RegisteredPlayer } from '@/lib/types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+type PlayerScoutRequest = {
+    player?: RegisteredPlayer;
+    stats?: CareerStats;
+};
 
 export async function POST(request: Request) {
     try {
+        const limited = rateLimit(request, 'ai:player-scout', 8);
+        if (limited) return limited;
+
         if (!process.env.GEMINI_API_KEY) {
             return NextResponse.json(
                 { error: 'Gemini API key is not configured' },
@@ -12,7 +20,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const { player, stats } = await request.json();
+        const { player, stats } = await readJsonBody<PlayerScoutRequest>(request);
 
         if (!player || !stats) {
             return NextResponse.json(
@@ -21,6 +29,7 @@ export async function POST(request: Request) {
             );
         }
 
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const prompt = `
       You are an expert football scout evaluating a player on the "FC Tournament Tracker" app.
       
@@ -42,10 +51,10 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json({ report: response.text });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Gemini API Error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to generate scouting report' },
+            { error: getErrorMessage(error, 'Failed to generate scouting report') },
             { status: 500 }
         );
     }

@@ -9,10 +9,22 @@ import Typography from '@mui/material/Typography';
 import ReactMarkdown from 'react-markdown';
 import GlassCard from '@/components/shared/GlassCard';
 import CardContent from '@mui/material/CardContent';
+import type { Goal, MatchStats, Player } from '@/lib/types';
+
+interface ReportMatch {
+    id: string;
+    tournament_id: string;
+    home_player?: Pick<Player, 'id' | 'name' | 'team'> | null;
+    away_player?: Pick<Player, 'id' | 'name' | 'team'> | null;
+    home_score: number | null;
+    away_score: number | null;
+    round_number: number;
+    goals?: Array<Pick<Goal, 'id' | 'minute'> & { player?: Pick<Player, 'id' | 'name'> | null }>;
+}
 
 interface AIMatchReportProps {
-    match: any;
-    stats: any;
+    match: ReportMatch;
+    stats: MatchStats;
 }
 
 export default function AIMatchReport({ match, stats }: AIMatchReportProps) {
@@ -38,8 +50,8 @@ export default function AIMatchReport({ match, stats }: AIMatchReportProps) {
             }
 
             setReport(data.report);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to generate match report');
         } finally {
             setLoading(false);
         }

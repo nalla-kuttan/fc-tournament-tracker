@@ -1,10 +1,23 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { getErrorMessage, rateLimit, readJsonBody } from '@/lib/api-guards';
+import type { Match, StandingRow } from '@/lib/types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+type TournamentSummaryRequest = {
+    tournament?: {
+        name?: string;
+        format: string;
+        status: string;
+    };
+    standings?: StandingRow[];
+    matches?: Match[];
+};
 
 export async function POST(request: Request) {
     try {
+        const limited = rateLimit(request, 'ai:tournament-summary', 8);
+        if (limited) return limited;
+
         if (!process.env.GEMINI_API_KEY) {
             return NextResponse.json(
                 { error: 'Gemini API key is not configured' },
@@ -12,7 +25,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const { tournament, standings, matches } = await request.json();
+        const { tournament, standings, matches } = await readJsonBody<TournamentSummaryRequest>(request);
 
         if (!tournament || !standings) {
             return NextResponse.json(
@@ -21,6 +34,7 @@ export async function POST(request: Request) {
             );
         }
 
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const prompt = `
       You are an energetic, slightly cheeky football pundit analyzing a tournament on the "FC Tournament Tracker" app.
       
@@ -44,10 +58,10 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json({ summary: response.text });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Gemini API Error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to generate AI summary' },
+            { error: getErrorMessage(error, 'Failed to generate AI summary') },
             { status: 500 }
         );
     }
