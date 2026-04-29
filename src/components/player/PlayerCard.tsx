@@ -3,44 +3,47 @@
 import { useRouter } from 'next/navigation';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
 import PersonIcon from '@mui/icons-material/Person';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { motion } from 'framer-motion';
-import Tilt from 'react-parallax-tilt';
-import type { RegisteredPlayer } from '@/lib/types';
+import type { CareerStats, RegisteredPlayer } from '@/lib/types';
+import { getAvatarColor, getInitials } from '@/lib/player-insights';
 
-const MotionBox = motion.create(Box);
-
-export default function PlayerCard({ player, showDivider = true, index = 0 }: { player: RegisteredPlayer; showDivider?: boolean; index?: number }) {
+export default function PlayerCard({
+  player,
+  stats,
+  badges = [],
+  elo,
+  form = [],
+  showDivider = true,
+  index = 0,
+}: {
+  player: RegisteredPlayer;
+  stats?: CareerStats;
+  badges?: string[];
+  elo?: number;
+  form?: ('W' | 'D' | 'L')[];
+  showDivider?: boolean;
+  index?: number;
+}) {
   const router = useRouter();
+  const avatarColor = getAvatarColor(player.id || player.name);
 
   return (
-    <Tilt
-      tiltMaxAngleX={4}
-      tiltMaxAngleY={4}
-      perspective={1000}
-      transitionSpeed={400}
-      scale={1.02}
-      gyroscope={true}
-      className="parallax-effect-glare-scale"
-    >
-      <MotionBox
-        layout
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }}
-        whileTap={{ scale: 0.98 }}
+      <Box
         onClick={() => router.push(`/players/${player.id}`)}
         className="list-row"
       sx={{
         display: 'flex',
         alignItems: 'center',
         px: 2,
-        py: 2,
+        py: 1.75,
         cursor: 'pointer',
         borderBottom: showDivider ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
-        transition: 'background 150ms ease',
-        transformStyle: 'preserve-3d',
+        animation: `fadeInUp 0.28s ease ${index * 0.03}s both`,
+        transition: 'background 150ms ease, transform 150ms ease',
+        '&:hover': { transform: 'translateX(2px)' },
+        '&:active': { transform: 'scale(0.99)' },
       }}
     >
       {/* Avatar */}
@@ -48,33 +51,97 @@ export default function PlayerCard({ player, showDivider = true, index = 0 }: { 
         sx={{
           width: 44,
           height: 44,
-          borderRadius: '50%',
-          background: 'rgba(34, 197, 94, 0.1)',
-          border: '1px solid rgba(34, 197, 94, 0.15)',
+          borderRadius: '14px',
+          background: `${avatarColor}18`,
+          border: `1px solid ${avatarColor}35`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           mr: 2,
           flexShrink: 0,
           transition: 'all 200ms ease',
-          transform: 'translateZ(20px)',
         }}
       >
-        <PersonIcon sx={{ color: '#22C55E', fontSize: 22 }} />
+        {stats && stats.total_matches > 0 ? (
+          <Typography fontWeight={800} sx={{ color: avatarColor, fontSize: '0.85rem' }}>
+            {getInitials(player.name)}
+          </Typography>
+        ) : (
+          <PersonIcon sx={{ color: avatarColor, fontSize: 22 }} />
+        )}
       </Box>
 
       {/* Info */}
-      <Box sx={{ flex: 1, minWidth: 0, transform: 'translateZ(10px)' }}>
-        <Typography variant="body1" fontWeight={600} noWrap sx={{ letterSpacing: '0.01em' }}>
-          {player.name}
-        </Typography>
-        <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem' }}>
-          {player.base_team}
-        </Typography>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0, mb: 0.25 }}>
+          <Typography variant="body1" fontWeight={700} noWrap sx={{ letterSpacing: '0.01em' }}>
+            {player.name}
+          </Typography>
+          {badges.slice(0, 2).map((badge) => (
+            <Chip
+              key={badge}
+              label={badge}
+              size="small"
+              sx={{
+                height: 20,
+                bgcolor: 'rgba(34, 197, 94, 0.1)',
+                color: '#22C55E',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+                fontSize: '0.65rem',
+                fontWeight: 700,
+              }}
+            />
+          ))}
+        </Box>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.25, alignItems: 'center' }}>
+          <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem' }}>
+            {player.base_team}
+          </Typography>
+          {stats && stats.total_matches > 0 && (
+            <>
+              <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem' }}>
+                {stats.total_matches} MP
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>
+                {stats.win_rate.toFixed(0)}% WR
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#F59E0B', fontSize: '0.8rem' }}>
+                {stats.total_goals} G
+              </Typography>
+              {elo && (
+                <Typography variant="caption" sx={{ color: '#A855F7', fontSize: '0.8rem' }}>
+                  {elo} ELO
+                </Typography>
+              )}
+            </>
+          )}
+        </Box>
       </Box>
 
-      <ChevronRightIcon sx={{ color: '#334155', fontSize: 20, transform: 'translateZ(15px)' }} />
-    </MotionBox>
-  </Tilt>
+      {form.length > 0 && (
+        <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 0.4, mx: 1.5 }}>
+          {form.map((result, resultIndex) => (
+            <Box
+              key={`${result}-${resultIndex}`}
+              sx={{
+                width: 20,
+                height: 20,
+                borderRadius: '6px',
+                display: 'grid',
+                placeItems: 'center',
+                fontSize: '0.65rem',
+                fontWeight: 800,
+                color: '#020617',
+                bgcolor: result === 'W' ? '#22C55E' : result === 'D' ? '#94A3B8' : '#EF4444',
+              }}
+            >
+              {result}
+            </Box>
+          ))}
+        </Box>
+      )}
+
+      <ChevronRightIcon sx={{ color: '#334155', fontSize: 20 }} />
+    </Box>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -15,7 +16,8 @@ import BackButton from '@/components/shared/BackButton';
 import AIH2HModal from '@/components/ai/AIH2HModal';
 import type { RegisteredPlayer, H2HData } from '@/lib/types';
 
-export default function H2HPage() {
+function H2HPageContent() {
+  const searchParams = useSearchParams();
   const [player1, setPlayer1] = useState<RegisteredPlayer | null>(null);
   const [player2, setPlayer2] = useState<RegisteredPlayer | null>(null);
   const [h2hData, setH2hData] = useState<H2HData | null>(null);
@@ -23,15 +25,15 @@ export default function H2HPage() {
   const [error, setError] = useState('');
   const [h2hModalOpen, setH2hModalOpen] = useState(false);
 
-  const handleCompare = async () => {
-    if (!player1 || !player2) return;
+  const loadComparison = useCallback(async (first: RegisteredPlayer | null, second: RegisteredPlayer | null) => {
+    if (!first || !second) return;
 
     setLoading(true);
     setError('');
     setH2hData(null);
 
     try {
-      const res = await fetch(`/api/analytics/h2h?p1=${player1.id}&p2=${player2.id}`);
+      const res = await fetch(`/api/analytics/h2h?p1=${first.id}&p2=${second.id}`);
       if (!res.ok) {
         throw new Error('Failed to load H2H data');
       }
@@ -42,7 +44,30 @@ export default function H2HPage() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const handleCompare = () => {
+    void loadComparison(player1, player2);
   };
+
+  useEffect(() => {
+    const p1 = searchParams.get('p1');
+    const p2 = searchParams.get('p2');
+    if (!p1 || !p2) return;
+
+    fetch('/api/players')
+      .then((response) => response.json())
+      .then((players: RegisteredPlayer[]) => {
+        const first = players.find((player) => player.id === p1) ?? null;
+        const second = players.find((player) => player.id === p2) ?? null;
+        setPlayer1(first);
+        setPlayer2(second);
+        if (first && second) {
+          void loadComparison(first, second);
+        }
+      })
+      .catch(() => {});
+  }, [loadComparison, searchParams]);
 
   return (
     <Box>
@@ -122,5 +147,13 @@ export default function H2HPage() {
         />
       )}
     </Box>
+  );
+}
+
+export default function H2HPage() {
+  return (
+    <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>}>
+      <H2HPageContent />
+    </Suspense>
   );
 }
