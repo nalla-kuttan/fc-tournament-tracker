@@ -162,6 +162,21 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
       return;
     }
 
+    const homeScoreValue = Number(homeScore);
+    const awayScoreValue = Number(awayScore);
+    const totalScore = homeScoreValue + awayScoreValue;
+    if (goals.length !== totalScore) {
+      setError('Goal scorers must match the final score total.');
+      return;
+    }
+
+    const homeGoalCount = goals.filter((goal) => goal.player_id === homePlayerId).length;
+    const awayGoalCount = goals.filter((goal) => goal.player_id === awayPlayerId).length;
+    if (homeGoalCount !== homeScoreValue || awayGoalCount !== awayScoreValue) {
+      setError('Goal scorers must match each player score.');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -189,6 +204,11 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
           home_score: homeScore,
           away_score: awayScore,
           stats,
+          goals: goals.map((g) => ({
+            player_id: g.player_id,
+            minute: g.minute !== '' ? g.minute : null,
+          })),
+          advance_bracket: !isEditing,
           pin,
         }),
       });
@@ -198,36 +218,7 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
         throw new Error(data.error || 'Failed to submit result');
       }
 
-      // Submit goals (POST endpoint handles deletion of old goals and insertion of new ones)
-      // Always submit when editing (even with empty goals) to delete old ones; only submit when creating if goals exist
-      if (isEditing || goals.length > 0) {
-        const goalRes = await fetch(`/api/matches/${match.id}/goals`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            goals: goals.map((g) => ({
-              player_id: g.player_id,
-              minute: g.minute !== '' ? g.minute : null,
-            })),
-            pin,
-          }),
-        });
-
-        if (!goalRes.ok) {
-          const data = await goalRes.json();
-          throw new Error(data.error || 'Failed to save goals');
-        }
-      }
-
-      // For knockout: advance winner (only if not editing and scores differ)
-      const updatedMatch = await matchRes.json();
-      if (!isEditing && updatedMatch.stage && homeScore !== '' && awayScore !== '' && homeScore !== awayScore) {
-        await fetch(`/api/tournaments/${match.tournament_id}/bracket/advance`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ matchId: match.id, pin }),
-        });
-      }
+      await matchRes.json();
 
       // If editing, call onSuccess callback; otherwise navigate
       if (isEditing) {

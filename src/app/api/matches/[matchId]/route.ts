@@ -3,6 +3,11 @@ import { createServerClient, createAdminClient } from '@/lib/supabase/server';
 import { readJsonBody, verifyTournamentPin } from '@/lib/api-guards';
 import type { MatchStats } from '@/lib/types';
 
+interface GoalInput {
+  player_id: string;
+  minute?: number | null;
+}
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ matchId: string }> }
@@ -37,17 +42,19 @@ export async function PATCH(
   const { matchId } = await params;
 
   try {
-    const { home_score, away_score, stats, pin } = await readJsonBody<{
+    const { home_score, away_score, stats, goals, advance_bracket, pin } = await readJsonBody<{
       home_score: number;
       away_score: number;
       stats?: MatchStats;
+      goals?: GoalInput[];
+      advance_bracket?: boolean;
       pin?: string;
     }>(request);
 
     const supabase = createServerClient();
     const { data: existingMatch, error: matchError } = await supabase
       .from('match')
-      .select('id, tournament_id, is_bye')
+      .select('id, tournament_id, home_player_id, away_player_id, is_bye')
       .eq('id', matchId)
       .single();
 
@@ -72,20 +79,41 @@ export async function PATCH(
       return NextResponse.json({ error: 'BYE matches cannot be edited' }, { status: 400 });
     }
 
+    const submittedGoals = goals ?? [];
+    if (!Array.isArray(submittedGoals)) {
+      return NextResponse.json({ error: 'Goals must be an array' }, { status: 400 });
+    }
+
+    if (submittedGoals.length !== home_score + away_score) {
+      return NextResponse.json({ error: 'Goal scorers must match the final score total' }, { status: 400 });
+    }
+
+    const homeGoalCount = submittedGoals.filter((goal) => goal.player_id === existingMatch.home_player_id).length;
+    const awayGoalCount = submittedGoals.filter((goal) => goal.player_id === existingMatch.away_player_id).length;
+    if (homeGoalCount !== home_score || awayGoalCount !== away_score) {
+      return NextResponse.json({ error: 'Goal scorers must match each player score' }, { status: 400 });
+    }
+
+    const validScorers = new Set([existingMatch.home_player_id, existingMatch.away_player_id].filter(Boolean));
+    const hasInvalidGoal = submittedGoals.some(
+      (goal) =>
+        !validScorers.has(goal.player_id) ||
+        (goal.minute != null && (!Number.isInteger(goal.minute) || goal.minute < 1 || goal.minute > 130))
+    );
+
+    if (hasInvalidGoal) {
+      return NextResponse.json({ error: 'Goals must use match players and valid minutes' }, { status: 400 });
+    }
+
     const adminClient = createAdminClient();
-    const { data, error } = await adminClient
-      .from('match')
-      .update({
-        home_score,
-        away_score,
-        stats: stats ?? {},
-        is_played: true,
-        played_at: new Date().toISOString(),
-      })
-      .eq('id', matchId)
-      .eq('tournament_id', existingMatch.tournament_id)
-      .select()
-      .single();
+    const { data, error } = await adminClient.rpc('save_match_result_atomic', {
+      p_match_id: matchId,
+      p_home_score: home_score,
+      p_away_score: away_score,
+      p_stats: stats ?? {},
+      p_goals: submittedGoals,
+      p_advance_bracket: advance_bracket ?? false,
+    });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
