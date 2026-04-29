@@ -11,9 +11,6 @@ import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import { TOURNAMENT_STATUSES } from '@/lib/constants';
 import type { Tournament } from '@/lib/types';
 
-import { motion } from 'framer-motion';
-import Tilt from 'react-parallax-tilt';
-
 const FORMAT_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   league: {
     icon: <StadiumIcon sx={{ fontSize: 22, color: '#3B82F6' }} />,
@@ -32,29 +29,13 @@ const FORMAT_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: 
   },
 };
 
-const MotionBox = motion.create(Box);
-
 export default function TournamentCard({ tournament, showDivider = true, index = 0 }: { tournament: Tournament; showDivider?: boolean; index?: number }) {
   const router = useRouter();
   const statusConfig = TOURNAMENT_STATUSES[tournament.status];
   const formatConfig = FORMAT_CONFIG[tournament.format] || FORMAT_CONFIG.league;
 
   return (
-    <Tilt
-      tiltMaxAngleX={4}
-      tiltMaxAngleY={4}
-      perspective={1000}
-      transitionSpeed={400}
-      scale={1.02}
-      gyroscope={true}
-      className="parallax-effect-glare-scale"
-    >
-      <MotionBox
-        layout
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }}
-        whileTap={{ scale: 0.98 }}
+      <Box
         onClick={() => router.push(`/tournaments/${tournament.id}`)}
         className="list-row"
         sx={{
@@ -64,8 +45,14 @@ export default function TournamentCard({ tournament, showDivider = true, index =
           py: 2,
           cursor: 'pointer',
           borderBottom: showDivider ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
-          transition: 'background 150ms ease',
-          transformStyle: 'preserve-3d', // For 3D floating effect on children
+          animation: `fadeInUp 0.28s ease ${index * 0.035}s both`,
+          transition: 'background 150ms ease, transform 150ms ease',
+          '&:hover': {
+            transform: 'translateX(2px)',
+          },
+          '&:active': {
+            transform: 'scale(0.99)',
+          },
         }}
       >
       {/* Format icon - SVG instead of emoji */}
@@ -82,14 +69,13 @@ export default function TournamentCard({ tournament, showDivider = true, index =
           mr: 2,
           flexShrink: 0,
           transition: 'all 200ms ease',
-          transform: 'translateZ(20px)', // Pop out effect
         }}
       >
         {formatConfig.icon}
       </Box>
 
       {/* Info */}
-      <Box sx={{ flex: 1, minWidth: 0, transform: 'translateZ(10px)' }}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="body1" fontWeight={600} noWrap sx={{ letterSpacing: '0.01em' }}>
           {tournament.name}
         </Typography>
@@ -99,7 +85,7 @@ export default function TournamentCard({ tournament, showDivider = true, index =
       </Box>
 
       {/* Status chip */}
-      <Box sx={{ transform: 'translateZ(15px)', display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Chip
           label={statusConfig.label}
           size="small"
@@ -117,7 +103,6 @@ export default function TournamentCard({ tournament, showDivider = true, index =
 
         <ChevronRightIcon sx={{ color: '#334155', fontSize: 20 }} />
       </Box>
-    </MotionBox>
-  </Tilt>
+    </Box>
   );
 }

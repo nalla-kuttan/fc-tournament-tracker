@@ -6,7 +6,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import theme from '@/theme';
 import { AdminProvider } from '@/contexts/AdminContext';
 import AppShell from '@/components/layout/AppShell';
-import MusicPlayer from '@/components/layout/MusicPlayer';
+import DeferredMusicPlayer from '@/components/layout/DeferredMusicPlayer';
 import './globals.css';
 
 const chakraPetch = Chakra_Petch({
@@ -50,7 +50,7 @@ export default function RootLayout({
             <CssBaseline />
             <AdminProvider>
               <AppShell>{children}</AppShell>
-              <MusicPlayer />
+              <DeferredMusicPlayer />
             </AdminProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>

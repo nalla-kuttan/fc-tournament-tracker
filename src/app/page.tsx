@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
@@ -10,11 +12,13 @@ import Skeleton from '@mui/material/Skeleton';
 import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import Tilt from 'react-parallax-tilt';
 import TournamentCard from '@/components/tournament/TournamentCard';
 import EmptyState from '@/components/shared/EmptyState';
-import FunFactsSection from '@/components/analytics/FunFactsSection';
 import type { Tournament, Match } from '@/lib/types';
+
+const FunFactsSection = dynamic(() => import('@/components/analytics/FunFactsSection'), {
+  ssr: false,
+});
 
 interface HallOfFameEntry {
   tournament_id: string;
@@ -36,24 +40,37 @@ interface AnalyticsData {
 
 export default function HomePage() {
   const router = useRouter();
+  const [loadAnalytics, setLoadAnalytics] = useState(false);
   const { data: tournaments = [], isLoading: loadingTournaments } = useSWR<Tournament[]>('/api/tournaments', fetcher);
   const { data: hallOfFame = [] } = useSWR<HallOfFameEntry[]>('/api/analytics/hall-of-fame', fetcher);
-  const { data: analytics = null } = useSWR<AnalyticsData>('/api/analytics/global', fetcher, { revalidateOnFocus: false });
+  const { data: analytics = null } = useSWR<AnalyticsData>(
+    loadAnalytics ? '/api/analytics/global' : null,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
 
   const loading = loadingTournaments;
+
+  useEffect(() => {
+    const scheduleIdle = window.requestIdleCallback;
+    const idleCallback =
+      typeof scheduleIdle === 'function'
+        ? scheduleIdle(() => setLoadAnalytics(true), { timeout: 1800 })
+        : window.setTimeout(() => setLoadAnalytics(true), 800);
+
+    return () => {
+      if (typeof scheduleIdle === 'function') {
+        window.cancelIdleCallback(idleCallback);
+      } else {
+        window.clearTimeout(idleCallback);
+      }
+    };
+  }, []);
 
   return (
     <Box>
       {/* Spatial Info Panel instead of flat floating text */}
       <Box className="animate-section" sx={{ mb: 4, mt: 1, perspective: 1000 }}>
-        <Tilt
-          tiltMaxAngleX={10}
-          tiltMaxAngleY={10}
-          perspective={800}
-          scale={1.02}
-          transitionSpeed={600}
-          gyroscope={true}
-        >
           <Box
             sx={{
               display: 'inline-flex',
@@ -68,7 +85,7 @@ export default function HomePage() {
               transformStyle: 'preserve-3d',
             }}
           >
-            <EmojiEventsIcon sx={{ fontSize: 32, color: '#22C55E', transform: 'translateZ(30px)', filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.5))' }} />
+            <EmojiEventsIcon sx={{ fontSize: 32, color: '#22C55E', filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.5))' }} />
             <Typography
               variant="h4"
               sx={{
@@ -76,13 +93,11 @@ export default function HomePage() {
                 letterSpacing: '-0.5px',
                 color: '#F8FAFC',
                 textShadow: '0 2px 10px rgba(0,0,0,0.5)',
-                transform: 'translateZ(20px)',
               }}
             >
               Tournaments
             </Typography>
           </Box>
-        </Tilt>
       </Box>
 
       {/* Hall of Fame */}
