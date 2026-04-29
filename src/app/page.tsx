@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
@@ -10,10 +10,16 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Skeleton from '@mui/material/Skeleton';
 import Chip from '@mui/material/Chip';
+import CardContent from '@mui/material/CardContent';
 import AddIcon from '@mui/icons-material/Add';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import BoltIcon from '@mui/icons-material/Bolt';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import TournamentCard from '@/components/tournament/TournamentCard';
 import EmptyState from '@/components/shared/EmptyState';
+import GlassCard from '@/components/shared/GlassCard';
+import { getPowerRankings } from '@/lib/analytics-insights';
 import type { Tournament, Match } from '@/lib/types';
 
 const FunFactsSection = dynamic(() => import('@/components/analytics/FunFactsSection'), {
@@ -41,6 +47,7 @@ interface AnalyticsData {
 export default function HomePage() {
   const router = useRouter();
   const [loadAnalytics, setLoadAnalytics] = useState(false);
+  const [showRecords, setShowRecords] = useState(false);
   const { data: tournaments = [], isLoading: loadingTournaments } = useSWR<Tournament[]>('/api/tournaments', fetcher);
   const { data: hallOfFame = [] } = useSWR<HallOfFameEntry[]>('/api/analytics/hall-of-fame', fetcher);
   const { data: analytics = null } = useSWR<AnalyticsData>(
@@ -50,6 +57,34 @@ export default function HomePage() {
   );
 
   const loading = loadingTournaments;
+  const champions = useMemo(
+    () => Object.values(
+      hallOfFame.reduce((acc, entry) => {
+        if (!acc[entry.winner_name]) {
+          acc[entry.winner_name] = {
+            name: entry.winner_name,
+            team: entry.winner_team,
+            tournaments: [],
+            points: 0,
+            latestTitle: entry.tournament_name,
+            latestCompletedAt: entry.completed_at,
+          };
+        }
+        acc[entry.winner_name].tournaments.push(entry.tournament_name);
+        acc[entry.winner_name].points += Number(entry.stats.points || 0);
+        if (!acc[entry.winner_name].latestCompletedAt || entry.completed_at > acc[entry.winner_name].latestCompletedAt) {
+          acc[entry.winner_name].latestTitle = entry.tournament_name;
+          acc[entry.winner_name].latestCompletedAt = entry.completed_at;
+        }
+        return acc;
+      }, {} as Record<string, { name: string; team: string; tournaments: string[]; points: number; latestTitle: string; latestCompletedAt: string }>)
+    ).sort((a, b) => b.tournaments.length - a.tournaments.length || b.points - a.points),
+    [hallOfFame]
+  );
+  const powerRankings = useMemo(
+    () => analytics ? getPowerRankings(analytics.registered_players, analytics.player_instances, analytics.all_matches).slice(0, 3) : [],
+    [analytics]
+  );
 
   useEffect(() => {
     const scheduleIdle = window.requestIdleCallback;
@@ -121,32 +156,58 @@ export default function HomePage() {
             <EmojiEventsIcon sx={{ fontSize: 16, color: '#F59E0B' }} />
             Hall of Fame
           </Typography>
-          <Box
-            sx={{
-              background: 'rgba(15, 23, 42, 0.6)',
-              backdropFilter: 'blur(16px)',
-              border: '1px solid rgba(148, 163, 184, 0.08)',
-              borderRadius: '16px',
-              overflow: 'hidden',
-            }}
-          >
-            {Object.values(
-              hallOfFame.reduce((acc, entry) => {
-                if (!acc[entry.winner_name]) {
-                  acc[entry.winner_name] = {
-                    name: entry.winner_name,
-                    team: entry.winner_team,
-                    tournaments: [],
-                    points: 0,
-                  };
-                }
-                acc[entry.winner_name].tournaments.push(entry.tournament_name);
-                acc[entry.winner_name].points += Number(entry.stats.points || 0);
-                return acc;
-              }, {} as Record<string, { name: string; team: string; tournaments: string[]; points: number }>)
-            )
-              .sort((a, b) => b.tournaments.length - a.tournaments.length || b.points - a.points)
-              .map((groupedEntry, index, arr) => (
+          <GlassCard>
+            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+                  gap: 1,
+                  p: 1.5,
+                  alignItems: 'end',
+                }}
+              >
+                {champions.slice(0, 3).map((champion, index) => {
+                  const rankColors = ['#F59E0B', '#94A3B8', '#B45309'];
+                  return (
+                    <Box
+                      key={champion.name}
+                      sx={{
+                        border: `1px solid ${rankColors[index]}35`,
+                        bgcolor: `${rankColors[index]}12`,
+                        borderRadius: '14px',
+                        p: 1.5,
+                        minHeight: { xs: 'auto', sm: index === 0 ? 132 : 112 },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        order: { xs: index, sm: index === 0 ? 2 : index === 1 ? 1 : 3 },
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="caption" sx={{ color: rankColors[index], fontWeight: 900 }}>
+                          #{index + 1}
+                        </Typography>
+                        <EmojiEventsIcon sx={{ color: rankColors[index], fontSize: index === 0 ? 26 : 20 }} />
+                      </Box>
+                      <Typography fontWeight={900} noWrap>
+                        {champion.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" noWrap>
+                        {champion.team}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                        <Chip size="small" label={`${champion.tournaments.length} titles`} sx={{ bgcolor: `${rankColors[index]}20`, color: rankColors[index], fontWeight: 800 }} />
+                      </Box>
+                      <Typography variant="caption" color="text.secondary" noWrap sx={{ mt: 1 }}>
+                        Latest: {champion.latestTitle}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
+
+              {champions.slice(3).map((groupedEntry, index, arr) => (
                 <Box
                   key={groupedEntry.name}
                   className="list-row"
@@ -154,8 +215,9 @@ export default function HomePage() {
                     display: 'flex',
                     alignItems: 'center',
                     px: 2,
-                    py: 2,
+                    py: 1.5,
                     borderBottom: index < arr.length - 1 ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
+                    borderTop: index === 0 ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
                     transition: 'background 150ms ease',
                   }}
                 >
@@ -212,19 +274,96 @@ export default function HomePage() {
                   />
                 </Box>
               ))}
-          </Box>
+            </CardContent>
+          </GlassCard>
+        </Box>
+      )}
+
+      {/* Power Rankings Preview */}
+      {powerRankings.length > 0 && (
+        <Box className="animate-section" sx={{ mb: 4 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: '#64748B',
+              textTransform: 'uppercase',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.1em',
+              px: 1,
+              mb: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+            }}
+          >
+            <BoltIcon sx={{ fontSize: 16, color: '#A855F7' }} />
+            Live Power Ranking
+          </Typography>
+          <GlassCard>
+            <CardContent sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 1.25 }}>
+              {powerRankings.map((row) => (
+                <Box
+                  key={row.player.id}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.25,
+                    p: 1.25,
+                    borderRadius: '12px',
+                    bgcolor: row.rank === 1 ? 'rgba(168, 85, 247, 0.12)' : 'rgba(148, 163, 184, 0.04)',
+                    border: row.rank === 1 ? '1px solid rgba(168, 85, 247, 0.25)' : '1px solid rgba(148, 163, 184, 0.06)',
+                  }}
+                >
+                  <Typography fontWeight={900} sx={{ color: row.rank === 1 ? '#A855F7' : '#64748B', width: 26 }}>
+                    #{row.rank}
+                  </Typography>
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Typography fontWeight={800} noWrap>{row.player.name}</Typography>
+                    <Typography variant="caption" color="text.secondary" noWrap>{row.player.base_team}</Typography>
+                  </Box>
+                  <Chip size="small" label={row.rating} sx={{ color: '#A855F7', bgcolor: 'rgba(168, 85, 247, 0.12)', fontWeight: 800 }} />
+                </Box>
+              ))}
+            </CardContent>
+          </GlassCard>
         </Box>
       )}
 
       {/* Records & Milestones */}
-      {analytics && (
-        <Box className="animate-section">
-          <FunFactsSection
-            matches={analytics.all_matches}
-            goals={analytics.all_goals}
-            registeredPlayers={analytics.registered_players}
-            playerInstances={analytics.player_instances}
-          />
+      {analytics && analytics.all_matches.length > 0 && (
+        <Box className="animate-section" sx={{ mb: showRecords ? 0 : 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 1, mb: 1.5 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#64748B',
+                textTransform: 'uppercase',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                letterSpacing: '0.1em',
+              }}
+            >
+              Records & Milestones
+            </Typography>
+            <Button
+              variant="text"
+              size="small"
+              endIcon={showRecords ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+              onClick={() => setShowRecords((value) => !value)}
+              sx={{ color: '#22C55E', textTransform: 'none', fontWeight: 700 }}
+            >
+              {showRecords ? 'Hide' : 'Show'}
+            </Button>
+          </Box>
+          {showRecords && (
+            <FunFactsSection
+              matches={analytics.all_matches}
+              goals={analytics.all_goals}
+              registeredPlayers={analytics.registered_players}
+              playerInstances={analytics.player_instances}
+            />
+          )}
         </Box>
       )}
 
