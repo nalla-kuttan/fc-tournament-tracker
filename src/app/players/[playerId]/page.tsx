@@ -30,6 +30,7 @@ import AIScoutModal from '@/components/ai/AIScoutModal';
 import BackButton from '@/components/shared/BackButton';
 import type { CareerStats, Match, RegisteredPlayer } from '@/lib/types';
 import { TEAMS } from '@/lib/constants';
+import { getPlayerImagePath } from '@/lib/player-images';
 import {
   getAvatarColor,
   getInitials,
@@ -121,6 +122,7 @@ export default function PlayerProfilePage() {
   }
 
   const avatarColor = getAvatarColor(player.id);
+  const imagePath = getPlayerImagePath(player.name);
 
   return (
     <Box>
@@ -140,7 +142,19 @@ export default function PlayerProfilePage() {
               flexShrink: 0,
             }}
           >
-            {stats && stats.total_matches > 0 ? (
+            {imagePath ? (
+              <Box
+                component="img"
+                src={imagePath}
+                alt={`${player.name} profile`}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 'inherit',
+                  objectFit: 'cover',
+                }}
+              />
+            ) : stats && stats.total_matches > 0 ? (
               <Typography fontWeight={900} sx={{ color: avatarColor, fontSize: '1.05rem' }}>
                 {getInitials(player.name)}
               </Typography>

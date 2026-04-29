@@ -8,6 +8,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import type { CareerStats, RegisteredPlayer } from '@/lib/types';
 import { getAvatarColor, getInitials, getPlayerArchetype } from '@/lib/player-insights';
+import { getPlayerImagePath } from '@/lib/player-images';
 import ArchetypeIcon from '@/components/player/ArchetypeIcon';
 
 export default function PlayerCard({
@@ -30,6 +31,7 @@ export default function PlayerCard({
   const router = useRouter();
   const avatarColor = getAvatarColor(player.id || player.name);
   const archetype = stats ? getPlayerArchetype(stats) : null;
+  const imagePath = getPlayerImagePath(player.name);
 
   return (
       <Box
@@ -64,7 +66,19 @@ export default function PlayerCard({
           transition: 'all 200ms ease',
         }}
       >
-        {stats && stats.total_matches > 0 ? (
+        {imagePath ? (
+          <Box
+            component="img"
+            src={imagePath}
+            alt={`${player.name} profile`}
+            sx={{
+              width: '100%',
+              height: '100%',
+              borderRadius: 'inherit',
+              objectFit: 'cover',
+            }}
+          />
+        ) : stats && stats.total_matches > 0 ? (
           <Typography fontWeight={800} sx={{ color: avatarColor, fontSize: '0.85rem' }}>
             {getInitials(player.name)}
           </Typography>
