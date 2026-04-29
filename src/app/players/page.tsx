@@ -11,7 +11,6 @@ import PeopleIcon from '@mui/icons-material/People';
 import Tilt from 'react-parallax-tilt';
 import PlayerCard from '@/components/player/PlayerCard';
 import EmptyState from '@/components/shared/EmptyState';
-import BackButton from '@/components/shared/BackButton';
 import type { RegisteredPlayer } from '@/lib/types';
 
 export default function PlayersPage() {
@@ -31,7 +30,6 @@ export default function PlayersPage() {
 
   return (
     <Box>
-      <BackButton />
       {/* Spatial Info Panel instead of flat floating text */}
       <Box className="animate-section" sx={{ mb: 4, mt: 1, perspective: 1000 }}>
         <Tilt

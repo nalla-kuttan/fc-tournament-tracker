@@ -13,7 +13,6 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import PeopleIcon from '@mui/icons-material/People';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import Paper from '@mui/material/Paper';
 
 const NAV_ITEMS = [
@@ -46,32 +45,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
         }}
       >
         <Toolbar sx={{ minHeight: { xs: 52, sm: 60 }, px: { xs: 1.5, sm: 2.5 } }}>
-          {/* Back Button (Conditional) */}
-          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-            {!['/', '/players', '/analytics'].includes(pathname) && (
-              <Button
-                variant="text"
-                startIcon={<ArrowBackIosNewIcon sx={{ fontSize: '1rem !important' }} />}
-                onClick={() => router.back()}
-                sx={{
-                  color: '#22C55E',
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  fontSize: '0.9375rem',
-                  p: 0,
-                  minWidth: 'auto',
-                  '&:hover': {
-                    background: 'rgba(34, 197, 94, 0.08)',
-                  },
-                }}
-              >
-                Back
-              </Button>
-            )}
-          </Box>
-
-          {/* Title with gradient accent */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
+          <Box
+            sx={{
+              flex: { xs: 1, sm: '0 0 auto' },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: { xs: 'center', sm: 'flex-start' },
+              gap: 1,
+            }}
+          >
             <SportsSoccerIcon
               sx={{
                 fontSize: 22,
@@ -97,8 +79,39 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </Typography>
           </Box>
 
-          {/* Right Spacer for balanced centering */}
-          <Box sx={{ flex: 1 }} />
+          <Box
+            component="nav"
+            sx={{
+              display: { xs: 'none', sm: 'flex' },
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: 0.5,
+              flex: 1,
+            }}
+          >
+            {NAV_ITEMS.map((item, index) => (
+              <Button
+                key={item.path}
+                startIcon={item.icon}
+                onClick={() => router.push(item.path)}
+                sx={{
+                  color: activeTab === index ? '#22C55E' : '#94A3B8',
+                  bgcolor: activeTab === index ? 'rgba(34, 197, 94, 0.08)' : 'transparent',
+                  px: 1.5,
+                  py: 0.75,
+                  '&:hover': {
+                    bgcolor: 'rgba(34, 197, 94, 0.08)',
+                    color: '#22C55E',
+                  },
+                  '& .MuiButton-startIcon': {
+                    mr: 0.75,
+                  },
+                }}
+              >
+                {item.label}
+              </Button>
+            ))}
+          </Box>
         </Toolbar>
       </AppBar>
 
@@ -109,7 +122,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           flexGrow: 1,
           px: { xs: 2, sm: 3 },
           pt: 2.5,
-          pb: 14,
+          pb: { xs: 'calc(104px + env(safe-area-inset-bottom))', sm: 5 },
           maxWidth: 960,
           mx: 'auto',
           width: '100%',
@@ -125,6 +138,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           bottom: 0,
           left: 0,
           right: 0,
+          display: { xs: 'block', sm: 'none' },
           zIndex: 1200,
           background: 'rgba(2, 6, 23, 0.85)',
           backdropFilter: 'blur(24px)',
@@ -142,8 +156,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
           }}
           sx={{
             background: 'transparent',
-            height: 80,
-            pb: 2,
+            height: 'calc(72px + env(safe-area-inset-bottom))',
+            pb: 'env(safe-area-inset-bottom)',
             '& .MuiBottomNavigationAction-root': {
               color: '#475569',
               minWidth: 'auto',

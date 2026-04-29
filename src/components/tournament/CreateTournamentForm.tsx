@@ -157,6 +157,7 @@ export default function CreateTournamentForm() {
           <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <Typography variant="h6">Tournament Details</Typography>
             <TextField
+              id="create-tournament-name"
               label="Tournament Name"
               fullWidth
               value={name}
@@ -231,6 +232,7 @@ export default function CreateTournamentForm() {
                   {selectedPlayerIds.has(player.id) && (
                     <FormControl size="small" sx={{ minWidth: 150 }}>
                       <Autocomplete
+                        id={`create-tournament-team-${player.id}`}
                         freeSolo
                         size="small"
                         options={TEAMS}
@@ -243,7 +245,12 @@ export default function CreateTournamentForm() {
                             setTeamOverrides((prev) => ({ ...prev, [player.id]: newValue }));
                           }
                         }}
-                        renderInput={(params) => <TextField {...params} label="Team" />}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Team"
+                          />
+                        )}
                       />
                     </FormControl>
                   )}
@@ -279,6 +286,7 @@ export default function CreateTournamentForm() {
               This PIN is required to enter match results and manage the tournament.
             </Typography>
             <TextField
+              id="create-tournament-admin-pin"
               label="Admin PIN"
               type="password"
               fullWidth
@@ -286,6 +294,7 @@ export default function CreateTournamentForm() {
               onChange={(e) => setPin(e.target.value)}
             />
             <TextField
+              id="create-tournament-admin-pin-confirm"
               label="Confirm PIN"
               type="password"
               fullWidth
@@ -316,6 +325,7 @@ export default function CreateTournamentForm() {
         <DialogTitle>Enter New Player</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
           <TextField
+            id="create-tournament-new-player-name"
             label="Player Name"
             name="playerNameNew"
             fullWidth
@@ -324,6 +334,7 @@ export default function CreateTournamentForm() {
             sx={{ mt: 1 }}
           />
           <Autocomplete
+            id="create-tournament-new-player-team"
             freeSolo
             options={TEAMS}
             value={newPlayerTeam}
