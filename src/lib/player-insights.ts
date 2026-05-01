@@ -209,6 +209,34 @@ export function calculateEloRatings(
     .filter((match) => match.is_played && !match.is_bye && match.home_player_id && match.away_player_id)
     .sort((a, b) => (a.played_at ?? '').localeCompare(b.played_at ?? ''));
 
+  const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+  const getPerformanceScore = (
+    match: Match,
+    side: 'home' | 'away',
+    goalsFor: number,
+    goalsAgainst: number
+  ) => {
+    const stats = match.stats as MatchStats | undefined;
+    const isHome = side === 'home';
+    const xg = isHome ? stats?.home_xg : stats?.away_xg;
+    const possession = isHome ? stats?.home_possession : stats?.away_possession;
+    const rating = isHome ? stats?.home_rating : stats?.away_rating;
+    const playerId = isHome ? match.home_player_id : match.away_player_id;
+    const motmBonus = stats?.motm_player_id && stats.motm_player_id === playerId
+      ? 5 + clamp((stats.motm_rating ?? 8) - 8, -1, 2)
+      : 0;
+
+    return (
+      clamp(goalsFor, 0, 6) * 1.2 +
+      clamp(goalsFor - goalsAgainst, -5, 5) * 2.2 +
+      (xg == null ? 0 : clamp(xg, 0, 5) * 2.4) +
+      (possession == null ? 0 : clamp(possession - 50, -30, 30) * 0.12) +
+      (rating == null ? 0 : clamp(rating - 6.5, -3, 3.5) * 3) +
+      motmBonus
+    );
+  };
+
   for (const match of sortedMatches) {
     const homeRegisteredId = instanceToRegistered.get(match.home_player_id ?? '');
     const awayRegisteredId = instanceToRegistered.get(match.away_player_id ?? '');
@@ -217,11 +245,16 @@ export function calculateEloRatings(
     const homeRating = ratings.get(homeRegisteredId) ?? 1000;
     const awayRating = ratings.get(awayRegisteredId) ?? 1000;
     const expectedHome = 1 / (1 + Math.pow(10, (awayRating - homeRating) / 400));
-    const homeScore = (match.home_score ?? 0) > (match.away_score ?? 0) ? 1 : (match.home_score ?? 0) === (match.away_score ?? 0) ? 0.5 : 0;
-    const k = 32;
+    const homeGoals = match.home_score ?? 0;
+    const awayGoals = match.away_score ?? 0;
+    const homeScore = homeGoals > awayGoals ? 1 : homeGoals === awayGoals ? 0.5 : 0;
+    const k = 28;
+    const homePerformance = getPerformanceScore(match, 'home', homeGoals, awayGoals);
+    const awayPerformance = getPerformanceScore(match, 'away', awayGoals, homeGoals);
+    const performanceModifier = clamp(homePerformance - awayPerformance, -14, 14);
 
-    ratings.set(homeRegisteredId, Math.round(homeRating + k * (homeScore - expectedHome)));
-    ratings.set(awayRegisteredId, Math.round(awayRating + k * ((1 - homeScore) - (1 - expectedHome))));
+    ratings.set(homeRegisteredId, Math.round(homeRating + k * (homeScore - expectedHome) + performanceModifier));
+    ratings.set(awayRegisteredId, Math.round(awayRating + k * ((1 - homeScore) - (1 - expectedHome)) - performanceModifier));
   }
 
   return ratings;

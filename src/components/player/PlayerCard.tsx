@@ -126,7 +126,7 @@ export default function PlayerCard({
               </Typography>
               {elo && (
                 <Typography variant="caption" sx={{ color: '#A855F7', fontSize: '0.8rem' }}>
-                  {elo} ELO
+                  {elo} PR
                 </Typography>
               )}
             </>

@@ -210,7 +210,7 @@ export default function GlobalAnalyticsPage() {
         <Grid size={{ xs: 12, md: 4 }}>
           <StatLeaderboard
             title="Power Rankings"
-            valueLabel="ELO"
+            valueLabel="Power"
             entries={powerRankings.slice(0, 8).map((row) => ({
               rank: row.rank,
               name: row.player.name,
