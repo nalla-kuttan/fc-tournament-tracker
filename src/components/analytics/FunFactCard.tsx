@@ -19,9 +19,6 @@ export default function FunFactCard({ emoji, title, value, subtitle, color, inde
   return (
     <MotionBox
       layout
-      drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.15}
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1, type: "spring", stiffness: 100 }}
@@ -38,6 +35,7 @@ export default function FunFactCard({ emoji, title, value, subtitle, color, inde
         flexDirection: 'column',
         gap: 0.75,
         flexShrink: 0,
+        scrollSnapAlign: 'start',
         position: 'relative',
         overflow: 'hidden',
         cursor: 'default',

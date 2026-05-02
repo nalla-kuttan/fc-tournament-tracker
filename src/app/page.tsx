@@ -138,6 +138,50 @@ function SectionTitle({
   );
 }
 
+function SpotlightMetric({ label, value, color = '#F8FAFC' }: { label: string; value: string | number; color?: string }) {
+  return (
+    <Box
+      sx={{
+        p: 1,
+        borderRadius: '10px',
+        bgcolor: 'rgba(2, 6, 23, 0.32)',
+        border: '1px solid rgba(148, 163, 184, 0.08)',
+        minWidth: 0,
+      }}
+    >
+      <Typography sx={{ color: '#8798B0', fontSize: '0.65rem', fontWeight: 850, textTransform: 'uppercase' }}>
+        {label}
+      </Typography>
+      <Typography sx={{ color, fontWeight: 950, fontSize: '1rem', lineHeight: 1.15 }} noWrap>
+        {value}
+      </Typography>
+    </Box>
+  );
+}
+
+function SpotlightBar({ label, value, color }: { label: string; value: number; color: string }) {
+  const clamped = Math.min(Math.max(value, 0), 100);
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.45 }}>
+        <Typography sx={{ color: '#B6C3D5', fontSize: '0.72rem', fontWeight: 800 }}>{label}</Typography>
+        <Typography sx={{ color, fontSize: '0.72rem', fontWeight: 900 }}>{Math.round(clamped)}</Typography>
+      </Box>
+      <Box sx={{ height: 7, borderRadius: 999, bgcolor: 'rgba(148, 163, 184, 0.1)', overflow: 'hidden' }}>
+        <Box
+          sx={{
+            width: `${clamped}%`,
+            height: '100%',
+            borderRadius: 999,
+            bgcolor: color,
+            boxShadow: `0 0 18px ${color}55`,
+          }}
+        />
+      </Box>
+    </Box>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [loadAnalytics, setLoadAnalytics] = useState(false);
@@ -490,24 +534,60 @@ export default function HomePage() {
               />
               {spotlight ? (
                 <Box>
-                  <Box sx={{ display: 'grid', gridTemplateColumns: '92px 1fr auto', gap: 1.25, alignItems: 'center', mb: 2 }}>
-                    <Avatar src={getPlayerImagePath(spotlight.player.name)} sx={{ width: 92, height: 92, border: '2px solid rgba(34, 197, 94, 0.7)', boxShadow: '0 0 26px rgba(34, 197, 94, 0.18)' }}>
-                      {spotlight.player.name.slice(0, 1)}
-                    </Avatar>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography sx={{ fontWeight: 950, fontSize: '1.05rem' }} noWrap>{spotlight.player.name}</Typography>
-                      <Typography sx={{ color: '#8FA2B9', fontSize: '0.8rem' }} noWrap>{spotlight.player.base_team}</Typography>
-                      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, mt: 1.25 }}>
-                        <Box><Typography sx={{ color: '#8FA2B9', fontSize: '0.68rem' }}>Matches</Typography><Typography sx={{ fontWeight: 900 }}>{spotlight.stats?.total_matches ?? 0}</Typography></Box>
-                        <Box><Typography sx={{ color: '#8FA2B9', fontSize: '0.68rem' }}>Goals</Typography><Typography sx={{ fontWeight: 900 }}>{spotlight.stats?.total_goals ?? 0}</Typography></Box>
-                        <Box><Typography sx={{ color: '#8FA2B9', fontSize: '0.68rem' }}>MOTM</Typography><Typography sx={{ fontWeight: 900 }}>{spotlight.stats?.motm_awards ?? 0}</Typography></Box>
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      mb: 1.5,
+                      minHeight: 188,
+                      background:
+                        'linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(15, 23, 42, 0.84) 52%, rgba(168, 85, 247, 0.18))',
+                      border: '1px solid rgba(34, 197, 94, 0.18)',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        opacity: 0.18,
+                        background: `url(${getPlayerImagePath(spotlight.player.name)}) center 18% / cover no-repeat`,
+                        filter: 'blur(14px) saturate(1.15)',
+                        transform: 'scale(1.08)',
+                      }}
+                    />
+                    <Box sx={{ position: 'relative', display: 'grid', gridTemplateColumns: { xs: '104px 1fr', sm: '128px 1fr' }, gap: 1.5, p: 1.5, alignItems: 'center' }}>
+                      <Avatar
+                        src={getPlayerImagePath(spotlight.player.name)}
+                        sx={{
+                          width: { xs: 104, sm: 128 },
+                          height: { xs: 104, sm: 128 },
+                          border: '2px solid rgba(74, 222, 128, 0.72)',
+                          boxShadow: '0 0 34px rgba(34, 197, 94, 0.22)',
+                        }}
+                      >
+                        {spotlight.player.name.slice(0, 1)}
+                      </Avatar>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', mb: 0.75 }}>
+                          <Chip size="small" label={`#${spotlight.rank} Power`} sx={{ color: '#86EFAC', bgcolor: 'rgba(34, 197, 94, 0.16)', fontWeight: 950 }} />
+                          <Chip size="small" label={`${spotlight.rating} PR`} sx={{ color: '#E9D5FF', bgcolor: 'rgba(168, 85, 247, 0.15)', fontWeight: 950 }} />
+                        </Box>
+                        <Typography sx={{ fontWeight: 950, fontSize: { xs: '1.25rem', sm: '1.5rem' }, lineHeight: 1.05 }} noWrap>
+                          {spotlight.player.name}
+                        </Typography>
+                        <Typography sx={{ color: '#B6C3D5', fontSize: '0.86rem', fontWeight: 750 }} noWrap>
+                          {spotlight.player.base_team}
+                        </Typography>
+                        <Typography sx={{ color: '#8FA2B9', fontSize: '0.76rem', mt: 1.1, lineHeight: 1.45 }}>
+                          {spotlight.stats && spotlight.stats.total_matches > 0
+                            ? `${spotlight.stats.goals_per_match.toFixed(2)} goals per match with ${spotlight.stats.win_rate.toFixed(1)}% win rate.`
+                            : 'Ready to build a profile once more matches are played.'}
+                        </Typography>
                       </Box>
                     </Box>
-                    <Box sx={{ border: '1px solid rgba(34, 197, 94, 0.22)', borderRadius: '12px', px: 1.4, py: 1, textAlign: 'center', bgcolor: 'rgba(34, 197, 94, 0.08)' }}>
-                      <Typography sx={{ color: '#A7F3D0', fontSize: '0.64rem', fontWeight: 900 }}>OVR</Typography>
-                      <Typography sx={{ color: '#4ADE80', fontWeight: 950, fontSize: '1.55rem', lineHeight: 1 }}>{Math.round((spotlight.rating - 900) / 3.8)}</Typography>
-                    </Box>
                   </Box>
+
                   {spotlightPlayers.length > 1 && (
                     <Box className="hide-scrollbar" sx={{ display: 'flex', gap: 0.75, overflowX: 'auto', pb: 0.5, mb: 1.5 }}>
                       {spotlightPlayers.map((row, index) => (
@@ -527,25 +607,33 @@ export default function HomePage() {
                       ))}
                     </Box>
                   )}
-                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.25, alignItems: 'center' }}>
-                    <Box
-                      sx={{
-                        width: 148,
-                        aspectRatio: '1',
-                        mx: 'auto',
-                        clipPath: 'polygon(50% 4%, 91% 27%, 91% 73%, 50% 96%, 9% 73%, 9% 27%)',
-                        background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.78), rgba(14, 165, 233, 0.35))',
-                        border: '1px solid rgba(34, 197, 94, 0.4)',
-                        opacity: 0.9,
-                      }}
-                    />
-                    <Box sx={{ display: 'grid', gap: 0.8 }}>
-                      <Chip size="small" label={`${spotlight.stats?.win_rate.toFixed(1) ?? '0.0'}% Win Rate`} sx={{ color: '#86EFAC', bgcolor: 'rgba(34, 197, 94, 0.13)', fontWeight: 900 }} />
-                      <Chip size="small" label={`${spotlight.stats?.avg_rating.toFixed(2) ?? '0.00'} Avg Rating`} sx={{ color: '#C4B5FD', bgcolor: 'rgba(168, 85, 247, 0.14)', fontWeight: 900 }} />
-                      <Button size="small" endIcon={<ArrowForwardIcon />} onClick={() => router.push(`/players/${spotlight.player.id}`)} sx={{ color: '#93C5FD', justifySelf: 'start' }}>
-                        View Profile
-                      </Button>
+
+                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 0.8, mb: 1.5 }}>
+                    <SpotlightMetric label="Matches" value={spotlight.stats?.total_matches ?? 0} />
+                    <SpotlightMetric label="Goals" value={spotlight.stats?.total_goals ?? 0} color="#FBBF24" />
+                    <SpotlightMetric label="MOTM" value={spotlight.stats?.motm_awards ?? 0} color="#C4B5FD" />
+                    <SpotlightMetric label="Rating" value={spotlight.stats?.avg_rating.toFixed(2) ?? '0.00'} color="#86EFAC" />
+                  </Box>
+
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr auto' }, gap: 1.5, alignItems: 'end' }}>
+                    <Box sx={{ display: 'grid', gap: 1 }}>
+                      <SpotlightBar label="Win Rate" value={spotlight.stats?.win_rate ?? 0} color="#22C55E" />
+                      <SpotlightBar label="Avg Rating" value={(spotlight.stats?.avg_rating ?? 0) * 10} color="#A855F7" />
+                      <SpotlightBar label="Goal Threat" value={Math.min((spotlight.stats?.goals_per_match ?? 0) * 28, 100)} color="#F59E0B" />
                     </Box>
+                    <Button
+                      size="small"
+                      endIcon={<ArrowForwardIcon />}
+                      onClick={() => router.push(`/players/${spotlight.player.id}`)}
+                      sx={{
+                        color: '#93C5FD',
+                        border: '1px solid rgba(147, 197, 253, 0.18)',
+                        bgcolor: 'rgba(147, 197, 253, 0.06)',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      View Profile
+                    </Button>
                   </Box>
                 </Box>
               ) : (

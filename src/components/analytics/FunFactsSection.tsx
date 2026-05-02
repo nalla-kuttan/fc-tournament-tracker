@@ -390,13 +390,28 @@ export default function FunFactsSection({ matches, goals, registeredPlayers, pla
         Records &amp; Milestones
       </Typography>
       <Box
-        className="hide-scrollbar"
         sx={{
           display: 'flex',
           gap: 1.5,
           overflowX: 'auto',
+          overflowY: 'hidden',
+          WebkitOverflowScrolling: 'touch',
+          overscrollBehaviorX: 'contain',
+          touchAction: 'pan-x',
+          scrollSnapType: 'x proximity',
           pb: 1,
           px: 0.5,
+          '&::-webkit-scrollbar': {
+            height: 6,
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'rgba(148, 163, 184, 0.06)',
+            borderRadius: 999,
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(34, 197, 94, 0.35)',
+            borderRadius: 999,
+          },
         }}
       >
         {facts.map((fact, idx) => (
