@@ -12,6 +12,7 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import GroupsIcon from '@mui/icons-material/Groups';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
@@ -43,6 +44,12 @@ const NAV_GROUPS = [
       { label: 'AI Analyst', path: '/analytics/ai', icon: <AutoAwesomeIcon /> },
     ],
   },
+  {
+    label: 'Competitive',
+    items: [
+      { label: 'Competitive', path: '/competitive', icon: <EmojiEventsIcon /> },
+    ],
+  },
 ];
 
 const MOBILE_NAV_ITEMS = [
@@ -52,6 +59,7 @@ const MOBILE_NAV_ITEMS = [
   { label: 'Analytics', path: '/analytics/global', icon: <AnalyticsIcon /> },
   { label: 'Leagues', path: '/analytics/league', icon: <TableChartIcon /> },
   { label: 'AI', path: '/analytics/ai', icon: <AutoAwesomeIcon /> },
+  { label: 'Comp', path: '/competitive', icon: <EmojiEventsIcon /> },
 ];
 
 function isActive(pathname: string, path: string, label: string) {
@@ -61,6 +69,7 @@ function isActive(pathname: string, path: string, label: string) {
   if (label === 'Analytics') return pathname === '/analytics/global';
   if (label === 'Leagues') return pathname.startsWith('/analytics/league');
   if (label === 'AI Analyst' || label === 'AI') return pathname.startsWith('/analytics/ai');
+  if (label === 'Competitive' || label === 'Comp') return pathname.startsWith('/competitive');
   return pathname === path;
 }
 

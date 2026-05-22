@@ -11,6 +11,17 @@ CREATE TABLE registered_player (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- SEASON (competitive era / campaign)
+CREATE TABLE season (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed', 'archived')),
+  starts_at TIMESTAMPTZ,
+  ends_at TIMESTAMPTZ,
+  source_tournament_id UUID UNIQUE,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- TOURNAMENT
 CREATE TABLE tournament (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -18,8 +29,11 @@ CREATE TABLE tournament (
   format TEXT NOT NULL CHECK (format IN ('league', 'knockout', 'cup')),
   pin TEXT NOT NULL, -- bcrypt hashed
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'active', 'completed')),
+  season_id UUID REFERENCES season(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+CREATE INDEX idx_tournament_season ON tournament(season_id);
 
 -- PLAYER (tournament-specific instance)
 CREATE TABLE player (
@@ -87,6 +101,7 @@ CREATE TABLE music_track (
 -- ============================================
 
 ALTER TABLE registered_player ENABLE ROW LEVEL SECURITY;
+ALTER TABLE season ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tournament ENABLE ROW LEVEL SECURITY;
 ALTER TABLE player ENABLE ROW LEVEL SECURITY;
 ALTER TABLE match ENABLE ROW LEVEL SECURITY;
@@ -95,6 +110,7 @@ ALTER TABLE music_track ENABLE ROW LEVEL SECURITY;
 
 -- Public read access (anyone with the link can view)
 CREATE POLICY "Public read" ON registered_player FOR SELECT USING (true);
+CREATE POLICY "Public read" ON season FOR SELECT USING (true);
 CREATE POLICY "Public read" ON tournament FOR SELECT USING (true);
 CREATE POLICY "Public read" ON player FOR SELECT USING (true);
 CREATE POLICY "Public read" ON match FOR SELECT USING (true);
@@ -110,6 +126,42 @@ CREATE POLICY "Public read" ON music_track FOR SELECT USING (true);
 ALTER PUBLICATION supabase_realtime ADD TABLE match;
 ALTER PUBLICATION supabase_realtime ADD TABLE goal;
 ALTER PUBLICATION supabase_realtime ADD TABLE player;
+ALTER PUBLICATION supabase_realtime ADD TABLE season;
+
+-- ============================================
+-- SEASON BACKFILL FOR EXISTING TOURNAMENTS
+-- ============================================
+
+WITH generated_seasons AS (
+  SELECT
+    gen_random_uuid() AS season_id,
+    t.id AS tournament_id,
+    t.name,
+    CASE
+      WHEN t.status = 'completed' THEN 'completed'
+      WHEN t.status = 'active' THEN 'active'
+      ELSE 'archived'
+    END AS season_status,
+    t.created_at
+  FROM tournament t
+  WHERE t.season_id IS NULL
+)
+INSERT INTO season (id, name, status, starts_at, ends_at, source_tournament_id, created_at)
+SELECT
+  season_id,
+  name,
+  season_status,
+  created_at,
+  CASE WHEN season_status = 'completed' THEN created_at ELSE NULL END,
+  tournament_id,
+  created_at
+FROM generated_seasons;
+
+UPDATE tournament t
+SET season_id = s.id
+FROM season s
+WHERE t.season_id IS NULL
+  AND s.source_tournament_id = t.id;
 
 -- ============================================
 -- STANDINGS VIEW

@@ -1,15 +1,25 @@
 import { NextResponse } from 'next/server';
 import { createServerClient, createAdminClient } from '@/lib/supabase/server';
 import { hashPin } from '@/lib/auth';
+import { rateLimit, readJsonBody } from '@/lib/api-guards';
 
 export async function GET() {
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from('tournament')
-    .select('id, name, format, status, created_at')
+    .select('id, name, format, status, season_id, created_at')
     .order('created_at', { ascending: false });
 
   if (error) {
+    const fallback = await supabase
+      .from('tournament')
+      .select('id, name, format, status, created_at')
+      .order('created_at', { ascending: false });
+
+    if (!fallback.error) {
+      return NextResponse.json(fallback.data);
+    }
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -18,7 +28,16 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { name, format, pin, playerSelections } = await request.json();
+    const limited = rateLimit(request, 'tournaments:create', 8);
+    if (limited) return limited;
+
+    const { name, format, pin, playerSelections, season_id } = await readJsonBody<{
+      name?: string;
+      format?: string;
+      pin?: string;
+      season_id?: string | null;
+      playerSelections?: Array<{ registered_player_id: string; name: string; team: string }>;
+    }>(request);
 
     if (!name || !format || !pin) {
       return NextResponse.json({ error: 'Name, format, and pin are required' }, { status: 400 });
@@ -30,13 +49,24 @@ export async function POST(request: Request) {
 
     const hashedPin = await hashPin(pin);
     const supabase = createAdminClient();
+    const seasonId = season_id ?? await getDefaultSeasonId(supabase);
 
     // Create tournament
-    const { data: tournament, error: tError } = await supabase
+    let insertResult = await supabase
       .from('tournament')
-      .insert({ name, format, pin: hashedPin })
+      .insert({ name: name.trim(), format, pin: hashedPin, season_id: seasonId })
       .select()
       .single();
+
+    if (insertResult.error && String(insertResult.error.message).includes('season_id')) {
+      insertResult = await supabase
+        .from('tournament')
+        .insert({ name: name.trim(), format, pin: hashedPin })
+        .select()
+        .single();
+    }
+
+    const { data: tournament, error: tError } = insertResult;
 
     if (tError) {
       return NextResponse.json({ error: tError.message }, { status: 500 });
@@ -45,11 +75,11 @@ export async function POST(request: Request) {
     // Add players if provided
     // playerSelections: [{registered_player_id, name, team}]
     if (playerSelections && playerSelections.length > 0) {
-      const playerRows = playerSelections.map((ps: { registered_player_id: string; name: string; team: string }, idx: number) => ({
+      const playerRows = playerSelections.map((ps, idx: number) => ({
         tournament_id: tournament.id,
         registered_player_id: ps.registered_player_id,
-        name: ps.name,
-        team: ps.team,
+        name: ps.name.trim(),
+        team: ps.team.trim(),
         seed: idx + 1,
       }));
 
@@ -64,4 +94,25 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
+}
+
+async function getDefaultSeasonId(supabase: ReturnType<typeof createAdminClient>) {
+  const { data: activeSeason } = await supabase
+    .from('season')
+    .select('id')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (activeSeason?.id) return activeSeason.id;
+
+  const { data: createdSeason, error } = await supabase
+    .from('season')
+    .insert({ name: 'Active Season', status: 'active', starts_at: new Date().toISOString() })
+    .select('id')
+    .single();
+
+  if (error) throw error;
+  return createdSeason.id;
 }
