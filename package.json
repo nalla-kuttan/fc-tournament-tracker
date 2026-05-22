@@ -7,7 +7,9 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "mac:dev": "./script/build_and_run.sh",
+    "mac:build": "cd macos && swift build"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
