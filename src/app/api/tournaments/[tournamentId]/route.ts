@@ -9,11 +9,21 @@ export async function GET(
   const { tournamentId } = await params;
   const supabase = createServerClient();
 
-  const { data: tournament, error } = await supabase
+  let tournamentResult = await supabase
     .from('tournament')
-    .select('id, name, format, status, created_at')
+    .select('id, name, format, status, season_id, created_at')
     .eq('id', tournamentId)
     .single();
+
+  if (tournamentResult.error && String(tournamentResult.error.message).includes('season_id')) {
+    tournamentResult = await supabase
+      .from('tournament')
+      .select('id, name, format, status, created_at')
+      .eq('id', tournamentId)
+      .single();
+  }
+
+  const { data: tournament, error } = tournamentResult;
 
   if (error || !tournament) {
     return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });

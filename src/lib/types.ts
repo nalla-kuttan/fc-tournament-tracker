@@ -8,6 +8,17 @@ export interface Tournament {
   format: 'league' | 'knockout' | 'cup';
   pin: string;
   status: 'draft' | 'active' | 'completed';
+  season_id?: string | null;
+  created_at: string;
+}
+
+export interface Season {
+  id: string;
+  name: string;
+  status: 'active' | 'completed' | 'archived';
+  starts_at: string | null;
+  ends_at: string | null;
+  source_tournament_id: string | null;
   created_at: string;
 }
 
@@ -48,6 +59,7 @@ export interface MatchStats {
 export interface Match {
   id: string;
   tournament_id: string;
+  season_id?: string | null;
   home_player_id: string | null;
   away_player_id: string | null;
   home_score: number | null;

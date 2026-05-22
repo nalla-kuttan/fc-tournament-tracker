@@ -16,6 +16,8 @@ import Button from '@mui/material/Button';
 import DescriptionIcon from '@mui/icons-material/Description';
 import EditIcon from '@mui/icons-material/Edit';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
 import Alert from '@mui/material/Alert';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -29,6 +31,7 @@ import ArchetypeIcon, { getArchetypeMeta } from '@/components/player/ArchetypeIc
 import AIScoutModal from '@/components/ai/AIScoutModal';
 import BackButton from '@/components/shared/BackButton';
 import type { CareerStats, Match, RegisteredPlayer } from '@/lib/types';
+import type { CompetitiveRatingRow, CompetitiveRecords } from '@/lib/competitive';
 import { TEAMS } from '@/lib/constants';
 import { getPlayerImagePath } from '@/lib/player-images';
 import {
@@ -45,6 +48,12 @@ const WDLDoughnut = dynamic(() => import('@/components/analytics/WDLDoughnut'), 
 const SingleRadarChart = dynamic(() => import('@/components/analytics/SingleRadarChart'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
 const FormMomentumChart = dynamic(() => import('@/components/analytics/FormMomentumChart'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
 
+interface CompetitiveOverviewLite {
+  allTimeRatings: CompetitiveRatingRow[];
+  seasonRatings: CompetitiveRatingRow[];
+  records: CompetitiveRecords;
+}
+
 export default function PlayerProfilePage() {
   const params = useParams();
   const router = useRouter();
@@ -60,6 +69,7 @@ export default function PlayerProfilePage() {
   const { data: player, isLoading: loadingPlayer, mutate: mutatePlayer } = useSWR<RegisteredPlayer & { participations?: { tournament: { id: string; name: string; format: string; status: string } }[] }>(`/api/players/${playerId}`, fetcher);
   const { data: statsData, isLoading: loadingStats } = useSWR<{ stats: CareerStats, matches: Match[], playerIds: string[] }>(`/api/players/${playerId}/stats`, fetcher);
   const { data: players = [] } = useSWR<RegisteredPlayer[]>('/api/players', fetcher);
+  const { data: competitive } = useSWR<CompetitiveOverviewLite>('/api/competitive/overview', fetcher);
 
   const loading = loadingPlayer || loadingStats;
   const stats = statsData?.stats || null;
@@ -70,6 +80,9 @@ export default function PlayerProfilePage() {
   const highlights = useMemo(() => (stats ? getPlayerHighlights(stats, matches, playerIdSet) : []), [matches, playerIdSet, stats]);
   const matchInsights = useMemo(() => getPlayerMatchInsights(matches, playerIdSet), [matches, playerIdSet]);
   const teamHistory = useMemo(() => getTeamHistory(matches, playerIdSet), [matches, playerIdSet]);
+  const allTimeRating = competitive?.allTimeRatings.find((row) => row.player.id === playerId);
+  const seasonRating = competitive?.seasonRatings.find((row) => row.player.id === playerId);
+  const trophyRow = competitive?.records.trophyCabinet.find((row) => row.player.id === playerId);
   const rivals = players.filter((p) => p.id !== playerId);
 
   const openEdit = () => {
@@ -327,6 +340,71 @@ export default function PlayerProfilePage() {
                 </GlassCard>
               </Grid>
             ))}
+          </Grid>
+        </Box>
+      )}
+
+      {/* Competitive Legacy */}
+      {(allTimeRating || seasonRating || trophyRow) && (
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+            Competitive Legacy
+          </Typography>
+          <Grid container spacing={2}>
+            {allTimeRating && (
+              <Grid size={{ xs: 12, md: 4 }}>
+                <GlassCard sx={{ height: '100%' }}>
+                  <CardContent sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+                    <ShowChartIcon sx={{ color: '#4ADE80', fontSize: 36 }} />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" textTransform="uppercase">
+                        All-Time Rating
+                      </Typography>
+                      <Typography variant="h5" fontWeight={900}>{allTimeRating.rating}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Rank #{allTimeRating.rank} · peak {allTimeRating.peakRating}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </GlassCard>
+              </Grid>
+            )}
+            {seasonRating && (
+              <Grid size={{ xs: 12, md: 4 }}>
+                <GlassCard sx={{ height: '100%' }}>
+                  <CardContent sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+                    <ShowChartIcon sx={{ color: '#60A5FA', fontSize: 36 }} />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" textTransform="uppercase">
+                        Season Rating
+                      </Typography>
+                      <Typography variant="h5" fontWeight={900}>{seasonRating.rating}</Typography>
+                      <Typography variant="caption" color={seasonRating.movement >= 0 ? '#4ADE80' : '#F87171'}>
+                        {seasonRating.movement >= 0 ? '+' : ''}{seasonRating.movement} latest movement
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </GlassCard>
+              </Grid>
+            )}
+            {trophyRow && (
+              <Grid size={{ xs: 12, md: 4 }}>
+                <GlassCard sx={{ height: '100%' }}>
+                  <CardContent sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+                    <EmojiEventsIcon sx={{ color: '#F59E0B', fontSize: 36 }} />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" textTransform="uppercase">
+                        Trophy Cabinet
+                      </Typography>
+                      <Typography variant="h5" fontWeight={900}>{trophyRow.titles} titles</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {trophyRow.finals} finals · {trophyRow.runnerUps} runner-up
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </GlassCard>
+              </Grid>
+            )}
           </Grid>
         </Box>
       )}

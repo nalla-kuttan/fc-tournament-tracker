@@ -6,6 +6,8 @@ import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import { motion } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
+import { getMatchIntelligenceLabels } from '@/lib/competitive';
+import type { Match, MatchStats } from '@/lib/types';
 
 const MotionBox = motion.create(Box);
 
@@ -21,12 +23,31 @@ interface MatchCardProps {
     is_bye: boolean;
     round_number: number;
     stage: string | null;
+    stats?: MatchStats;
   };
   index?: number;
 }
 
 export default function MatchCard({ match, index = 0 }: MatchCardProps) {
   const router = useRouter();
+  const intelligenceMatch: Match = {
+    id: match.id,
+    tournament_id: match.tournament_id,
+    home_player_id: match.home_player?.id ?? null,
+    away_player_id: match.away_player?.id ?? null,
+    home_score: match.home_score,
+    away_score: match.away_score,
+    round_number: match.round_number,
+    match_number: 0,
+    stage: match.stage,
+    is_played: match.is_played,
+    is_bye: match.is_bye,
+    stats: match.stats ?? {},
+    match_order: null,
+    played_at: null,
+    created_at: '',
+  };
+  const intelligenceLabel = match.is_played ? getMatchIntelligenceLabels(intelligenceMatch)[0] : null;
 
   if (match.is_bye) {
     return (
@@ -154,6 +175,22 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
             ml: 1,
             border: '1px solid rgba(59, 130, 246, 0.15)',
             letterSpacing: '0.02em',
+          }}
+        />
+      )}
+      {intelligenceLabel && (
+        <Chip
+          label={intelligenceLabel.label}
+          size="small"
+          sx={{
+            display: { xs: 'none', sm: 'inline-flex' },
+            bgcolor: 'rgba(245, 158, 11, 0.12)',
+            color: '#FBBF24',
+            fontWeight: 700,
+            fontSize: '0.65rem',
+            height: 22,
+            ml: 1,
+            border: '1px solid rgba(245, 158, 11, 0.18)',
           }}
         />
       )}

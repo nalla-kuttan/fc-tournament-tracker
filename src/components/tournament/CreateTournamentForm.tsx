@@ -13,6 +13,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
@@ -27,7 +28,7 @@ import StadiumIcon from '@mui/icons-material/Stadium';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import { TEAMS } from '@/lib/constants';
-import type { RegisteredPlayer } from '@/lib/types';
+import type { RegisteredPlayer, Season } from '@/lib/types';
 
 const STEPS = ['Tournament Info', 'Select Players', 'Set Admin PIN'];
 
@@ -38,6 +39,8 @@ export default function CreateTournamentForm() {
   const [format, setFormat] = useState<string>('league');
   const [pin, setPin] = useState('');
   const [pinConfirm, setPinConfirm] = useState('');
+  const [seasons, setSeasons] = useState<Season[]>([]);
+  const [seasonId, setSeasonId] = useState('');
   const [registeredPlayers, setRegisteredPlayers] = useState<RegisteredPlayer[]>([]);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<Set<string>>(new Set());
   const [teamOverrides, setTeamOverrides] = useState<Record<string, string>>({});
@@ -83,6 +86,15 @@ export default function CreateTournamentForm() {
       .then((r) => r.json())
       .then((data) => setRegisteredPlayers(data))
       .catch(() => { });
+
+    fetch('/api/seasons')
+      .then((r) => r.json())
+      .then((data: Season[]) => {
+        setSeasons(data);
+        const active = data.find((season) => season.status === 'active') ?? data[0];
+        if (active) setSeasonId(active.id);
+      })
+      .catch(() => { });
   }, []);
 
   const togglePlayer = (id: string) => {
@@ -119,7 +131,7 @@ export default function CreateTournamentForm() {
       const res = await fetch('/api/tournaments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, format, pin, playerSelections }),
+        body: JSON.stringify({ name, format, pin, season_id: seasonId || null, playerSelections }),
       });
 
       if (!res.ok) {
@@ -164,6 +176,23 @@ export default function CreateTournamentForm() {
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. FC 26 Championship"
             />
+            {seasons.length > 0 && (
+              <TextField
+                id="create-tournament-season"
+                label="Season"
+                select
+                fullWidth
+                value={seasonId}
+                onChange={(e) => setSeasonId(e.target.value)}
+                helperText="New tournaments default to the active competitive season."
+              >
+                {seasons.map((season) => (
+                  <MenuItem key={season.id} value={season.id}>
+                    {season.name} ({season.status})
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
             <Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 Format
