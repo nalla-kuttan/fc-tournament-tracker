@@ -19,7 +19,7 @@ interface Props {
   accentColor?: string;
 }
 
-const MEDAL_COLORS = ['#FF9F0A', '#c0c0c0', '#cd7f32'];
+const MEDAL_COLORS = ['#F59E0B', '#c0c0c0', '#cd7f32'];
 
 export default function StatLeaderboard({ title, entries, valueLabel, accentColor = '#22C55E' }: Props) {
   if (entries.length === 0) return null;

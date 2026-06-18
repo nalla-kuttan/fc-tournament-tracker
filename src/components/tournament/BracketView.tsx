@@ -66,7 +66,7 @@ function MatchSlot({
         transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': onClick ? {
           borderColor: 'rgba(34, 197, 94, 0.2)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+          boxShadow: '0 4px 16px rgba(2, 6, 23, 0.3)',
         } : {},
       }}
     >

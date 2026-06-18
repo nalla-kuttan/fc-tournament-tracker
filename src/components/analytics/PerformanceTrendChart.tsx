@@ -19,11 +19,11 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip,
 
 const PLAYER_COLORS = [
   '#22C55E',
-  '#BF5AF2',
-  '#FF9F0A',
-  '#34C759',
-  '#FF3B30',
-  '#5AC8FA',
+  '#3B82F6',
+  '#F59E0B',
+  '#22C55E',
+  '#EF4444',
+  '#60A5FA',
 ];
 
 interface PlayerInstance {
@@ -121,7 +121,7 @@ export default function PerformanceTrendChart({ matches, registeredPlayers, play
       legend: {
         position: 'bottom' as const,
         labels: {
-          color: '#FFFFFF',
+          color: '#F8FAFC',
           padding: 16,
           usePointStyle: true,
           pointStyle: 'circle' as const,
@@ -136,7 +136,7 @@ export default function PerformanceTrendChart({ matches, registeredPlayers, play
       y: {
         min: 0,
         max: 10,
-        grid: { color: 'rgba(255,255,255,0.06)' },
+        grid: { color: 'rgba(148, 163, 184, 0.08)' },
         ticks: { color: '#64748B' },
         title: {
           display: true,
@@ -145,7 +145,7 @@ export default function PerformanceTrendChart({ matches, registeredPlayers, play
         },
       },
       x: {
-        grid: { color: 'rgba(255,255,255,0.06)' },
+        grid: { color: 'rgba(148, 163, 184, 0.08)' },
         ticks: { color: '#64748B', maxRotation: 45 },
       },
     },

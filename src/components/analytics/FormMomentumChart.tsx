@@ -100,11 +100,11 @@ export default function FormMomentumChart({ matches, playerIds, title }: Props) 
       y: {
         min: 0,
         max: 10,
-        grid: { color: 'rgba(255,255,255,0.06)' },
+        grid: { color: 'rgba(148, 163, 184, 0.08)' },
         ticks: { color: '#64748B' },
       },
       x: {
-        grid: { color: 'rgba(255,255,255,0.06)' },
+        grid: { color: 'rgba(148, 163, 184, 0.08)' },
         ticks: { color: '#64748B', maxRotation: 45 },
       },
     },

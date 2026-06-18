@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-18T07:26:23Z",
+  "title": "Design System: FC Tournament Tracker",
+  "extensions": {
+    "colorMeta": {
+      "pitch-black": {
+        "role": "neutral",
+        "displayName": "Stadium Black",
+        "canonical": "#020617",
+        "tonalRamp": ["oklch(12% 0.03 260)", "oklch(20% 0.03 260)", "oklch(30% 0.03 260)", "oklch(42% 0.03 260)", "oklch(55% 0.03 260)", "oklch(68% 0.03 260)", "oklch(82% 0.03 260)", "oklch(94% 0.03 260)"]
+      },
+      "panel-slate": {
+        "role": "neutral",
+        "displayName": "Panel Slate",
+        "canonical": "#0F172A",
+        "tonalRamp": ["oklch(15% 0.035 260)", "oklch(24% 0.035 260)", "oklch(34% 0.035 260)", "oklch(46% 0.035 260)", "oklch(58% 0.035 260)", "oklch(70% 0.035 260)", "oklch(84% 0.035 260)", "oklch(95% 0.035 260)"]
+      },
+      "primary-green": {
+        "role": "primary",
+        "displayName": "Pitchline Green",
+        "canonical": "#22C55E",
+        "tonalRamp": ["oklch(18% 0.12 150)", "oklch(28% 0.14 150)", "oklch(40% 0.16 150)", "oklch(52% 0.18 150)", "oklch(64% 0.19 150)", "oklch(74% 0.16 150)", "oklch(84% 0.11 150)", "oklch(94% 0.06 150)"]
+      },
+      "electric-blue": {
+        "role": "secondary",
+        "displayName": "Analyst Blue",
+        "canonical": "#3B82F6",
+        "tonalRamp": ["oklch(18% 0.12 260)", "oklch(28% 0.15 260)", "oklch(40% 0.18 260)", "oklch(52% 0.2 260)", "oklch(64% 0.18 260)", "oklch(74% 0.14 260)", "oklch(84% 0.09 260)", "oklch(94% 0.05 260)"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Route titles and major player or tournament identity."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Explanatory copy, empty states, AI narrative, and help text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Dense stat labels, table heads, chips, and navigation groups."
+      }
+    },
+    "shadows": [
+      {
+        "name": "panel-ambient",
+        "value": "0 4px 24px rgba(0, 0, 0, 0.3)",
+        "purpose": "Default separation for cards and paper surfaces."
+      },
+      {
+        "name": "panel-lift",
+        "value": "0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(34, 197, 94, 0.1)",
+        "purpose": "Hover and selected surfaces."
+      },
+      {
+        "name": "dialog-stage",
+        "value": "0 24px 64px rgba(0, 0, 0, 0.5)",
+        "purpose": "Dialogs and high-priority overlays."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-fast",
+        "value": "150ms ease",
+        "purpose": "List-row hover and quick feedback."
+      },
+      {
+        "name": "state-standard",
+        "value": "200ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Buttons, inputs, tabs, and active state changes."
+      },
+      {
+        "name": "surface-lift",
+        "value": "250ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Card hover and surface elevation changes."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "0px"
+      },
+      {
+        "name": "desktop-sidebar",
+        "value": "1200px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main action control for creation, saving, generating schedules, and confirming competitive flows.",
+      "html": "<button class=\"ds-btn-primary\">Create Tournament</button>",
+      "css": ".ds-btn-primary { font-family: Chakra Petch, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; font-weight: 600; font-size: 0.9375rem; color: #fff; background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); border: 0; border-radius: 12px; padding: 10px 24px; box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25); transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1), background 200ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background: linear-gradient(135deg, #4ADE80 0%, #22C55E 100%); box-shadow: 0 8px 24px rgba(34, 197, 94, 0.35); transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 3px solid rgba(34, 197, 94, 0.32); outline-offset: 2px; } .ds-btn-primary:active { transform: scale(0.97); }"
+    },
+    {
+      "name": "Outlined Button",
+      "kind": "button",
+      "refersTo": "button-outlined",
+      "description": "Secondary action control for alternate tournament or navigation choices.",
+      "html": "<button class=\"ds-btn-outlined\">View Standings</button>",
+      "css": ".ds-btn-outlined { font-family: Chakra Petch, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; font-weight: 600; font-size: 0.9375rem; color: #F8FAFC; background: transparent; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 12px; padding: 10px 24px; transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1), border-color 200ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-outlined:hover { border-color: #22C55E; background: rgba(34, 197, 94, 0.05); } .ds-btn-outlined:focus-visible { outline: 3px solid rgba(34, 197, 94, 0.25); outline-offset: 2px; }"
+    },
+    {
+      "name": "Glass Card",
+      "kind": "card",
+      "refersTo": "card-glass",
+      "description": "Default slate glass container for tournament cards, stat modules, analytics panels, and player summaries.",
+      "html": "<article class=\"ds-card\"><p class=\"ds-card-kicker\">Current Leader</p><h3>Ruban FC</h3><p>Top of the table with a +9 goal difference.</p></article>",
+      "css": ".ds-card { font-family: Chakra Petch, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; color: #F8FAFC; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(148, 163, 184, 0.08); border-radius: 16px; padding: 16px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3); backdrop-filter: blur(16px); transition: border-color 250ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1), transform 250ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-card:hover { border-color: rgba(34, 197, 94, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(34, 197, 94, 0.1); transform: translateY(-2px); } .ds-card h3 { margin: 0 0 6px; font-size: 1.1rem; } .ds-card p { margin: 0; color: #94A3B8; line-height: 1.5; } .ds-card .ds-card-kicker { margin-bottom: 8px; color: #4ADE80; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Dark slate input for PINs, player names, teams, and match result forms.",
+      "html": "<label class=\"ds-field\"><span>Player name</span><input placeholder=\"Enter player\" /></label>",
+      "css": ".ds-field { display: grid; gap: 6px; font-family: Chakra Petch, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; color: #F8FAFC; } .ds-field span { font-size: 0.8125rem; font-weight: 700; color: #94A3B8; } .ds-field input { color: #F8FAFC; background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(148, 163, 184, 0.12); border-radius: 12px; padding: 12px 16px; font: inherit; transition: border-color 200ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-field input::placeholder { color: #64748B; opacity: 1; } .ds-field input:hover { border-color: rgba(148, 163, 184, 0.25); } .ds-field input:focus { outline: none; border-color: #22C55E; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1); }"
+    },
+    {
+      "name": "Sidebar Navigation Item",
+      "kind": "nav",
+      "refersTo": "navigation-active",
+      "description": "Desktop navigation item with clear selected state for app sections.",
+      "html": "<button class=\"ds-nav-item ds-nav-item-active\"><span>⚽</span><strong>Competitive</strong></button>",
+      "css": ".ds-nav-item { width: 100%; display: flex; align-items: center; gap: 10px; font-family: Chakra Petch, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; font-size: 0.9rem; font-weight: 700; color: #B7C4D6; background: transparent; border: 1px solid transparent; border-radius: 10px; padding: 10px; text-align: left; transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1), border-color 200ms cubic-bezier(0.4, 0, 0.2, 1), color 200ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-nav-item:hover { background: rgba(148, 163, 184, 0.07); } .ds-nav-item:focus-visible { outline: 3px solid rgba(34, 197, 94, 0.25); outline-offset: 2px; } .ds-nav-item-active { color: #ECFDF5; background: rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.55); box-shadow: inset 4px 0 0 rgba(74, 222, 128, 0.9), 0 0 22px rgba(34, 197, 94, 0.13); } .ds-nav-item span { color: #4ADE80; }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "chip-selected",
+      "description": "Compact state or filter pill for formats, awards, selected players, and match metadata.",
+      "html": "<span class=\"ds-chip\">Group Stage</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; min-height: 28px; padding: 4px 10px; font-family: Chakra Petch, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.02em; color: #F8FAFC; background: rgba(148, 163, 184, 0.08); border: 1px solid rgba(148, 163, 184, 0.12); border-radius: 999px; backdrop-filter: blur(8px); } .ds-chip:hover { border-color: rgba(34, 197, 94, 0.35); color: #4ADE80; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Match-Night Control Room",
+    "overview": "FC Tournament Tracker should feel like a private competitive command center for a friend group: dark, focused, energetic, and exact. The system uses a deep navy-black field, electric pitch-green state color, and compact technical typography to make tournaments feel live without turning every screen into decoration.\n\nThe interface is product-first. Tables, forms, standings, brackets, player cards, and analytics panels must be readable under match-night pressure. The visual drama comes from hierarchy, ranking, current state, rivalry context, and selective glow, not from generic esports clutter.",
+    "keyCharacteristics": [
+      "Dark OLED-style surfaces with layered slate panels.",
+      "Primary green reserved for action, selection, success, and live competitive status.",
+      "Electric blue used as a secondary analytical accent, never as a competing CTA.",
+      "Chakra Petch across the product for a technical match-broadcast voice.",
+      "Glass and glow used sparingly to separate active surfaces from dense data."
+    ],
+    "rules": [
+      {
+        "name": "The Green Means Action Rule",
+        "body": "Pitchline Green is reserved for actions, active state, success, and live competitive meaning. Never spray it across inactive decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Generic Dashboard Rule",
+        "body": "Do not reduce the palette to interchangeable dark cards and blue charts. Every highlight must explain a tournament, rivalry, form, or match state.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Chakra Petch owns the interface. Do not add a second decorative font unless a future redesign deliberately replaces the whole type system.",
+        "section": "typography"
+      },
+      {
+        "name": "The Data First Rule",
+        "body": "Dense labels can be small, but scores, ranks, standings, and form indicators must remain optically louder than surrounding chrome.",
+        "section": "typography"
+      },
+      {
+        "name": "The State Earns Glow Rule",
+        "body": "Glow belongs to active, hover, focus, selected, success, or primary action states. Static ornament glow is prohibited.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve the competitive control-room atmosphere: Stadium Black, Panel Slate, Pitchline Green, and Chakra Petch are the core identity.",
+      "Do use green to clarify actions, active state, success, rankings, and live competitive meaning.",
+      "Do make standings, scores, records, and form indicators louder than decorative chrome.",
+      "Do pair color-coded status with labels, icons, order, or copy so the meaning survives color-blindness and low contrast.",
+      "Do respect reduced motion; glow and reveal effects must have non-disruptive alternatives."
+    ],
+    "donts": [
+      "Don't let the app feel generic.",
+      "Don't use anonymous SaaS dashboard patterns, bland chart panels, or interchangeable card grids.",
+      "Don't use decorative esports styling that does not help users understand tournaments, rivalries, form, or match state.",
+      "Don't add gradient text or colored side-stripe borders.",
+      "Don't use static glassmorphism as filler. Glass is allowed only when it improves hierarchy, separation, or active context."
+    ]
+  }
+}

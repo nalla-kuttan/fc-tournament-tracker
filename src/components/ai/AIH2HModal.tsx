@@ -69,7 +69,7 @@ export default function AIH2HModal({
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <CompareArrowsIcon sx={{ color: '#34C759' }} />
+                <CompareArrowsIcon sx={{ color: '#22C55E' }} />
                 <Typography variant="h6" fontWeight={700}>
                     AI Rivalry Analyst
                 </Typography>
@@ -77,7 +77,7 @@ export default function AIH2HModal({
             <DialogContent dividers>
                 {loading ? (
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4, gap: 2 }}>
-                        <CircularProgress sx={{ color: '#34C759' }} />
+                        <CircularProgress sx={{ color: '#22C55E' }} />
                         <Typography variant="body2" color="text.secondary">
                             Analyzing the rivalry...
                         </Typography>
@@ -105,7 +105,7 @@ export default function AIH2HModal({
                     onClick={generateAnalysis}
                     disabled={loading}
                     variant="contained"
-                    sx={{ bgcolor: '#34C759', '&:hover': { bgcolor: '#2aa649' } }}
+                    sx={{ bgcolor: '#22C55E', '&:hover': { bgcolor: '#2aa649' } }}
                 >
                     Regenerate
                 </Button>

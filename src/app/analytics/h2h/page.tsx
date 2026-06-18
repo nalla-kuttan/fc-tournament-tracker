@@ -115,7 +115,7 @@ function H2HPageContent() {
             variant="outlined"
             onClick={() => setH2hModalOpen(true)}
             startIcon={<AutoAwesomeIcon />}
-            sx={{ color: '#34C759', borderColor: 'rgba(52,199,89,0.5)', '&:hover': { borderColor: '#34C759', bgcolor: 'rgba(52,199,89,0.1)' } }}
+            sx={{ color: '#22C55E', borderColor: 'rgba(34,197,94,0.5)', '&:hover': { borderColor: '#22C55E', bgcolor: 'rgba(34,197,94,0.1)' } }}
           >
             AI Analyst
           </Button>

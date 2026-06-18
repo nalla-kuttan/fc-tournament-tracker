@@ -265,7 +265,7 @@ export default function LeagueAnalyticsPage() {
                         display: 'flex',
                         py: 1,
                         borderBottom: '1px solid rgba(255,255,255,0.04)',
-                        '&:hover': { bgcolor: 'rgba(0,212,255,0.04)' },
+                        '&:hover': { bgcolor: 'rgba(59,130,246,0.04)' },
                       }}
                     >
                       <Box sx={{ width: 120, flexShrink: 0, px: 0.5 }}>
@@ -309,7 +309,7 @@ export default function LeagueAnalyticsPage() {
                 title="Top Scorers"
                 valueLabel="Goals"
                 entries={toLeaderboard(data.top_scorers, (s) => String(s.goals))}
-                accentColor="#34C759"
+                accentColor="#22C55E"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -317,7 +317,7 @@ export default function LeagueAnalyticsPage() {
                 title="Win Rate"
                 valueLabel="Rate"
                 entries={toLeaderboard(data.win_rate_rankings, (s) => `${s.win_rate.toFixed(0)}%`)}
-                accentColor="#FF9F0A"
+                accentColor="#F59E0B"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -333,7 +333,7 @@ export default function LeagueAnalyticsPage() {
                 title="Avg xG"
                 valueLabel="xG"
                 entries={toLeaderboard(data.xg_rankings, (s) => s.avg_xg.toFixed(2))}
-                accentColor="#BF5AF2"
+                accentColor="#3B82F6"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -349,7 +349,7 @@ export default function LeagueAnalyticsPage() {
                 title="Avg Rating"
                 valueLabel="Rtg"
                 entries={toLeaderboard(data.rating_rankings, (s) => s.avg_rating.toFixed(1))}
-                accentColor="#FF9F0A"
+                accentColor="#F59E0B"
               />
             </Grid>
           </Grid>

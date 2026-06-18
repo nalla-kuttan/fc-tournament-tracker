@@ -124,7 +124,7 @@ a {
 
 .glass-card:hover {
   border-color: rgba(34, 197, 94, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(34, 197, 94, 0.08);
+  box-shadow: 0 8px 32px rgba(2, 6, 23, 0.3), 0 0 0 1px rgba(34, 197, 94, 0.08);
 }
 
 /* ─── List Row Hover ─── */
@@ -150,7 +150,7 @@ a {
 
 .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.3);
 }
 
 /* ─── Custom Scrollbar ─── */
@@ -166,7 +166,7 @@ a {
 
 ::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.15);
-  border-radius: 3px;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -187,15 +187,6 @@ a {
 
 .text-glow {
   text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
-}
-
-/* ─── Gradient Text ─── */
-
-.gradient-text {
-  background: linear-gradient(135deg, #22C55E 0%, #3B82F6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* ─── Reduced Motion ─── */

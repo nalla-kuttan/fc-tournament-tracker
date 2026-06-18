@@ -121,7 +121,7 @@ export default function PlayersPage() {
               border: '1px solid rgba(34, 197, 94, 0.2)',
               borderRadius: '16px',
               padding: '12px 24px',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 8px 32px rgba(2, 6, 23, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
               transformStyle: 'preserve-3d',
             }}
           >

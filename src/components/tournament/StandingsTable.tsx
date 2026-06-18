@@ -21,14 +21,14 @@ function FormDot({ result }: { result: 'W' | 'D' | 'L' }) {
       sx={{
         width: 22,
         height: 22,
-        borderRadius: '6px',
+        borderRadius: '10px',
         bgcolor: FORM_COLORS[result],
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: 10,
         fontWeight: 700,
-        color: '#fff',
+        color: '#F8FAFC',
         boxShadow: `0 2px 4px ${FORM_COLORS[result]}30`,
         transition: 'transform 150ms ease',
       }}

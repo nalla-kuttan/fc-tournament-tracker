@@ -131,6 +131,41 @@ export default function GlobalAnalyticsPage() {
     () => data ? getUpsets(filteredMatches, data.registered_players, data.player_instances) : [],
     [data, filteredMatches]
   );
+  const latestMatch = useMemo(
+    () => [...filteredMatches].filter((match) => match.is_played && !match.is_bye).sort((a, b) => (b.played_at ?? '').localeCompare(a.played_at ?? ''))[0],
+    [filteredMatches]
+  );
+  const topStoryCards = useMemo(() => {
+    const powerLeader = powerRankings[0];
+    const formLeader = formRankings[0];
+    const topScorer = filteredStats.slice().sort((a, b) => b.total_goals - a.total_goals)[0];
+    return [
+      {
+        label: 'Control Room Read',
+        value: powerLeader?.player.name ?? '-',
+        detail: powerLeader ? `${powerLeader.rating} power rating` : 'No power ranking yet',
+        color: '#3B82F6',
+      },
+      {
+        label: 'Hot Form',
+        value: formLeader?.player.name ?? '-',
+        detail: formLeader?.form.length ? `Last five: ${formLeader.form.join('')}` : 'No recent run yet',
+        color: '#22C55E',
+      },
+      {
+        label: 'Goal Threat',
+        value: topScorer?.player_name ?? '-',
+        detail: topScorer ? `${topScorer.total_goals} career goals` : 'No goals recorded',
+        color: '#F59E0B',
+      },
+      {
+        label: 'Latest Result',
+        value: latestMatch ? `${latestMatch.home_score}-${latestMatch.away_score}` : '-',
+        detail: latestMatch ? `${latestMatch.home_player?.name ?? 'Home'} vs ${latestMatch.away_player?.name ?? 'Away'}` : 'No played match in this lens',
+        color: '#94A3B8',
+      },
+    ];
+  }, [filteredStats, formRankings, latestMatch, powerRankings]);
 
   if (loading) {
     return (
@@ -203,6 +238,47 @@ export default function GlobalAnalyticsPage() {
         <Chip size="small" label={`${filteredStats.length} ranked players`} />
       </Box>
 
+      <GlassCard sx={{ mb: 3 }}>
+        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, gap: 2, flexDirection: { xs: 'column', md: 'row' }, mb: 2 }}>
+            <Box>
+              <Typography variant="h6" fontWeight={800}>
+                What matters now
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Current read for this analytics lens before the deep tables.
+              </Typography>
+            </Box>
+            <Chip size="small" label={format === 'all' ? 'All formats' : format} sx={{ color: '#22C55E', borderColor: 'rgba(34, 197, 94, 0.24)' }} />
+          </Box>
+          <Grid container spacing={1.5}>
+            {topStoryCards.map((card) => (
+              <Grid key={card.label} size={{ xs: 12, sm: 6, md: 3 }}>
+                <Box
+                  sx={{
+                    p: 1.5,
+                    height: '100%',
+                    borderRadius: '12px',
+                    bgcolor: 'rgba(2, 6, 23, 0.32)',
+                    border: '1px solid rgba(148, 163, 184, 0.1)',
+                  }}
+                >
+                  <Typography variant="caption" sx={{ color: '#94A3B8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    {card.label}
+                  </Typography>
+                  <Typography variant="h6" fontWeight={900} noWrap sx={{ mt: 0.5, color: card.color }}>
+                    {card.value}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }} noWrap>
+                    {card.detail}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </CardContent>
+      </GlassCard>
+
       {/* Season Awards */}
       <SeasonAwards stats={filteredStats} />
 
@@ -217,7 +293,7 @@ export default function GlobalAnalyticsPage() {
               team: row.player.base_team,
               value: String(row.rating),
             }))}
-            accentColor="#A855F7"
+            accentColor="#3B82F6"
           />
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
@@ -286,7 +362,7 @@ export default function GlobalAnalyticsPage() {
                       display: 'flex',
                       py: 1,
                       borderBottom: '1px solid rgba(255,255,255,0.04)',
-                      '&:hover': { bgcolor: 'rgba(0,212,255,0.04)' },
+                      '&:hover': { bgcolor: 'rgba(59,130,246,0.04)' },
                     }}
                   >
                     <Box sx={{ width: 140, flexShrink: 0, px: 0.5 }}>
@@ -330,7 +406,7 @@ export default function GlobalAnalyticsPage() {
             title="Top Scorers"
             valueLabel="Goals"
             entries={toLeaderboard(data.top_scorers, (s) => String(s.total_goals))}
-            accentColor="#34C759"
+            accentColor="#22C55E"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -338,7 +414,7 @@ export default function GlobalAnalyticsPage() {
             title="Win Rate"
             valueLabel="Rate"
             entries={toLeaderboard(data.win_rate_rankings, (s) => `${s.win_rate.toFixed(0)}%`)}
-            accentColor="#FF9F0A"
+            accentColor="#F59E0B"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -354,7 +430,7 @@ export default function GlobalAnalyticsPage() {
             title="Avg xG"
             valueLabel="xG"
             entries={toLeaderboard(data.xg_rankings, (s) => s.avg_xg.toFixed(2))}
-            accentColor="#BF5AF2"
+            accentColor="#3B82F6"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -370,7 +446,7 @@ export default function GlobalAnalyticsPage() {
             title="Avg Rating"
             valueLabel="Rtg"
             entries={toLeaderboard(data.rating_rankings, (s) => s.avg_rating.toFixed(1))}
-            accentColor="#FF9F0A"
+            accentColor="#F59E0B"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -378,7 +454,7 @@ export default function GlobalAnalyticsPage() {
             title="Clean Sheets"
             valueLabel="CS"
             entries={toLeaderboard(data.clean_sheet_rankings, (s) => String(s.clean_sheets))}
-            accentColor="#34C759"
+            accentColor="#22C55E"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -386,7 +462,7 @@ export default function GlobalAnalyticsPage() {
             title="MOTM Awards"
             valueLabel="Awards"
             entries={toLeaderboard(data.motm_rankings, (s) => String(s.motm_awards))}
-            accentColor="#FF9F0A"
+            accentColor="#F59E0B"
           />
         </Grid>
       </Grid>

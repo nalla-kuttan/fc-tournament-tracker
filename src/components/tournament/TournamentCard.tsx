@@ -23,8 +23,8 @@ const FORMAT_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: 
     bg: 'rgba(245, 158, 11, 0.1)',
   },
   cup: {
-    icon: <MilitaryTechIcon sx={{ fontSize: 22, color: '#A855F7' }} />,
-    color: '#A855F7',
+    icon: <MilitaryTechIcon sx={{ fontSize: 22, color: '#3B82F6' }} />,
+    color: '#3B82F6',
     bg: 'rgba(168, 85, 247, 0.1)',
   },
 };
@@ -101,7 +101,7 @@ export default function TournamentCard({ tournament, showDivider = true, index =
           }}
         />
 
-        <ChevronRightIcon sx={{ color: '#334155', fontSize: 20 }} />
+        <ChevronRightIcon sx={{ color: '#64748B', fontSize: 20 }} />
       </Box>
     </Box>
   );

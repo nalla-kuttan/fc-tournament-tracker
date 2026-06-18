@@ -6,7 +6,7 @@ import SvgIcon from '@mui/material/SvgIcon';
 
 const ARCHETYPE_META: Record<string, { color: string; label: string; path: string }> = {
   'New Prospect': {
-    color: '#38BDF8',
+    color: '#60A5FA',
     label: 'New Prospect',
     path: 'M12 2 7.5 8.5 3 10l3.2 2.5L5 17l4.5-1.2L12 21l2.5-5.2L19 17l-1.2-4.5L21 10l-4.5-1.5L12 2Zm0 4.1 2.5 3.7 3 .9-2.4 1.9.8 3.1-3.1-.9L12 17.4l-1.8-2.6-3.1.9.8-3.1-2.4-1.9 3-.9L12 6.1Z',
   },
@@ -26,12 +26,12 @@ const ARCHETYPE_META: Record<string, { color: string; label: string; path: strin
     path: 'M7 5a5 5 0 0 0-5 5h2.2A2.8 2.8 0 0 1 7 7.2h2.6L7.8 9 9.2 10.4 13.4 6 9.2 1.6 7.8 3 9.6 5H7Zm10 14a5 5 0 0 0 5-5h-2.2A2.8 2.8 0 0 1 17 16.8h-2.6l1.8-1.8-1.4-1.4L10.6 18l4.2 4.4 1.4-1.4-1.8-2H17ZM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z',
   },
   'Big Game Player': {
-    color: '#A855F7',
+    color: '#3B82F6',
     label: 'Big Game Player',
     path: 'M7 3h10v3h4v3c0 3.1-2.1 5.4-5 6.2A5.8 5.8 0 0 1 13 17v2h3v2H8v-2h3v-2a5.8 5.8 0 0 1-3-1.8C5.1 14.4 3 12.1 3 9V6h4V3Zm2 2v6c0 2 1.3 4 3 4s3-2 3-4V5H9Zm-4 3v1c0 1.6.8 2.9 2.1 3.6A8.7 8.7 0 0 1 7 11V8H5Zm12 0v3c0 .5 0 1.1-.1 1.6A4 4 0 0 0 19 9V8h-2Z',
   },
   'Serial Winner': {
-    color: '#FACC15',
+    color: '#F59E0B',
     label: 'Serial Winner',
     path: 'M12 2 9.7 7.2 4 7.8l4.3 3.8L7 17.2l5-2.9 5 2.9-1.3-5.6L20 7.8l-5.7-.6L12 2Zm0 5 1 2.2 2.4.3-1.8 1.6.5 2.3-2.1-1.2-2.1 1.2.5-2.3-1.8-1.6 2.4-.3L12 7Zm-7 13h14v2H5v-2Z',
   },
@@ -41,7 +41,7 @@ const ARCHETYPE_META: Record<string, { color: string; label: string; path: strin
     path: 'M12 2a10 10 0 0 0-3.3 19.4l.8-2.1A7.8 7.8 0 0 1 4.2 12c0-1.3.3-2.5.9-3.5L8 11H5v2h6V7H9v2.4L6.3 6.7A7.8 7.8 0 0 1 19.8 12c0 1.3-.3 2.5-.9 3.5L16 13h3v-2h-6v6h2v-2.4l2.7 2.7A10 10 0 0 0 12 2Z',
   },
   'Balanced Operator': {
-    color: '#14B8A6',
+    color: '#60A5FA',
     label: 'Balanced Operator',
     path: 'M11 3h2v3h5v2H6V6h5V3Zm-5.5 7h13L16 17H8l-2.5-7Zm2.8 2 1.1 3h5.2l1.1-3H8.3ZM5 19h14v2H5v-2Z',
   },

@@ -11,7 +11,7 @@ export default function GlassCard({ sx, children, ...props }: CardProps) {
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         border: '1px solid rgba(148, 163, 184, 0.08)',
-        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3)',
+        boxShadow: '0 4px 24px rgba(2, 6, 23, 0.3)',
         borderRadius: '16px',
         overflow: 'hidden',
         transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',

@@ -65,11 +65,35 @@ interface TournamentDetails extends Tournament {
   goals: { id: string; match_id: string; player_id: string; minute: number | null; player?: Pick<Player, 'id' | 'name'> }[];
 }
 
+const COLORS = {
+  pitchBlack: '#020617',
+  panelSlate: '#0F172A',
+  textIce: '#F8FAFC',
+  textSteel: '#94A3B8',
+  textMuted: '#64748B',
+  green: '#22C55E',
+  greenLight: '#4ADE80',
+  greenDark: '#16A34A',
+  blue: '#3B82F6',
+  blueLight: '#60A5FA',
+  blueDark: '#2563EB',
+  amber: '#F59E0B',
+  red: '#EF4444',
+};
+
 const panelSx = {
   background: 'rgba(3, 12, 24, 0.68)',
-  border: '1px solid rgba(94, 234, 212, 0.18)',
-  boxShadow: '0 18px 55px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04)',
-  borderRadius: '14px',
+  border: '1px solid rgba(148, 163, 184, 0.12)',
+  boxShadow: '0 4px 24px rgba(2, 6, 23, 0.3)',
+  borderRadius: '16px',
+  overflow: 'hidden',
+};
+
+const quietPanelSx = {
+  background: 'rgba(15, 23, 42, 0.46)',
+  border: '1px solid rgba(148, 163, 184, 0.08)',
+  boxShadow: 'none',
+  borderRadius: '16px',
   overflow: 'hidden',
 };
 
@@ -149,7 +173,7 @@ function SpotlightMetric({ label, value, color = '#F8FAFC' }: { label: string; v
         minWidth: 0,
       }}
     >
-      <Typography sx={{ color: '#8798B0', fontSize: '0.65rem', fontWeight: 850, textTransform: 'uppercase' }}>
+      <Typography sx={{ color: COLORS.textMuted, fontSize: '0.65rem', fontWeight: 850, textTransform: 'uppercase' }}>
         {label}
       </Typography>
       <Typography sx={{ color, fontWeight: 950, fontSize: '1rem', lineHeight: 1.15 }} noWrap>
@@ -182,10 +206,225 @@ function SpotlightBar({ label, value, color }: { label: string; value: number; c
   );
 }
 
+function MatchNightCommand({
+  featuredTournament,
+  nextMatch,
+  loadingTournaments,
+  tournamentCount,
+  onPrimary,
+  onSecondary,
+}: {
+  featuredTournament: Tournament | null;
+  nextMatch: Match | null;
+  loadingTournaments: boolean;
+  tournamentCount: number;
+  onPrimary: () => void;
+  onSecondary: () => void;
+}) {
+  const hasTournament = Boolean(featuredTournament);
+  const primaryLabel = nextMatch ? 'Enter Next Result' : hasTournament ? 'Open Active Tournament' : 'Create Tournament';
+  const secondaryLabel = hasTournament ? 'View Standings' : 'Register Players';
+  const statusLabel = loadingTournaments
+    ? 'Loading command center'
+    : nextMatch
+      ? `Round ${nextMatch.round_number} ready`
+      : hasTournament
+        ? `${featuredTournament?.status} tournament`
+        : 'No tournament yet';
+
+  return (
+    <GlassCard
+      className="animate-section"
+      sx={{
+        ...panelSx,
+        mb: 1.75,
+        background:
+          'linear-gradient(135deg, rgba(34, 197, 94, 0.16), rgba(15, 23, 42, 0.86) 42%, rgba(59, 130, 246, 0.12))',
+        borderColor: 'rgba(34, 197, 94, 0.22)',
+      }}
+    >
+      <CardContent
+        sx={{
+          p: { xs: 2, md: 2.5 },
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1.2fr) minmax(280px, 0.8fr)' },
+          gap: { xs: 2, md: 3 },
+          alignItems: 'center',
+          '&:last-child': { pb: { xs: 2, md: 2.5 } },
+        }}
+      >
+        <Box sx={{ minWidth: 0 }}>
+          <Chip
+            size="small"
+            label={statusLabel}
+            sx={{
+              mb: 1.25,
+              color: nextMatch ? COLORS.greenLight : COLORS.blueLight,
+              bgcolor: nextMatch ? 'rgba(34, 197, 94, 0.12)' : 'rgba(59, 130, 246, 0.12)',
+              border: `1px solid ${nextMatch ? 'rgba(34, 197, 94, 0.24)' : 'rgba(59, 130, 246, 0.24)'}`,
+              fontWeight: 900,
+            }}
+          />
+          <Typography sx={{ color: COLORS.textIce, fontSize: { xs: '1.55rem', sm: '2rem' }, lineHeight: 1.05, fontWeight: 950, letterSpacing: '-0.02em' }}>
+            {nextMatch
+              ? `${nextMatch.home_player?.name ?? 'Home'} vs ${nextMatch.away_player?.name ?? 'Away'}`
+              : hasTournament
+                ? featuredTournament?.name
+                : 'Start the next FC night'}
+          </Typography>
+          <Typography sx={{ color: COLORS.textSteel, mt: 1, maxWidth: 620, lineHeight: 1.55 }}>
+            {nextMatch
+              ? `The next fixture is ready. Jump straight into the match flow, then let standings, rivalries, and player records update around it.`
+              : hasTournament
+                ? 'Pick up the active tournament, check standings, or move into setup before the next result lands.'
+                : 'Create a tournament, add players, and turn the first kickoff into a tracked season.'}
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+            <Button variant="contained" onClick={onPrimary} startIcon={nextMatch ? <SportsSoccerIcon /> : <AddIcon />}>
+              {primaryLabel}
+            </Button>
+            <Button variant="outlined" onClick={onSecondary}>
+              {secondaryLabel}
+            </Button>
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: 1,
+            p: 1,
+            borderRadius: '16px',
+            bgcolor: 'rgba(2, 6, 23, 0.34)',
+            border: '1px solid rgba(148, 163, 184, 0.08)',
+          }}
+        >
+          <SpotlightMetric label="Tournaments" value={loadingTournaments ? '-' : tournamentCount} color={COLORS.amber} />
+          <SpotlightMetric label="Status" value={featuredTournament?.status ?? 'Setup'} color={nextMatch ? COLORS.greenLight : COLORS.blueLight} />
+          <SpotlightMetric label="Next" value={nextMatch ? `R${nextMatch.round_number}` : 'Queue'} color={COLORS.textIce} />
+        </Box>
+      </CardContent>
+    </GlassCard>
+  );
+}
+
+function FirstRunReadyCheck({
+  hasTournaments,
+  registeredPlayers,
+  analyticsLoaded,
+  onNavigate,
+}: {
+  hasTournaments: boolean;
+  registeredPlayers: number;
+  analyticsLoaded: boolean;
+  onNavigate: (path: string) => void;
+}) {
+  if (hasTournaments) return null;
+
+  const steps = [
+    {
+      label: 'Register players',
+      detail: analyticsLoaded && registeredPlayers > 0 ? `${registeredPlayers} ready` : 'Build the roster first',
+      complete: analyticsLoaded && registeredPlayers > 0,
+      action: 'Players',
+      path: '/players',
+      icon: <GroupsIcon />,
+    },
+    {
+      label: 'Create tournament',
+      detail: 'Choose league, cup, or knockout',
+      complete: false,
+      action: 'Create',
+      path: '/tournaments/new',
+      icon: <EmojiEventsIcon />,
+    },
+    {
+      label: 'Enter first result',
+      detail: 'The tracker becomes useful after kickoff',
+      complete: false,
+      action: 'Next',
+      path: '/tournaments/new',
+      icon: <SportsSoccerIcon />,
+    },
+  ];
+
+  return (
+    <GlassCard
+      className="animate-section"
+      sx={{
+        ...quietPanelSx,
+        mb: 1.75,
+      }}
+    >
+      <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+        <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: 1.5, mb: 1.5, flexDirection: { xs: 'column', sm: 'row' } }}>
+          <Box>
+            <Typography sx={{ color: COLORS.textIce, fontWeight: 950, fontSize: '1rem' }}>
+              Quick setup path
+            </Typography>
+            <Typography sx={{ color: COLORS.textSteel, fontSize: '0.84rem', mt: 0.25 }}>
+              Optional for repeat users. Follow these once to get to the first tracked match.
+            </Typography>
+          </Box>
+          <Button size="small" variant="outlined" onClick={() => onNavigate('/tournaments/new')}>
+            Skip to create
+          </Button>
+        </Box>
+
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' }, gap: 1 }}>
+          {steps.map((step, index) => (
+            <Box
+              key={step.label}
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: '38px 1fr auto',
+                alignItems: 'center',
+                gap: 1,
+                p: 1,
+                borderRadius: '12px',
+                bgcolor: step.complete ? 'rgba(34, 197, 94, 0.1)' : 'rgba(2, 6, 23, 0.26)',
+                border: step.complete ? '1px solid rgba(34, 197, 94, 0.22)' : '1px solid rgba(148, 163, 184, 0.08)',
+              }}
+            >
+              <Box
+                sx={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: '10px',
+                  display: 'grid',
+                  placeItems: 'center',
+                  color: step.complete ? COLORS.greenLight : COLORS.blueLight,
+                  bgcolor: step.complete ? 'rgba(34, 197, 94, 0.12)' : 'rgba(59, 130, 246, 0.1)',
+                }}
+              >
+                {step.icon}
+              </Box>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ color: COLORS.textIce, fontWeight: 850, fontSize: '0.9rem' }} noWrap>
+                  {index + 1}. {step.label}
+                </Typography>
+                <Typography sx={{ color: COLORS.textSteel, fontSize: '0.74rem' }} noWrap>
+                  {step.detail}
+                </Typography>
+              </Box>
+              <Button size="small" onClick={() => onNavigate(step.path)} sx={{ color: step.complete ? COLORS.greenLight : COLORS.blueLight, minWidth: 0 }}>
+                {step.complete ? 'Done' : step.action}
+              </Button>
+            </Box>
+          ))}
+        </Box>
+      </CardContent>
+    </GlassCard>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [loadAnalytics, setLoadAnalytics] = useState(false);
   const [spotlightIndex, setSpotlightIndex] = useState(0);
+  const [spotlightPaused, setSpotlightPaused] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const { data: tournaments = [], isLoading: loadingTournaments } = useSWR<Tournament[]>('/api/tournaments', fetcher);
   const { data: hallOfFame = [] } = useSWR<HallOfFameEntry[]>('/api/analytics/hall-of-fame', fetcher);
   const { data: analytics = null } = useSWR<AnalyticsData>(
@@ -252,6 +491,16 @@ export default function HomePage() {
   const recentMatches = useMemo(() => analytics?.all_matches.slice(0, 4) ?? [], [analytics?.all_matches]);
 
   useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const updatePreference = () => setPrefersReducedMotion(mediaQuery.matches);
+
+    updatePreference();
+    mediaQuery.addEventListener('change', updatePreference);
+
+    return () => mediaQuery.removeEventListener('change', updatePreference);
+  }, []);
+
+  useEffect(() => {
     const scheduleIdle = window.requestIdleCallback;
     const idleCallback =
       typeof scheduleIdle === 'function'
@@ -268,22 +517,44 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (spotlightPlayers.length <= 1) return undefined;
+    if (spotlightPlayers.length <= 1 || spotlightPaused || prefersReducedMotion) return undefined;
 
     const interval = window.setInterval(() => {
       setSpotlightIndex((index) => (index + 1) % spotlightPlayers.length);
     }, 5000);
 
     return () => window.clearInterval(interval);
-  }, [spotlightPlayers.length]);
+  }, [prefersReducedMotion, spotlightPaused, spotlightPlayers.length]);
 
   const playedMatches = analytics?.all_matches.length ?? 0;
   const totalGoals = analytics?.all_goals.length ?? 0;
   const motmAwards = analytics?.motm_rankings.reduce((sum, row) => sum + row.motm_awards, 0) ?? 0;
   const registeredPlayers = analytics?.registered_players.length ?? 0;
+  const commandPrimaryPath = nextMatch
+    ? `/tournaments/${nextMatch.tournament_id}/matches/${nextMatch.id}`
+    : featuredTournament
+      ? `/tournaments/${featuredTournament.id}`
+      : '/tournaments/new';
+  const commandSecondaryPath = featuredTournament ? `/tournaments/${featuredTournament.id}/standings` : '/players';
 
   return (
     <Box>
+      <MatchNightCommand
+        featuredTournament={featuredTournament}
+        nextMatch={nextMatch}
+        loadingTournaments={loadingTournaments}
+        tournamentCount={tournaments.length}
+        onPrimary={() => router.push(commandPrimaryPath)}
+        onSecondary={() => router.push(commandSecondaryPath)}
+      />
+
+      <FirstRunReadyCheck
+        hasTournaments={tournaments.length > 0}
+        registeredPlayers={registeredPlayers}
+        analyticsLoaded={Boolean(analytics)}
+        onNavigate={(path) => router.push(path)}
+      />
+
       <Box
         className="animate-section"
         sx={{
@@ -293,11 +564,11 @@ export default function HomePage() {
           mb: 1.75,
         }}
       >
-        <StatCard icon={<EmojiEventsIcon />} label="Tournaments" value={loadingTournaments ? '-' : tournaments.length} delta={featuredTournament ? featuredTournament.status : 'Create one'} accent="#F59E0B" />
-        <StatCard icon={<GroupsIcon />} label="Players" value={registeredPlayers || '-'} delta={registeredPlayers ? 'registered' : 'loading'} accent="#60A5FA" />
-        <StatCard icon={<SportsSoccerIcon />} label="Matches Played" value={playedMatches || '-'} delta={playedMatches ? 'recorded' : 'loading'} accent="#CBD5E1" />
-        <StatCard icon={<BoltIcon />} label="Goals Scored" value={totalGoals || '-'} delta={totalGoals ? 'all-time' : 'loading'} accent="#EF4444" />
-        <StatCard icon={<StarsIcon />} label="MOTM Awards" value={motmAwards || '-'} delta={motmAwards ? 'given out' : 'loading'} accent="#FBBF24" />
+        <StatCard icon={<EmojiEventsIcon />} label="Tournaments" value={loadingTournaments ? '-' : tournaments.length} delta={featuredTournament ? featuredTournament.status : 'Create one'} accent={COLORS.amber} />
+        <StatCard icon={<GroupsIcon />} label="Players" value={registeredPlayers || '-'} delta={registeredPlayers ? 'registered' : 'loading'} accent={COLORS.blueLight} />
+        <StatCard icon={<SportsSoccerIcon />} label="Matches Played" value={playedMatches || '-'} delta={playedMatches ? 'recorded' : 'loading'} accent={COLORS.textSteel} />
+        <StatCard icon={<BoltIcon />} label="Goals Scored" value={totalGoals || '-'} delta={totalGoals ? 'all-time' : 'loading'} accent={COLORS.red} />
+        <StatCard icon={<StarsIcon />} label="MOTM Awards" value={motmAwards || '-'} delta={motmAwards ? 'given out' : 'loading'} accent={COLORS.amber} />
       </Box>
 
       <Box
@@ -309,7 +580,7 @@ export default function HomePage() {
         }}
       >
         <Box sx={{ display: 'grid', gap: 1.5, minWidth: 0 }}>
-          <GlassCard className="animate-section" sx={panelSx}>
+          <GlassCard className="animate-section" sx={quietPanelSx}>
             <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
               <SectionTitle
                 title="Hall of Fame"
@@ -318,7 +589,7 @@ export default function HomePage() {
                     <Button
                       size="small"
                       onClick={() => router.push('/analytics')}
-                      sx={{ color: '#93C5FD', py: 0.5, px: 1, fontSize: '0.78rem' }}
+                      sx={{ color: COLORS.blueLight, py: 0.5, px: 1, fontSize: '0.78rem' }}
                     >
                       View Full
                     </Button>
@@ -346,7 +617,7 @@ export default function HomePage() {
                         border: index === 0 ? '1px solid rgba(245, 158, 11, 0.26)' : '1px solid rgba(148, 163, 184, 0.08)',
                       }}
                     >
-                      <Box sx={{ width: 34, height: 34, borderRadius: '10px', display: 'grid', placeItems: 'center', color: index === 0 ? '#FBBF24' : '#94A3B8', bgcolor: index === 0 ? 'rgba(245, 158, 11, 0.13)' : 'rgba(148, 163, 184, 0.08)' }}>
+                      <Box sx={{ width: 34, height: 34, borderRadius: '10px', display: 'grid', placeItems: 'center', color: index === 0 ? COLORS.amber : COLORS.textSteel, bgcolor: index === 0 ? 'rgba(245, 158, 11, 0.13)' : 'rgba(148, 163, 184, 0.08)' }}>
                         <MilitaryTechIcon sx={{ fontSize: 21 }} />
                       </Box>
                       <Box sx={{ minWidth: 0 }}>
@@ -358,7 +629,7 @@ export default function HomePage() {
                       <Chip
                         size="small"
                         label={`${champion.tournaments.length} titles`}
-                        sx={{ color: index === 0 ? '#FBBF24' : '#A7F3D0', bgcolor: index === 0 ? 'rgba(245, 158, 11, 0.12)' : 'rgba(34, 197, 94, 0.12)', fontWeight: 900 }}
+                        sx={{ color: index === 0 ? COLORS.amber : COLORS.greenLight, bgcolor: index === 0 ? 'rgba(245, 158, 11, 0.12)' : 'rgba(34, 197, 94, 0.12)', fontWeight: 900 }}
                       />
                     </Box>
                   ))}
@@ -368,7 +639,7 @@ export default function HomePage() {
           </GlassCard>
 
           {analytics && analytics.all_matches.length > 0 && (
-            <GlassCard className="animate-section" sx={panelSx}>
+            <GlassCard className="animate-section" sx={quietPanelSx}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                 <SectionTitle title="Records & Milestones" />
                 <FunFactsSection
@@ -382,9 +653,9 @@ export default function HomePage() {
           )}
 
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1.5 }}>
-            <GlassCard className="animate-section" sx={panelSx}>
+            <GlassCard className="animate-section" sx={quietPanelSx}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <SectionTitle title="Top Scorers" action={<Button size="small" onClick={() => router.push('/analytics/global')} sx={{ color: '#93C5FD', py: 0.25 }}>View All</Button>} />
+                <SectionTitle title="Top Scorers" action={<Button size="small" onClick={() => router.push('/analytics/global')} sx={{ color: COLORS.blueLight, py: 0.25 }}>View All</Button>} />
                 {(analytics?.top_scorers ?? []).slice(0, 5).map((row, index) => (
                   <Box key={row.registered_player_id} onClick={() => router.push(`/players/${row.registered_player_id}`)} sx={{ display: 'grid', gridTemplateColumns: '26px 1fr auto', alignItems: 'center', gap: 1, py: 0.8, cursor: 'pointer' }}>
                     <Typography sx={{ fontWeight: 950 }}>{index + 1}</Typography>
@@ -406,7 +677,7 @@ export default function HomePage() {
 
             <GlassCard className="animate-section" sx={panelSx}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <SectionTitle title="Top Performers" action={<Button size="small" onClick={() => router.push('/analytics/global')} sx={{ color: '#93C5FD', py: 0.25 }}>View All</Button>} />
+                <SectionTitle title="Top Performers" action={<Button size="small" onClick={() => router.push('/analytics/global')} sx={{ color: COLORS.blueLight, py: 0.25 }}>View All</Button>} />
                 {powerRankings.slice(0, 5).map((row) => (
                   <Box key={row.player.id} onClick={() => router.push(`/players/${row.player.id}`)} sx={{ display: 'grid', gridTemplateColumns: '26px 1fr auto', alignItems: 'center', gap: 1, py: 0.8, cursor: 'pointer' }}>
                     <Typography sx={{ fontWeight: 950 }}>{row.rank}</Typography>
@@ -417,7 +688,7 @@ export default function HomePage() {
                         <Typography sx={{ color: '#8FA2B9', fontSize: '0.74rem' }} noWrap>{row.player.base_team}</Typography>
                       </Box>
                     </Box>
-                    <Chip size="small" label={row.rating} sx={{ color: '#86EFAC', bgcolor: 'rgba(34, 197, 94, 0.14)', fontWeight: 900 }} />
+                    <Chip size="small" label={row.rating} sx={{ color: COLORS.greenLight, bgcolor: 'rgba(34, 197, 94, 0.14)', fontWeight: 900 }} />
                   </Box>
                 ))}
               </CardContent>
@@ -463,7 +734,7 @@ export default function HomePage() {
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <SectionTitle
                 title="Next Up"
-                action={featuredTournament && <Button size="small" onClick={() => router.push(`/tournaments/${featuredTournament.id}`)} sx={{ color: '#93C5FD', py: 0.25 }}>Fixtures</Button>}
+                action={featuredTournament && <Button size="small" onClick={() => router.push(`/tournaments/${featuredTournament.id}`)} sx={{ color: COLORS.blueLight, py: 0.25 }}>Fixtures</Button>}
               />
               {nextMatch ? (
                 <Box
@@ -476,7 +747,7 @@ export default function HomePage() {
                     cursor: 'pointer',
                   }}
                 >
-                  <Typography sx={{ color: '#D7E1EF', textAlign: 'center', fontWeight: 800, mb: 0.5 }}>Round {nextMatch.round_number}</Typography>
+                  <Typography sx={{ color: COLORS.textIce, textAlign: 'center', fontWeight: 800, mb: 0.5 }}>Round {nextMatch.round_number}</Typography>
                   <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 54px 1fr', alignItems: 'center', gap: 1.5, py: 1 }}>
                     {[nextMatch.home_player, nextMatch.away_player].map((player) => (
                       <Box key={player?.id} sx={{ textAlign: 'center', minWidth: 0 }}>
@@ -487,7 +758,7 @@ export default function HomePage() {
                         <Typography sx={{ color: '#8FA2B9', fontSize: '0.74rem' }} noWrap>{player?.team}</Typography>
                       </Box>
                     ))}
-                    <Typography sx={{ textAlign: 'center', color: '#E2E8F0', fontWeight: 950, fontSize: '1.9rem' }}>VS</Typography>
+                    <Typography sx={{ textAlign: 'center', color: COLORS.textIce, fontWeight: 950, fontSize: '1.9rem' }}>VS</Typography>
                   </Box>
                   <Typography sx={{ color: '#8FA2B9', textAlign: 'center', fontSize: '0.78rem', mt: 0.75 }}>
                     Estadio de FC
@@ -502,7 +773,14 @@ export default function HomePage() {
             </CardContent>
           </GlassCard>
 
-          <GlassCard className="animate-section" sx={panelSx}>
+          <GlassCard
+            className="animate-section"
+            onMouseEnter={() => setSpotlightPaused(true)}
+            onMouseLeave={() => setSpotlightPaused(false)}
+            onFocus={() => setSpotlightPaused(true)}
+            onBlur={() => setSpotlightPaused(false)}
+            sx={panelSx}
+          >
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <SectionTitle
                 title="Player Spotlight"
@@ -513,7 +791,7 @@ export default function HomePage() {
                         aria-label="Previous spotlight player"
                         size="small"
                         onClick={() => setSpotlightIndex((index) => (index - 1 + spotlightPlayers.length) % spotlightPlayers.length)}
-                        sx={{ color: '#93C5FD', border: '1px solid rgba(147, 197, 253, 0.16)', width: 30, height: 30 }}
+                        sx={{ color: COLORS.blueLight, border: '1px solid rgba(59, 130, 246, 0.16)', width: 30, height: 30 }}
                       >
                         <ChevronLeftIcon fontSize="small" />
                       </IconButton>
@@ -524,7 +802,7 @@ export default function HomePage() {
                         aria-label="Next spotlight player"
                         size="small"
                         onClick={() => setSpotlightIndex((index) => (index + 1) % spotlightPlayers.length)}
-                        sx={{ color: '#93C5FD', border: '1px solid rgba(147, 197, 253, 0.16)', width: 30, height: 30 }}
+                        sx={{ color: COLORS.blueLight, border: '1px solid rgba(59, 130, 246, 0.16)', width: 30, height: 30 }}
                       >
                         <ChevronRightIcon fontSize="small" />
                       </IconButton>
@@ -542,7 +820,7 @@ export default function HomePage() {
                       mb: 1.5,
                       minHeight: 188,
                       background:
-                        'linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(15, 23, 42, 0.84) 52%, rgba(168, 85, 247, 0.18))',
+                        'linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(15, 23, 42, 0.84) 52%, rgba(59, 130, 246, 0.16))',
                       border: '1px solid rgba(34, 197, 94, 0.18)',
                     }}
                   >
@@ -570,8 +848,8 @@ export default function HomePage() {
                       </Avatar>
                       <Box sx={{ minWidth: 0 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', mb: 0.75 }}>
-                          <Chip size="small" label={`#${spotlight.rank} Power`} sx={{ color: '#86EFAC', bgcolor: 'rgba(34, 197, 94, 0.16)', fontWeight: 950 }} />
-                          <Chip size="small" label={`${spotlight.rating} PR`} sx={{ color: '#E9D5FF', bgcolor: 'rgba(168, 85, 247, 0.15)', fontWeight: 950 }} />
+                          <Chip size="small" label={`#${spotlight.rank} Power`} sx={{ color: COLORS.greenLight, bgcolor: 'rgba(34, 197, 94, 0.16)', fontWeight: 950 }} />
+                          <Chip size="small" label={`${spotlight.rating} PR`} sx={{ color: COLORS.blueLight, bgcolor: 'rgba(59, 130, 246, 0.15)', fontWeight: 950 }} />
                         </Box>
                         <Typography sx={{ fontWeight: 950, fontSize: { xs: '1.25rem', sm: '1.5rem' }, lineHeight: 1.05 }} noWrap>
                           {spotlight.player.name}
@@ -598,7 +876,7 @@ export default function HomePage() {
                           onClick={() => setSpotlightIndex(index)}
                           sx={{
                             flexShrink: 0,
-                            color: spotlight.player.id === row.player.id ? '#ECFDF5' : '#B7C4D6',
+                            color: spotlight.player.id === row.player.id ? COLORS.textIce : '#B7C4D6',
                             bgcolor: spotlight.player.id === row.player.id ? 'rgba(34, 197, 94, 0.22)' : 'rgba(148, 163, 184, 0.07)',
                             borderColor: spotlight.player.id === row.player.id ? 'rgba(34, 197, 94, 0.42)' : 'rgba(148, 163, 184, 0.1)',
                             fontWeight: 850,
@@ -610,25 +888,25 @@ export default function HomePage() {
 
                   <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 0.8, mb: 1.5 }}>
                     <SpotlightMetric label="Matches" value={spotlight.stats?.total_matches ?? 0} />
-                    <SpotlightMetric label="Goals" value={spotlight.stats?.total_goals ?? 0} color="#FBBF24" />
-                    <SpotlightMetric label="MOTM" value={spotlight.stats?.motm_awards ?? 0} color="#C4B5FD" />
-                    <SpotlightMetric label="Rating" value={spotlight.stats?.avg_rating.toFixed(2) ?? '0.00'} color="#86EFAC" />
+                    <SpotlightMetric label="Goals" value={spotlight.stats?.total_goals ?? 0} color={COLORS.amber} />
+                    <SpotlightMetric label="MOTM" value={spotlight.stats?.motm_awards ?? 0} color={COLORS.blueLight} />
+                    <SpotlightMetric label="Rating" value={spotlight.stats?.avg_rating.toFixed(2) ?? '0.00'} color={COLORS.greenLight} />
                   </Box>
 
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr auto' }, gap: 1.5, alignItems: 'end' }}>
                     <Box sx={{ display: 'grid', gap: 1 }}>
                       <SpotlightBar label="Win Rate" value={spotlight.stats?.win_rate ?? 0} color="#22C55E" />
-                      <SpotlightBar label="Avg Rating" value={(spotlight.stats?.avg_rating ?? 0) * 10} color="#A855F7" />
-                      <SpotlightBar label="Goal Threat" value={Math.min((spotlight.stats?.goals_per_match ?? 0) * 28, 100)} color="#F59E0B" />
+                      <SpotlightBar label="Avg Rating" value={(spotlight.stats?.avg_rating ?? 0) * 10} color={COLORS.blue} />
+                      <SpotlightBar label="Goal Threat" value={Math.min((spotlight.stats?.goals_per_match ?? 0) * 28, 100)} color={COLORS.amber} />
                     </Box>
                     <Button
                       size="small"
                       endIcon={<ArrowForwardIcon />}
                       onClick={() => router.push(`/players/${spotlight.player.id}`)}
                       sx={{
-                        color: '#93C5FD',
-                        border: '1px solid rgba(147, 197, 253, 0.18)',
-                        bgcolor: 'rgba(147, 197, 253, 0.06)',
+                        color: COLORS.blueLight,
+                        border: '1px solid rgba(59, 130, 246, 0.18)',
+                        bgcolor: 'rgba(59, 130, 246, 0.06)',
                         whiteSpace: 'nowrap',
                       }}
                     >
@@ -645,21 +923,22 @@ export default function HomePage() {
             </CardContent>
           </GlassCard>
 
-          <GlassCard className="animate-section" sx={panelSx}>
+          <GlassCard className="animate-section" sx={quietPanelSx}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <SectionTitle title="Recent Activity" />
-              {recentMatches.length > 0 ? recentMatches.map((match) => (
-                <Box key={match.id} onClick={() => router.push(`/tournaments/${match.tournament_id}`)} sx={{ display: 'grid', gridTemplateColumns: '34px 1fr auto', gap: 1, py: 1, alignItems: 'center', cursor: 'pointer', borderBottom: '1px solid rgba(148, 163, 184, 0.07)' }}>
-                  <Box sx={{ width: 34, height: 34, borderRadius: '10px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(34, 197, 94, 0.13)', color: '#4ADE80' }}>
-                    <SportsSoccerIcon sx={{ fontSize: 20 }} />
-                  </Box>
+              {recentMatches.length > 0 ? recentMatches.map((match, index) => (
+                <Box key={match.id} onClick={() => router.push(`/tournaments/${match.tournament_id}`)} sx={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 1, py: 1, alignItems: 'center', cursor: 'pointer', borderTop: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.07)' }}>
                   <Box sx={{ minWidth: 0 }}>
                     <Typography sx={{ fontWeight: 850, fontSize: '0.86rem' }} noWrap>
                       {match.home_player?.name} {match.home_score} - {match.away_score} {match.away_player?.name}
                     </Typography>
                     <Typography sx={{ color: '#8FA2B9', fontSize: '0.72rem' }} noWrap>{match.tournament?.name ?? 'Tournament'}</Typography>
                   </Box>
-                  <Typography sx={{ color: '#8FA2B9', fontSize: '0.7rem' }}>{match.round_number ? `R${match.round_number}` : ''}</Typography>
+                  <Chip
+                    size="small"
+                    label={match.round_number ? `R${match.round_number}` : 'Match'}
+                    sx={{ color: COLORS.greenLight, bgcolor: 'rgba(34, 197, 94, 0.11)', fontWeight: 850 }}
+                  />
                 </Box>
               )) : (
                 <Typography sx={{ color: '#94A3B8', py: 2 }}>Recent match results will appear here.</Typography>
@@ -667,17 +946,17 @@ export default function HomePage() {
             </CardContent>
           </GlassCard>
 
-          <GlassCard className="animate-section" sx={panelSx}>
+          <GlassCard className="animate-section" sx={quietPanelSx}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-              <SectionTitle title="Dashboard" />
+              <SectionTitle title="Command Shortcuts" />
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', sm: 'repeat(3, minmax(0, 1fr))' }, gap: 1 }}>
                 {[
-                  { label: 'Dashboard', icon: <EmojiEventsIcon />, path: '/', color: '#22C55E' },
+                  { label: 'New Tournament', icon: <AddIcon />, path: '/tournaments/new', color: COLORS.green },
                   { label: 'Players', icon: <GroupsIcon />, path: '/players', color: '#60A5FA' },
-                  { label: 'Rivalry', icon: <SportsSoccerIcon />, path: '/analytics/h2h', color: '#A78BFA' },
+                  { label: 'Rivalry', icon: <SportsSoccerIcon />, path: '/analytics/h2h', color: COLORS.blue },
                   { label: 'Analytics', icon: <LeaderboardIcon />, path: '/analytics/global', color: '#F59E0B' },
-                  { label: 'Leagues', icon: <TableChartIcon />, path: '/analytics/league', color: '#2DD4BF' },
-                  { label: 'AI Analyst', icon: <AutoAwesomeIcon />, path: '/analytics/ai', color: '#BF5AF2' },
+                  { label: 'Leagues', icon: <TableChartIcon />, path: '/analytics/league', color: COLORS.green },
+                  { label: 'AI Analyst', icon: <AutoAwesomeIcon />, path: '/analytics/ai', color: COLORS.blueLight },
                 ].map((action) => (
                   <Button
                     key={action.label}

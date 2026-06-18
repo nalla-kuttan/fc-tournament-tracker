@@ -111,7 +111,7 @@ export default function RivalryCard({ data }: { data: H2HData }) {
             <Typography variant="caption" sx={{ color: '#22C55E', fontWeight: 600 }}>
               {data.player1.name}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#BF5AF2', fontWeight: 600 }}>
+            <Typography variant="caption" sx={{ color: '#3B82F6', fontWeight: 600 }}>
               {data.player2.name}
             </Typography>
           </Box>
@@ -125,13 +125,13 @@ export default function RivalryCard({ data }: { data: H2HData }) {
             }}
           >
             {p1Pct > 0 && (
-              <Box sx={{ width: `${p1Pct}%`, bgcolor: '#22C55E', transition: 'width 0.5s ease' }} />
+              <Box sx={{ width: `${p1Pct}%`, bgcolor: '#22C55E' }} />
             )}
             {drawPct > 0 && (
-              <Box sx={{ width: `${drawPct}%`, bgcolor: '#64748B', transition: 'width 0.5s ease' }} />
+              <Box sx={{ width: `${drawPct}%`, bgcolor: '#64748B' }} />
             )}
             {p2Pct > 0 && (
-              <Box sx={{ width: `${p2Pct}%`, bgcolor: '#BF5AF2', transition: 'width 0.5s ease' }} />
+              <Box sx={{ width: `${p2Pct}%`, bgcolor: '#3B82F6' }} />
             )}
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
@@ -159,7 +159,7 @@ export default function RivalryCard({ data }: { data: H2HData }) {
           }}
         >
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="body1" fontWeight={700} sx={{ color: '#FF9F0A' }}>
+            <Typography variant="body1" fontWeight={700} sx={{ color: '#F59E0B' }}>
               {avgMargin}
             </Typography>
             <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.65rem' }}>
@@ -167,7 +167,7 @@ export default function RivalryCard({ data }: { data: H2HData }) {
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="body1" fontWeight={700} sx={{ color: '#34C759' }}>
+            <Typography variant="body1" fontWeight={700} sx={{ color: '#22C55E' }}>
               {closestMatch}
             </Typography>
             <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.65rem' }}>
@@ -175,7 +175,7 @@ export default function RivalryCard({ data }: { data: H2HData }) {
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="body1" fontWeight={700} sx={{ color: '#FF3B30' }}>
+            <Typography variant="body1" fontWeight={700} sx={{ color: '#EF4444' }}>
               {biggestWin}
             </Typography>
             <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.65rem' }}>
@@ -204,7 +204,7 @@ export default function RivalryCard({ data }: { data: H2HData }) {
                     justifyContent: 'center',
                   }}
                 >
-                  <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '0.7rem' }}>
+                  <Typography sx={{ color: '#F8FAFC', fontWeight: 700, fontSize: '0.7rem' }}>
                     {result}
                   </Typography>
                 </Box>

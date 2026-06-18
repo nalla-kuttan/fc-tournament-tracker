@@ -1,11 +1,15 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { KeyboardEvent, ReactNode, useMemo, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import useSWR from 'swr';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
+import CircularProgress from '@mui/material/CircularProgress';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Divider from '@mui/material/Divider';
 import InputBase from '@mui/material/InputBase';
 import Paper from '@mui/material/Paper';
@@ -19,8 +23,21 @@ import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import SearchIcon from '@mui/icons-material/Search';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import TableChartIcon from '@mui/icons-material/TableChart';
+import type { RegisteredPlayer, Tournament } from '@/lib/types';
+import { fetcher } from '@/lib/fetcher';
 
 const SIDEBAR_WIDTH = 278;
+
+const COLORS = {
+  pitchBlack: '#020617',
+  textIce: '#F8FAFC',
+  textSteel: '#94A3B8',
+  textMuted: '#64748B',
+  green: '#22C55E',
+  greenLight: '#4ADE80',
+  blue: '#3B82F6',
+  blueLight: '#60A5FA',
+};
 
 const NAV_GROUPS = [
   {
@@ -55,37 +72,104 @@ const NAV_GROUPS = [
 const MOBILE_NAV_ITEMS = [
   { label: 'Dashboard', path: '/', icon: <HomeRoundedIcon /> },
   { label: 'Players', path: '/players', icon: <GroupsIcon /> },
-  { label: 'Rivalry', path: '/analytics/h2h', icon: <SportsSoccerIcon /> },
-  { label: 'Analytics', path: '/analytics/global', icon: <AnalyticsIcon /> },
-  { label: 'Leagues', path: '/analytics/league', icon: <TableChartIcon /> },
+  { label: 'Analytics', path: '/analytics', icon: <AnalyticsIcon /> },
   { label: 'AI', path: '/analytics/ai', icon: <AutoAwesomeIcon /> },
-  { label: 'Comp', path: '/competitive', icon: <EmojiEventsIcon /> },
+  { label: 'Compete', path: '/competitive', icon: <EmojiEventsIcon /> },
 ];
+
+type SearchResult = {
+  id: string;
+  label: string;
+  meta: string;
+  path: string;
+  kind: 'Player' | 'Tournament';
+};
 
 function isActive(pathname: string, path: string, label: string) {
   if (label === 'Dashboard') return pathname === '/';
   if (label === 'Players') return pathname.startsWith('/players');
   if (label === 'Rivalry') return pathname.startsWith('/analytics/h2h');
-  if (label === 'Analytics') return pathname === '/analytics/global';
+  if (label === 'Analytics') return pathname === '/analytics' || pathname === '/analytics/global' || pathname === '/analytics/league';
   if (label === 'Leagues') return pathname.startsWith('/analytics/league');
   if (label === 'AI Analyst' || label === 'AI') return pathname.startsWith('/analytics/ai');
-  if (label === 'Competitive' || label === 'Comp') return pathname.startsWith('/competitive');
+  if (label === 'Competitive' || label === 'Compete') return pathname.startsWith('/competitive');
   return pathname === path;
 }
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const activeSearch = searchOpen || query.trim().length > 0;
+  const { data: tournaments = [], isLoading: loadingTournaments } = useSWR<Tournament[]>(
+    activeSearch ? '/api/tournaments' : null,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
+  const { data: players = [], isLoading: loadingPlayers } = useSWR<RegisteredPlayer[]>(
+    activeSearch ? '/api/players' : null,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
 
   const activeMobileTab = MOBILE_NAV_ITEMS.findIndex((item) => isActive(pathname, item.path, item.label));
+  const trimmedQuery = query.trim().toLowerCase();
+  const searchResults = useMemo<SearchResult[]>(() => {
+    if (trimmedQuery.length < 2) return [];
+
+    const tournamentMatches = tournaments
+      .filter((tournament) =>
+        `${tournament.name} ${tournament.format} ${tournament.status}`.toLowerCase().includes(trimmedQuery)
+      )
+      .slice(0, 4)
+      .map((tournament) => ({
+        id: `tournament-${tournament.id}`,
+        label: tournament.name,
+        meta: `${tournament.format} · ${tournament.status}`,
+        path: `/tournaments/${tournament.id}`,
+        kind: 'Tournament' as const,
+      }));
+
+    const playerMatches = players
+      .filter((player) => `${player.name} ${player.base_team}`.toLowerCase().includes(trimmedQuery))
+      .slice(0, 4)
+      .map((player) => ({
+        id: `player-${player.id}`,
+        label: player.name,
+        meta: player.base_team,
+        path: `/players/${player.id}`,
+        kind: 'Player' as const,
+      }));
+
+    return [...tournamentMatches, ...playerMatches].slice(0, 6);
+  }, [players, tournaments, trimmedQuery]);
+  const searchLoading = loadingTournaments || loadingPlayers;
+
+  const navigateTo = (path: string) => {
+    setQuery('');
+    setSearchOpen(false);
+    router.push(path);
+  };
+
+  const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
+      setSearchOpen(false);
+      return;
+    }
+    if (event.key === 'Enter' && searchResults[0]) {
+      event.preventDefault();
+      navigateTo(searchResults[0].path);
+    }
+  };
 
   return (
     <Box
       sx={{
         minHeight: '100vh',
-        color: '#F8FAFC',
+        color: COLORS.textIce,
         background:
-          'linear-gradient(180deg, rgba(2, 6, 23, 0.88), rgba(2, 6, 23, 0.97)), radial-gradient(circle at 45% 28%, rgba(34, 197, 94, 0.16), transparent 28%), radial-gradient(circle at 90% 0%, rgba(59, 130, 246, 0.18), transparent 24%), linear-gradient(135deg, #020617 0%, #05111f 42%, #031409 100%)',
+          'linear-gradient(180deg, rgba(2, 6, 23, 0.88), rgba(2, 6, 23, 0.97)), radial-gradient(circle at 45% 28%, rgba(34, 197, 94, 0.16), transparent 28%), radial-gradient(circle at 90% 0%, rgba(59, 130, 246, 0.18), transparent 24%), linear-gradient(135deg, #020617 0%, #0F172A 48%, #020617 100%)',
         position: 'relative',
         overflowX: 'hidden',
         '&::before': {
@@ -111,7 +195,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           bottom: 14,
           width: SIDEBAR_WIDTH,
           flexDirection: 'column',
-          borderRadius: '18px',
+          borderRadius: '16px',
           border: '1px solid rgba(34, 197, 94, 0.24)',
           background: 'rgba(2, 10, 20, 0.76)',
           backdropFilter: 'blur(24px)',
@@ -129,7 +213,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               borderRadius: '12px',
               display: 'grid',
               placeItems: 'center',
-              color: '#02130B',
+              color: COLORS.pitchBlack,
               background: 'linear-gradient(135deg, #4ADE80, #22C55E)',
               boxShadow: '0 0 24px rgba(34, 197, 94, 0.36)',
             }}
@@ -140,7 +224,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <Typography sx={{ fontWeight: 950, fontSize: '1.38rem', lineHeight: 0.9, color: '#4ADE80' }}>
               FC
             </Typography>
-            <Typography sx={{ fontSize: '0.68rem', letterSpacing: '0.14em', fontWeight: 800, color: '#E2E8F0' }}>
+            <Typography sx={{ fontSize: '0.68rem', letterSpacing: '0.14em', fontWeight: 800, color: COLORS.textIce }}>
               TOURNAMENT TRACKER
             </Typography>
           </Box>
@@ -159,7 +243,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   fontWeight: 900,
                   letterSpacing: '0.12em',
                   textTransform: 'uppercase',
-                  color: '#7891AE',
+                  color: COLORS.textSteel,
                 }}
               >
                 {group.label}
@@ -180,7 +264,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                       borderRadius: '10px',
                       fontSize: '0.9rem',
                       fontWeight: 700,
-                      color: active ? '#ECFDF5' : '#B7C4D6',
+                      color: active ? COLORS.textIce : '#B7C4D6',
                       bgcolor: active ? 'rgba(34, 197, 94, 0.2)' : 'transparent',
                       border: active ? '1px solid rgba(34, 197, 94, 0.55)' : '1px solid transparent',
                       boxShadow: active ? 'inset 4px 0 0 rgba(74, 222, 128, 0.9), 0 0 22px rgba(34, 197, 94, 0.13)' : 'none',
@@ -204,22 +288,37 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <Box
             sx={{
               p: 1.5,
-              borderRadius: '14px',
+              borderRadius: '16px',
               border: '1px solid rgba(148, 163, 184, 0.12)',
-              background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.11), rgba(34, 197, 94, 0.08))',
+              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 197, 94, 0.08))',
             }}
           >
             <Typography sx={{ fontWeight: 900, fontSize: '0.9rem' }}>Kick Off Vibes</Typography>
-            <Typography sx={{ color: '#94A3B8', fontSize: '0.76rem', mb: 1.25 }}>by Inner Celestial</Typography>
+            <Typography sx={{ color: COLORS.textSteel, fontSize: '0.76rem', mb: 1.25 }}>by Inner Celestial</Typography>
             <Box
               sx={{
                 height: 34,
                 borderRadius: '10px',
-                background:
-                  'repeating-linear-gradient(90deg, #22C55E 0 3px, transparent 3px 7px), linear-gradient(90deg, rgba(34, 197, 94, 0.05), rgba(59, 130, 246, 0.12))',
-                opacity: 0.85,
+                display: 'grid',
+                gridTemplateColumns: '1.2fr 0.8fr 0.55fr',
+                gap: 0.5,
+                opacity: 0.9,
+                '& > span': {
+                  borderRadius: '10px',
+                  background: 'rgba(34, 197, 94, 0.18)',
+                },
+                '& > span:nth-of-type(2)': {
+                  background: 'rgba(59, 130, 246, 0.16)',
+                },
+                '& > span:nth-of-type(3)': {
+                  background: 'rgba(245, 158, 11, 0.14)',
+                },
               }}
-            />
+            >
+              <span />
+              <span />
+              <span />
+            </Box>
           </Box>
         </Box>
       </Box>
@@ -264,32 +363,123 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </Box>
           </Box>
 
-          <Box
-            sx={{
-              display: { xs: 'none', lg: 'flex' },
-              alignItems: 'center',
-              gap: 1,
-              width: 380,
-              px: 1.5,
-              py: 0.65,
-              ml: 'auto',
-              borderRadius: '16px',
-              border: '1px solid rgba(148, 163, 184, 0.18)',
-              background: 'rgba(15, 23, 42, 0.68)',
-              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.04)',
-            }}
-          >
-            <SearchIcon sx={{ color: '#8DA2BA', fontSize: 20 }} />
-            <InputBase
-              placeholder="Search players, tournaments..."
+          <ClickAwayListener onClickAway={() => setSearchOpen(false)}>
+            <Box
               sx={{
-                flex: 1,
-                color: '#E2E8F0',
-                fontSize: '0.86rem',
-                '& input::placeholder': { color: '#90A0B8', opacity: 1 },
+                display: { xs: 'none', lg: 'block' },
+                width: 420,
+                ml: 'auto',
+                position: 'relative',
               }}
-            />
-          </Box>
+            >
+              <Box
+                role="search"
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  px: 1.5,
+                  py: 0.65,
+                  borderRadius: '16px',
+                  border: '1px solid rgba(148, 163, 184, 0.18)',
+                  background: 'rgba(15, 23, 42, 0.68)',
+                  boxShadow: searchOpen ? '0 0 0 3px rgba(34, 197, 94, 0.1)' : 'inset 0 1px 0 rgba(255, 255, 255, 0.04)',
+                }}
+              >
+                <SearchIcon sx={{ color: '#94A3B8', fontSize: 20 }} />
+                <InputBase
+                  value={query}
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                    setSearchOpen(true);
+                  }}
+                  onFocus={() => setSearchOpen(true)}
+                  onKeyDown={handleSearchKeyDown}
+                  placeholder="Search players, tournaments..."
+                  inputProps={{ 'aria-label': 'Search players and tournaments' }}
+                  sx={{
+                    flex: 1,
+                    color: '#F8FAFC',
+                    fontSize: '0.86rem',
+                    '& input::placeholder': { color: '#94A3B8', opacity: 1 },
+                  }}
+                />
+                {searchLoading && <CircularProgress size={16} thickness={5} sx={{ color: '#22C55E' }} />}
+              </Box>
+
+              {searchOpen && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    position: 'absolute',
+                    top: 'calc(100% + 8px)',
+                    left: 0,
+                    right: 0,
+                    zIndex: 40,
+                    overflow: 'hidden',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(148, 163, 184, 0.14)',
+                    background: 'rgba(15, 23, 42, 0.97)',
+                    boxShadow: '0 22px 56px rgba(0, 0, 0, 0.42)',
+                  }}
+                >
+                  {trimmedQuery.length < 2 ? (
+                    <Box sx={{ p: 1.5 }}>
+                      <Typography sx={{ color: '#94A3B8', fontSize: '0.82rem' }}>
+                        Type at least two characters to find a player or tournament.
+                      </Typography>
+                    </Box>
+                  ) : searchResults.length === 0 && !searchLoading ? (
+                    <Box sx={{ p: 1.5 }}>
+                      <Typography sx={{ color: '#F8FAFC', fontWeight: 800 }}>No results found</Typography>
+                      <Typography sx={{ color: '#94A3B8', fontSize: '0.82rem' }}>
+                        Try a player name, team, tournament, or format.
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ py: 0.5 }}>
+                      {searchResults.map((result) => (
+                        <Button
+                          key={result.id}
+                          fullWidth
+                          onClick={() => navigateTo(result.path)}
+                          sx={{
+                            justifyContent: 'space-between',
+                            gap: 1.5,
+                            px: 1.5,
+                            py: 1.1,
+                            borderRadius: 0,
+                            color: '#F8FAFC',
+                            textAlign: 'left',
+                            '&:hover': { background: 'rgba(34, 197, 94, 0.08)' },
+                          }}
+                        >
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography sx={{ fontWeight: 850, fontSize: '0.9rem' }} noWrap>
+                              {result.label}
+                            </Typography>
+                            <Typography sx={{ color: '#94A3B8', fontSize: '0.74rem' }} noWrap>
+                              {result.meta}
+                            </Typography>
+                          </Box>
+                          <Chip
+                            size="small"
+                            label={result.kind}
+                            sx={{
+                              flexShrink: 0,
+                              color: result.kind === 'Player' ? '#60A5FA' : '#22C55E',
+                              bgcolor: result.kind === 'Player' ? 'rgba(59, 130, 246, 0.12)' : 'rgba(34, 197, 94, 0.12)',
+                              fontWeight: 850,
+                            }}
+                          />
+                        </Button>
+                      ))}
+                    </Box>
+                  )}
+                </Paper>
+              )}
+            </Box>
+          </ClickAwayListener>
 
         </Box>
 
@@ -333,7 +523,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             height: 'calc(74px + env(safe-area-inset-bottom))',
             pb: 'env(safe-area-inset-bottom)',
             '& .MuiBottomNavigationAction-root': {
-              color: '#7C8EA6',
+              color: COLORS.textSteel,
               minWidth: 'auto',
               gap: 0,
               pt: 1,

@@ -53,7 +53,7 @@ export default function TournamentLayout({ children }: { children: ReactNode }) 
             variant="h4"
             fontWeight={700}
             sx={{
-              background: 'linear-gradient(135deg, #F8FAFC 0%, #CBD5E1 100%)',
+              background: 'linear-gradient(135deg, #F8FAFC 0%, #94A3B8 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',

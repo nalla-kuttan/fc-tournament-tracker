@@ -73,7 +73,7 @@ export default function GoalDistributionChart({ goals }: { goals: GoalData[] }) 
     },
     scales: {
       x: {
-        grid: { color: 'rgba(255,255,255,0.06)' },
+        grid: { color: 'rgba(148, 163, 184, 0.08)' },
         ticks: { color: '#64748B', stepSize: 1 },
       },
       y: {

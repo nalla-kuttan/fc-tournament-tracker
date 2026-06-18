@@ -185,7 +185,7 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
           sx={{
             display: { xs: 'none', sm: 'inline-flex' },
             bgcolor: 'rgba(245, 158, 11, 0.12)',
-            color: '#FBBF24',
+            color: '#F59E0B',
             fontWeight: 700,
             fontSize: '0.65rem',
             height: 22,

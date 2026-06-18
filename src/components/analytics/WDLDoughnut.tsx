@@ -19,7 +19,7 @@ export default function WDLDoughnut({ stats, title }: Props) {
     datasets: [
       {
         data: [stats.wins, stats.draws, stats.losses],
-        backgroundColor: ['#22C55E', '#BF5AF2', '#FF9F0A'],
+        backgroundColor: ['#22C55E', '#3B82F6', '#F59E0B'],
         borderColor: ['#009fcc', '#7c3aed', '#ccac00'],
         borderWidth: 2,
       },
@@ -32,7 +32,7 @@ export default function WDLDoughnut({ stats, title }: Props) {
     plugins: {
       legend: {
         position: 'bottom' as const,
-        labels: { color: '#FFFFFF', padding: 16 },
+        labels: { color: '#F8FAFC', padding: 16 },
       },
     },
   };

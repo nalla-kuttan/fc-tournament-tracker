@@ -47,7 +47,7 @@ export default function AnalyticsPage() {
     {
       title: 'Global Analytics',
       description: summary?.topScorer ? `${summary.topScorer.player_name} leads with ${summary.topScorer.total_goals} goals` : 'All-time career stats and rankings',
-      icon: <PublicIcon sx={{ fontSize: 24, color: '#A855F7' }} />,
+      icon: <PublicIcon sx={{ fontSize: 24, color: '#3B82F6' }} />,
       iconBg: 'rgba(168, 85, 247, 0.1)',
       iconBorder: 'rgba(168, 85, 247, 0.15)',
       href: '/analytics/global',
@@ -63,9 +63,9 @@ export default function AnalyticsPage() {
     {
       title: 'AI Analyst',
       description: 'Ask natural language questions about player stats, rankings, form, and records',
-      icon: <AutoAwesomeIcon sx={{ fontSize: 24, color: '#BF5AF2' }} />,
-      iconBg: 'rgba(191, 90, 242, 0.1)',
-      iconBorder: 'rgba(191, 90, 242, 0.15)',
+      icon: <AutoAwesomeIcon sx={{ fontSize: 24, color: '#3B82F6' }} />,
+      iconBg: 'rgba(59, 130, 246, 0.1)',
+      iconBorder: 'rgba(59, 130, 246, 0.15)',
       href: '/analytics/ai',
     },
   ];
@@ -84,7 +84,7 @@ export default function AnalyticsPage() {
               border: '1px solid rgba(34, 197, 94, 0.2)',
               borderRadius: '16px',
               padding: '12px 24px',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 8px 32px rgba(2, 6, 23, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
               transformStyle: 'preserve-3d',
             }}
           >
@@ -109,7 +109,7 @@ export default function AnalyticsPage() {
             { label: 'Matches', value: summary.matches, icon: <SportsSoccerIcon />, color: '#22C55E' },
             { label: 'Goals', value: summary.goals, icon: <EmojiEventsIcon />, color: '#F59E0B' },
             { label: 'Players', value: summary.players, icon: <PeopleIcon />, color: '#3B82F6' },
-            { label: 'Best WR', value: summary.bestWinRate ? `${summary.bestWinRate.win_rate.toFixed(0)}%` : '—', icon: <TrendingUpIcon />, color: '#A855F7' },
+            { label: 'Best WR', value: summary.bestWinRate ? `${summary.bestWinRate.win_rate.toFixed(0)}%` : '—', icon: <TrendingUpIcon />, color: '#3B82F6' },
           ].map((stat) => (
             <Grid key={stat.label} size={{ xs: 6, sm: 3 }}>
               <GlassCard>
@@ -184,7 +184,7 @@ export default function AnalyticsPage() {
               </Typography>
             </Box>
 
-            <ChevronRightIcon sx={{ color: '#334155', fontSize: 20 }} />
+            <ChevronRightIcon sx={{ color: '#64748B', fontSize: 20 }} />
           </Box>
         ))}
       </Box>

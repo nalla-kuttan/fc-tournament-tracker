@@ -62,7 +62,7 @@ function MatchHistoryRow({ match, player1Name }: { match: Match; player1Name: st
           size="small"
           sx={{
             bgcolor: resultColor,
-            color: '#fff',
+            color: '#F8FAFC',
             fontWeight: 700,
             fontSize: '0.7rem',
             minWidth: 48,
@@ -125,12 +125,12 @@ export default function H2HComparison({ data }: Props) {
                     px: 3,
                     py: 1.5,
                     borderRadius: 2,
-                    bgcolor: 'rgba(0,212,255,0.08)',
+                    bgcolor: 'rgba(59,130,246,0.08)',
                   }}
                 >
                   <BigStat value={data.player1_wins} label="Wins" color="#22C55E" />
                   <BigStat value={data.draws} label="Draws" color="#64748B" />
-                  <BigStat value={data.player2_wins} label="Wins" color="#BF5AF2" />
+                  <BigStat value={data.player2_wins} label="Wins" color="#3B82F6" />
                 </Box>
 
                 <Box sx={{ textAlign: 'center' }}>

@@ -76,7 +76,7 @@ export default function AIPunditModal({
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <AutoAwesomeIcon sx={{ color: '#FF9F0A' }} />
+                <AutoAwesomeIcon sx={{ color: '#F59E0B' }} />
                 <Typography variant="h6" fontWeight={700}>
                     AI Pundit Summary
                 </Typography>
@@ -84,7 +84,7 @@ export default function AIPunditModal({
             <DialogContent dividers>
                 {loading ? (
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4, gap: 2 }}>
-                        <CircularProgress sx={{ color: '#FF9F0A' }} />
+                        <CircularProgress sx={{ color: '#F59E0B' }} />
                         <Typography variant="body2" color="text.secondary">
                             Analyzing the tournament...
                         </Typography>
@@ -112,7 +112,7 @@ export default function AIPunditModal({
                     onClick={generateSummary}
                     disabled={loading}
                     variant="contained"
-                    sx={{ bgcolor: '#FF9F0A', '&:hover': { bgcolor: '#e08905' } }}
+                    sx={{ bgcolor: '#F59E0B', '&:hover': { bgcolor: '#e08905' } }}
                 >
                     Regenerate
                 </Button>

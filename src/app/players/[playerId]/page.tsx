@@ -141,7 +141,7 @@ export default function PlayerProfilePage() {
   return (
     <Box>
       <BackButton />
-      {/* Header */}
+      {/* Player command header */}
       <GlassCard sx={{ mb: 4, overflow: 'hidden' }}>
         <CardContent
           sx={{
@@ -158,7 +158,7 @@ export default function PlayerProfilePage() {
               maxWidth: { xs: 360, md: 'none' },
               mx: { xs: 'auto', md: 0 },
               aspectRatio: { xs: '4 / 3', md: '4 / 5' },
-              borderRadius: '22px',
+              borderRadius: '16px',
               overflow: 'hidden',
               bgcolor: `${avatarColor}18`,
               border: `1px solid ${avatarColor}35`,
@@ -190,7 +190,7 @@ export default function PlayerProfilePage() {
               </Box>
             )}
             {archetypeHighlight && (
-              <Box sx={{ position: 'absolute', left: 12, bottom: 12, display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75, borderRadius: '14px', bgcolor: 'rgba(2, 6, 23, 0.78)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <Box sx={{ position: 'absolute', left: 12, bottom: 12, display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75, borderRadius: '12px', bgcolor: 'rgba(2, 6, 23, 0.78)', backdropFilter: 'blur(16px)', border: '1px solid rgba(148, 163, 184, 0.08)' }}>
                 <ArchetypeIcon archetype={archetypeHighlight.value} size={32} showTooltip={false} />
                 <Typography variant="caption" fontWeight={800} sx={{ color: getArchetypeMeta(archetypeHighlight.value).color }}>
                   {archetypeHighlight.value}
@@ -245,13 +245,13 @@ export default function PlayerProfilePage() {
                   { label: 'Win Rate', value: `${stats.win_rate.toFixed(0)}%`, color: '#22C55E' },
                   { label: 'Goals', value: stats.total_goals, color: '#F59E0B' },
                   { label: 'G/M', value: stats.goals_per_match.toFixed(2), color: '#3B82F6' },
-                  { label: 'MOTM', value: stats.motm_awards, color: '#A855F7' },
+                  { label: 'MOTM', value: stats.motm_awards, color: '#3B82F6' },
                 ].map((item) => (
                   <Box
                     key={item.label}
                     sx={{
                       p: 1.25,
-                      borderRadius: '14px',
+                      borderRadius: '12px',
                       bgcolor: `${item.color}12`,
                       border: `1px solid ${item.color}22`,
                     }}
@@ -379,7 +379,7 @@ export default function PlayerProfilePage() {
                         Season Rating
                       </Typography>
                       <Typography variant="h5" fontWeight={900}>{seasonRating.rating}</Typography>
-                      <Typography variant="caption" color={seasonRating.movement >= 0 ? '#4ADE80' : '#F87171'}>
+                      <Typography variant="caption" color={seasonRating.movement >= 0 ? '#4ADE80' : '#EF4444'}>
                         {seasonRating.movement >= 0 ? '+' : ''}{seasonRating.movement} latest movement
                       </Typography>
                     </Box>

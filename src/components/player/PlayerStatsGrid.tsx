@@ -34,16 +34,16 @@ export default function PlayerStatsGrid({ stats }: { stats: CareerStats }) {
           <StatCard label="Matches" value={stats.total_matches} />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-          <StatCard label="Wins" value={stats.wins} color="#34C759" />
+          <StatCard label="Wins" value={stats.wins} color="#22C55E" />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
           <StatCard label="Draws" value={stats.draws} />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-          <StatCard label="Losses" value={stats.losses} color="#FF3B30" />
+          <StatCard label="Losses" value={stats.losses} color="#EF4444" />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-          <StatCard label="Goals" value={stats.total_goals} color="#FF9F0A" />
+          <StatCard label="Goals" value={stats.total_goals} color="#F59E0B" />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
           <StatCard label="Clean Sheets" value={stats.clean_sheets} />
@@ -58,13 +58,13 @@ export default function PlayerStatsGrid({ stats }: { stats: CareerStats }) {
           <StatCard label="Avg xG" value={stats.avg_xg.toFixed(2)} />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-          <StatCard label="Avg Rating" value={stats.avg_rating.toFixed(1)} color="#BF5AF2" />
+          <StatCard label="Avg Rating" value={stats.avg_rating.toFixed(1)} color="#3B82F6" />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
           <StatCard label="Avg Possession" value={`${stats.avg_possession.toFixed(0)}%`} />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-          <StatCard label="MOTM Awards" value={stats.motm_awards} color="#FF9F0A" />
+          <StatCard label="MOTM Awards" value={stats.motm_awards} color="#F59E0B" />
         </Grid>
       </Grid>
     </Box>

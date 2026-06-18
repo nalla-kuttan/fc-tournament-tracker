@@ -73,7 +73,7 @@ export default function AIMatchReport({ match, stats }: AIMatchReportProps) {
                             color="primary"
                             onClick={generateReport}
                             startIcon={<NewspaperIcon />}
-                            sx={{ color: '#22C55E', borderColor: 'rgba(10,132,255,0.5)' }}
+                            sx={{ color: '#22C55E', borderColor: 'rgba(59, 130, 246, 0.5)' }}
                         >
                             Generate Report
                         </Button>
@@ -100,8 +100,8 @@ export default function AIMatchReport({ match, stats }: AIMatchReportProps) {
                         </Box>
                         <Box sx={{
                             fontFamily: '"Georgia", serif', // Newspaper feel
-                            '& h1, & h2, & h3, & strong': { fontWeight: 800, mb: 1, color: '#E5E5EA', display: 'block' },
-                            '& p': { mb: 2, lineHeight: 1.6, color: '#D1D1D6' },
+                            '& h1, & h2, & h3, & strong': { fontWeight: 800, mb: 1, color: '#F8FAFC', display: 'block' },
+                            '& p': { mb: 2, lineHeight: 1.6, color: '#94A3B8' },
                         }}>
                             <ReactMarkdown>{report}</ReactMarkdown>
                         </Box>

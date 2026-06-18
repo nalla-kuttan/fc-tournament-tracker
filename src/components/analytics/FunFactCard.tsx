@@ -19,9 +19,9 @@ export default function FunFactCard({ emoji, title, value, subtitle, color, inde
   return (
     <MotionBox
       layout
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.1, type: "spring", stiffness: 100 }}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.18, delay: index * 0.03, ease: 'easeOut' }}
       className="stat-card"
       sx={{
         minWidth: 160,
@@ -43,9 +43,8 @@ export default function FunFactCard({ emoji, title, value, subtitle, color, inde
         '&:hover': {
           transform: 'translateY(-3px)',
           borderColor: `${color}30`,
-          boxShadow: `0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px ${color}15`,
+          boxShadow: `0 8px 24px rgba(2, 6, 23, 0.3), 0 0 0 1px ${color}15`,
         },
-        // Subtle top accent line
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -55,7 +54,7 @@ export default function FunFactCard({ emoji, title, value, subtitle, color, inde
           height: '2px',
           background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
           opacity: 0.5,
-          borderRadius: '0 0 2px 2px',
+          borderRadius: '0 0 10px 10px',
         },
       }}
     >

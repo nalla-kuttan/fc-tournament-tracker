@@ -16,9 +16,12 @@
 # next.js
 /.next/
 /out/
+/macos/.build/
+/macos/.swiftpm/
 
 # production
 /build
+/dist/
 
 # misc
 .DS_Store

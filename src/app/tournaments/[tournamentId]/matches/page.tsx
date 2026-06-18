@@ -50,11 +50,19 @@ export default function MatchesPage() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} sx={{ mb: 2 }}>
-        Matches
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1.5, flexDirection: { xs: 'column', sm: 'row' }, mb: 2 }}>
+        <Box>
+          <Typography variant="h5" fontWeight={700}>
+            Match Queue
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {matches.filter((m) => !m.is_played && !m.is_bye).length} pending · {matches.filter((m) => m.is_played && !m.is_bye).length} recorded
+          </Typography>
+        </Box>
+        <Chip size="small" label={selectedRound ? `Round ${selectedRound}` : 'All rounds'} sx={{ color: '#22C55E', borderColor: 'rgba(34, 197, 94, 0.24)' }} />
+      </Box>
 
-      {/* iOS-style segmented filter */}
+      {/* Round filter */}
       <Box sx={{
         display: 'flex',
         gap: 0.5,
@@ -68,13 +76,13 @@ export default function MatchesPage() {
           label="All"
           onClick={() => setSelectedRound(null)}
           sx={{
-            bgcolor: selectedRound === null ? '#636366' : 'transparent',
-            color: selectedRound === null ? '#FFFFFF' : '#64748B',
+            bgcolor: selectedRound === null ? '#64748B' : 'transparent',
+            color: selectedRound === null ? '#F8FAFC' : '#64748B',
             fontWeight: 600,
             fontSize: '0.85rem',
-            borderRadius: '8px',
+            borderRadius: '10px',
             border: 'none',
-            '&:hover': { bgcolor: selectedRound === null ? '#636366' : 'rgba(148, 163, 184, 0.04)' },
+            '&:hover': { bgcolor: selectedRound === null ? '#64748B' : 'rgba(148, 163, 184, 0.04)' },
           }}
         />
         {rounds.map((r) => (
@@ -83,19 +91,19 @@ export default function MatchesPage() {
             label={`Round ${r}`}
             onClick={() => setSelectedRound(r)}
             sx={{
-              bgcolor: selectedRound === r ? '#636366' : 'transparent',
-              color: selectedRound === r ? '#FFFFFF' : '#64748B',
+              bgcolor: selectedRound === r ? '#64748B' : 'transparent',
+              color: selectedRound === r ? '#F8FAFC' : '#64748B',
               fontWeight: 600,
               fontSize: '0.85rem',
-              borderRadius: '8px',
+              borderRadius: '10px',
               border: 'none',
-              '&:hover': { bgcolor: selectedRound === r ? '#636366' : 'rgba(148, 163, 184, 0.04)' },
+              '&:hover': { bgcolor: selectedRound === r ? '#64748B' : 'rgba(148, 163, 184, 0.04)' },
             }}
           />
         ))}
       </Box>
 
-      {/* Matches by Round - iOS Grouped List */}
+      {/* Matches by round */}
       {Object.entries(grouped)
         .sort(([a], [b]) => Number(a) - Number(b))
         .map(([round, roundMatches]) => (

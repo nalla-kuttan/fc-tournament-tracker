@@ -55,7 +55,7 @@ export default function PlayerCard({
         sx={{
           width: 44,
           height: 44,
-          borderRadius: '14px',
+          borderRadius: '12px',
           background: `${avatarColor}18`,
           border: `1px solid ${avatarColor}35`,
           display: 'flex',
@@ -125,7 +125,7 @@ export default function PlayerCard({
                 {stats.total_goals} G
               </Typography>
               {elo && (
-                <Typography variant="caption" sx={{ color: '#A855F7', fontSize: '0.8rem' }}>
+                <Typography variant="caption" sx={{ color: '#3B82F6', fontSize: '0.8rem' }}>
                   {elo} PR
                 </Typography>
               )}
@@ -148,7 +148,7 @@ export default function PlayerCard({
               sx={{
                 width: 20,
                 height: 20,
-                borderRadius: '6px',
+                borderRadius: '10px',
                 display: 'grid',
                 placeItems: 'center',
                 fontSize: '0.65rem',
@@ -163,7 +163,7 @@ export default function PlayerCard({
         </Box>
       )}
 
-      <ChevronRightIcon sx={{ color: '#334155', fontSize: 20 }} />
+      <ChevronRightIcon sx={{ color: '#64748B', fontSize: 20 }} />
     </Box>
   );
 }

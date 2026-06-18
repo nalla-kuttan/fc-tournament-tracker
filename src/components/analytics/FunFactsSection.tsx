@@ -92,7 +92,7 @@ function computeFunFacts(
         title: 'Win Streak',
         value: `${bestStreak} in a row`,
         subtitle: bestStreakPlayer,
-        color: '#FF9F0A',
+        color: '#F59E0B',
       });
     }
   } catch { /* skip */ }
@@ -146,7 +146,7 @@ function computeFunFacts(
         title: 'Best Performance',
         value: `${maxRating.toFixed(1)} rating`,
         subtitle: `${maxRatingPlayer} ${maxRatingMatch}`,
-        color: '#FF9F0A',
+        color: '#F59E0B',
       });
     }
   } catch { /* skip */ }
@@ -184,7 +184,7 @@ function computeFunFacts(
         title: 'CS Streak',
         value: `${bestCSStreak} in a row`,
         subtitle: bestCSPlayer,
-        color: '#34C759',
+        color: '#22C55E',
       });
     }
   } catch { /* skip */ }
@@ -208,7 +208,7 @@ function computeFunFacts(
         title: 'Biggest Win',
         value: `${biggestWin.home_score}-${biggestWin.away_score}`,
         subtitle: `${winnerName ?? 'Unknown'} dominance`,
-        color: '#FF3B30',
+        color: '#EF4444',
       });
     }
   } catch { /* skip */ }
@@ -237,7 +237,7 @@ function computeFunFacts(
         title: 'MOTM King',
         value: `${maxMotm} awards`,
         subtitle: rp?.name ?? 'Unknown',
-        color: '#BF5AF2',
+        color: '#3B82F6',
       });
     }
   } catch { /* skip */ }
@@ -281,7 +281,7 @@ function computeFunFacts(
         title: 'Clinical Finisher',
         value: `+${maxOverperformance.toFixed(1)} xG Diff`,
         subtitle: `${overperformerName} ${overperformerMatch}`,
-        color: '#FFD60A', // iOS Yellow
+        color: '#F59E0B', // iOS Yellow
       });
     }
   } catch { /* skip */ }
@@ -317,7 +317,7 @@ function computeFunFacts(
         title: 'Brick Wall',
         value: `${maxTackles} tackles`,
         subtitle: `${tacklerName} ${tacklerMatch}`,
-        color: '#FF453A', // iOS Red/Orange
+        color: '#EF4444', // iOS Red/Orange
       });
     }
   } catch { /* skip */ }
@@ -353,7 +353,7 @@ function computeFunFacts(
         title: 'Master Reader',
         value: `${maxInterceptions} ints`,
         subtitle: `${interceptorName} ${interceptorMatch}`,
-        color: '#64D2FF', // iOS Light Blue
+        color: '#3B82F6', // iOS Light Blue
       });
     }
   } catch { /* skip */ }

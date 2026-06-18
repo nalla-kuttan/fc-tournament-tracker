@@ -25,7 +25,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
     awards.push({
       emoji: '⚽',
       title: 'Golden Boot',
-      color: '#FF9F0A',
+      color: '#F59E0B',
       winner: topScorer.player_name,
       team: topScorer.base_team,
       value: `${topScorer.total_goals} goals`,
@@ -52,7 +52,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
     awards.push({
       emoji: '🧤',
       title: 'Iron Wall',
-      color: '#34C759',
+      color: '#22C55E',
       winner: ironWall.player_name,
       team: ironWall.base_team,
       value: `${ironWall.clean_sheets} clean sheets`,
@@ -65,7 +65,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
     awards.push({
       emoji: '🌟',
       title: 'MOTM Magnet',
-      color: '#BF5AF2',
+      color: '#3B82F6',
       winner: motmKing.player_name,
       team: motmKing.base_team,
       value: `${motmKing.motm_awards} awards`,
@@ -78,7 +78,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
     awards.push({
       emoji: '🔄',
       title: 'Possession Master',
-      color: '#5AC8FA',
+      color: '#60A5FA',
       winner: possKing.player_name,
       team: possKing.base_team,
       value: `${possKing.avg_possession.toFixed(0)}% avg`,
@@ -91,7 +91,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
     awards.push({
       emoji: '💥',
       title: 'Goal Machine',
-      color: '#FF3B30',
+      color: '#EF4444',
       winner: goalMachine.player_name,
       team: goalMachine.base_team,
       value: `${goalMachine.goals_per_match.toFixed(2)} per match`,

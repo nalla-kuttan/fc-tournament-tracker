@@ -88,7 +88,7 @@ function RatingTable({ rows }: { rows: CompetitiveRatingRow[] }) {
             </Stack>
             <Box sx={{ textAlign: 'right', minWidth: 78 }}>
               <Typography sx={{ fontWeight: 950, fontSize: '1.2rem' }}>{row.rating}</Typography>
-              <Typography sx={{ color: row.movement >= 0 ? '#4ADE80' : '#F87171', fontSize: '0.78rem', fontWeight: 800 }}>
+              <Typography sx={{ color: row.movement >= 0 ? '#4ADE80' : '#EF4444', fontSize: '0.78rem', fontWeight: 800 }}>
                 {row.movement >= 0 ? '+' : ''}{row.movement}
               </Typography>
             </Box>
@@ -236,7 +236,7 @@ export default function CompetitivePage() {
             {tabLabels.map((label) => <Tab key={label} label={label} />)}
           </Tabs>
 
-          <Typography sx={{ mb: 1.5, fontWeight: 900, color: '#E2E8F0' }}>{activeTabLabel}</Typography>
+          <Typography sx={{ mb: 1.5, fontWeight: 900, color: '#F8FAFC' }}>{activeTabLabel}</Typography>
 
           {tab === 0 && (
             <Grid container spacing={2}>
@@ -394,7 +394,7 @@ export default function CompetitivePage() {
                     <Stack spacing={1}>
                       {(selectedSeasonRecords?.biggestLosses ?? []).slice(0, 5).map((row, index) => (
                         <Box key={`${row.matchId}-${row.playerId}`} sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-                          <Typography sx={{ width: 26, color: '#F87171', fontWeight: 900 }}>#{index + 1}</Typography>
+                          <Typography sx={{ width: 26, color: '#EF4444', fontWeight: 900 }}>#{index + 1}</Typography>
                           <Box sx={{ minWidth: 0, flex: 1 }}>
                             <Typography sx={{ fontWeight: 800 }} noWrap>{row.playerName} vs {row.opponentName}</Typography>
                             <Typography sx={{ color: '#94A3B8', fontSize: '0.78rem' }} noWrap>{row.goalDifference} goal margin</Typography>

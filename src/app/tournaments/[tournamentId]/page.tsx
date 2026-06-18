@@ -85,6 +85,8 @@ export default function TournamentDashboard() {
   const upcomingMatches = (tournament.matches ?? [])
     .filter((m) => !m.is_played && !m.is_bye)
     .slice(0, 3);
+  const playedCount = (tournament.matches ?? []).filter((m) => m.is_played && !m.is_bye).length;
+  const pendingCount = (tournament.matches ?? []).filter((m) => !m.is_played && !m.is_bye).length;
 
   return (
     <Box>
@@ -93,6 +95,42 @@ export default function TournamentDashboard() {
           {error}
         </Alert>
       )}
+
+      <GlassCard sx={{ mb: 3 }}>
+        <CardContent sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr auto' }, gap: 2, alignItems: 'center', p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
+          <Box>
+            <Typography variant="caption" sx={{ color: '#22C55E', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Tournament Command
+            </Typography>
+            <Typography variant="h5" fontWeight={800} sx={{ mt: 0.4 }}>
+              {hasMatches ? `${pendingCount} fixtures pending` : 'Schedule not generated'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {playedCount} played · {tournament.players?.length ?? 0} registered · {tournament.format} · {tournament.status}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+            <Button variant="outlined" onClick={() => router.push(`/tournaments/${tournamentId}/matches`)}>
+              Open Matches
+            </Button>
+            <Button variant="outlined" onClick={() => router.push(`/tournaments/${tournamentId}/standings`)}>
+              View Standings
+            </Button>
+            {!hasMatches && (
+              <AdminGate tournamentId={tournamentId}>
+                <Button
+                  variant="contained"
+                  startIcon={generating ? <CircularProgress size={18} color="inherit" /> : <PlayArrowIcon />}
+                  onClick={handleGenerateSchedule}
+                  disabled={generating || (tournament.players?.length ?? 0) < 2}
+                >
+                  Generate Schedule
+                </Button>
+              </AdminGate>
+            )}
+          </Box>
+        </CardContent>
+      </GlassCard>
 
       {!hasMatches && (
         <GlassCard sx={{ mb: 3 }}>
