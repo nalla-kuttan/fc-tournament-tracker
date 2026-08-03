@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import Avatar from '@mui/material/Avatar';
@@ -70,7 +71,7 @@ const COLORS = {
   panelSlate: '#0F172A',
   textIce: '#F8FAFC',
   textSteel: '#94A3B8',
-  textMuted: '#64748B',
+  textMuted: '#94A3B8',
   green: '#22C55E',
   greenLight: '#4ADE80',
   greenDark: '#16A34A',
@@ -265,7 +266,7 @@ function MatchNightCommand({
               fontWeight: 900,
             }}
           />
-          <Typography sx={{ color: COLORS.textIce, fontSize: { xs: '1.55rem', sm: '2rem' }, lineHeight: 1.05, fontWeight: 950, letterSpacing: '-0.02em' }}>
+          <Typography component="h1" sx={{ color: COLORS.textIce, fontSize: { xs: '1.55rem', sm: '2rem' }, lineHeight: 1.05, fontWeight: 950, letterSpacing: '-0.02em' }}>
             {nextMatch
               ? `${nextMatch.home_player?.name ?? 'Home'} vs ${nextMatch.away_player?.name ?? 'Away'}`
               : hasTournament
@@ -657,7 +658,7 @@ export default function HomePage() {
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                 <SectionTitle title="Top Scorers" action={<Button size="small" onClick={() => router.push('/analytics/global')} sx={{ color: COLORS.blueLight, py: 0.25 }}>View All</Button>} />
                 {(analytics?.top_scorers ?? []).slice(0, 5).map((row, index) => (
-                  <Box key={row.registered_player_id} onClick={() => router.push(`/players/${row.registered_player_id}`)} sx={{ display: 'grid', gridTemplateColumns: '26px 1fr auto', alignItems: 'center', gap: 1, py: 0.8, cursor: 'pointer' }}>
+                  <Box component={Link} href={`/players/${row.registered_player_id}`} key={row.registered_player_id} sx={{ display: 'grid', gridTemplateColumns: '26px 1fr auto', alignItems: 'center', gap: 1, py: 0.8, color: 'inherit', textDecoration: 'none', '&:focus-visible': { outline: '2px solid #4ADE80', outlineOffset: 2 } }}>
                     <Typography sx={{ fontWeight: 950 }}>{index + 1}</Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
                       <Avatar src={getPlayerImagePath(row.player_name)} sx={{ width: 34, height: 34 }}>{row.player_name.slice(0, 1)}</Avatar>
@@ -679,7 +680,7 @@ export default function HomePage() {
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                 <SectionTitle title="Top Performers" action={<Button size="small" onClick={() => router.push('/analytics/global')} sx={{ color: COLORS.blueLight, py: 0.25 }}>View All</Button>} />
                 {powerRankings.slice(0, 5).map((row) => (
-                  <Box key={row.player.id} onClick={() => router.push(`/players/${row.player.id}`)} sx={{ display: 'grid', gridTemplateColumns: '26px 1fr auto', alignItems: 'center', gap: 1, py: 0.8, cursor: 'pointer' }}>
+                  <Box component={Link} href={`/players/${row.player.id}`} key={row.player.id} sx={{ display: 'grid', gridTemplateColumns: '26px 1fr auto', alignItems: 'center', gap: 1, py: 0.8, color: 'inherit', textDecoration: 'none', '&:focus-visible': { outline: '2px solid #4ADE80', outlineOffset: 2 } }}>
                     <Typography sx={{ fontWeight: 950 }}>{row.rank}</Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
                       <Avatar src={getPlayerImagePath(row.player.name)} sx={{ width: 34, height: 34 }}>{row.player.name.slice(0, 1)}</Avatar>
@@ -738,13 +739,18 @@ export default function HomePage() {
               />
               {nextMatch ? (
                 <Box
-                  onClick={() => router.push(`/tournaments/${nextMatch.tournament_id}`)}
+                  component={Link}
+                  href={`/tournaments/${nextMatch.tournament_id}`}
+                  aria-label="Open the next tournament fixture"
                   sx={{
                     p: 2,
                     borderRadius: '12px',
                     background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.13), rgba(15, 23, 42, 0.72))',
                     border: '1px solid rgba(148, 163, 184, 0.12)',
                     cursor: 'pointer',
+                    color: 'inherit',
+                    textDecoration: 'none',
+                    '&:focus-visible': { outline: '3px solid #4ADE80', outlineOffset: 2 },
                   }}
                 >
                   <Typography sx={{ color: COLORS.textIce, textAlign: 'center', fontWeight: 800, mb: 0.5 }}>Round {nextMatch.round_number}</Typography>
@@ -927,7 +933,7 @@ export default function HomePage() {
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <SectionTitle title="Recent Activity" />
               {recentMatches.length > 0 ? recentMatches.map((match, index) => (
-                <Box key={match.id} onClick={() => router.push(`/tournaments/${match.tournament_id}`)} sx={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 1, py: 1, alignItems: 'center', cursor: 'pointer', borderTop: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.07)' }}>
+                <Box component={Link} href={`/tournaments/${match.tournament_id}`} key={match.id} sx={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 1, py: 1, alignItems: 'center', color: 'inherit', textDecoration: 'none', borderTop: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.07)', '&:focus-visible': { outline: '2px solid #4ADE80', outlineOffset: 2 } }}>
                   <Box sx={{ minWidth: 0 }}>
                     <Typography sx={{ fontWeight: 850, fontSize: '0.86rem' }} noWrap>
                       {match.home_player?.name} {match.home_score} - {match.away_score} {match.away_player?.name}

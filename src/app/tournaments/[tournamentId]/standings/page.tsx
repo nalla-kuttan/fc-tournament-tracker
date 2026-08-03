@@ -34,7 +34,7 @@ export default function StandingsPage() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
+      <Typography component="h1" variant="h5" fontWeight={700} sx={{ mb: 3 }}>
         League Standings
       </Typography>
       {standings.length === 0 ? (

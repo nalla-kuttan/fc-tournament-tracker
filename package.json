@@ -6,33 +6,34 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint src next.config.ts eslint.config.mjs",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build",
     "test": "vitest run",
     "mac:dev": "./script/build_and_run.sh",
     "mac:build": "cd macos && swift build"
   },
   "dependencies": {
-    "@ducanh2912/next-pwa": "^10.2.9",
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@google/genai": "^1.44.0",
-    "@hello-pangea/dnd": "^18.0.1",
-    "@mui/icons-material": "^7.3.8",
-    "@mui/material": "^7.3.8",
-    "@mui/material-nextjs": "^7.3.8",
-    "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.98.0",
-    "bcryptjs": "^3.0.3",
-    "chart.js": "^4.5.1",
-    "dayjs": "^1.11.19",
-    "framer-motion": "^12.38.0",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-chartjs-2": "^5.3.1",
-    "react-dom": "19.2.3",
-    "react-markdown": "^10.1.0",
-    "react-parallax-tilt": "^1.7.320",
-    "swr": "^2.4.1"
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1",
+    "@google/genai": "2.15.0",
+    "@hello-pangea/dnd": "18.0.1",
+    "@mui/icons-material": "7.3.8",
+    "@mui/material": "7.3.8",
+    "@mui/material-nextjs": "7.3.8",
+    "@supabase/ssr": "0.12.4",
+    "@supabase/supabase-js": "2.111.0",
+    "bcryptjs": "3.0.3",
+    "chart.js": "4.5.1",
+    "dayjs": "1.11.19",
+    "framer-motion": "12.43.0",
+    "next": "16.2.12",
+    "react": "19.2.8",
+    "react-chartjs-2": "5.3.1",
+    "react-dom": "19.2.8",
+    "react-markdown": "10.1.0",
+    "swr": "2.4.2",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -40,9 +41,34 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.2.12",
     "pg": "^8.19.0",
     "typescript": "^5",
     "vitest": "^4.1.7"
+  },
+  "engines": {
+    "node": ">=20.9 <25",
+    "npm": ">=10"
+  },
+  "overrides": {
+    "@google/genai": {
+      "protobufjs": "7.6.5",
+      "ws": "8.21.1"
+    },
+    "protobufjs": {
+      "@protobufjs/utf8": "1.1.2"
+    },
+    "next": {
+      "postcss": "8.5.25",
+      "sharp": "0.35.3"
+    },
+    "minimatch@>=9": {
+      "brace-expansion": "2.1.4"
+    },
+    "brace-expansion@1": "1.1.17",
+    "yaml@1": "1.10.3",
+    "vite": {
+      "yaml": "2.8.1"
+    }
   }
 }

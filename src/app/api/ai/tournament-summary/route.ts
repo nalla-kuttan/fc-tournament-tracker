@@ -1,68 +1,21 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
-import { getErrorMessage, rateLimit, readJsonBody } from '@/lib/api-guards';
-import type { Match, StandingRow } from '@/lib/types';
-
-type TournamentSummaryRequest = {
-    tournament?: {
-        name?: string;
-        format: string;
-        status: string;
-    };
-    standings?: StandingRow[];
-    matches?: Match[];
-};
+import { generateAiText } from '@/lib/ai';
+import { getTournamentSummaryFacts } from '@/lib/ai-data';
+import { handleApiError, rateLimit, readJsonBody } from '@/lib/api-guards';
+import { aiTournamentSchema } from '@/lib/validation';
 
 export async function POST(request: Request) {
-    try {
-        const limited = rateLimit(request, 'ai:tournament-summary', 8);
-        if (limited) return limited;
-
-        if (!process.env.GEMINI_API_KEY) {
-            return NextResponse.json(
-                { error: 'Gemini API key is not configured' },
-                { status: 500 }
-            );
-        }
-
-        const { tournament, standings, matches } = await readJsonBody<TournamentSummaryRequest>(request);
-
-        if (!tournament || !standings) {
-            return NextResponse.json(
-                { error: 'Tournament data and standings are required' },
-                { status: 400 }
-            );
-        }
-
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        const prompt = `
-      You are an energetic, slightly cheeky football pundit analyzing a tournament on the "FC Tournament Tracker" app.
-      
-      Here is the data for the tournament "${tournament.name}" (${tournament.format}):
-      Status: ${tournament.status}
-      
-      Standings:
-      ${JSON.stringify(standings, null, 2)}
-      
-      Matches (if any):
-      ${JSON.stringify(matches?.slice(0, 5) || [], null, 2)}
-      
-      Write a colorful, engaging summary of how the tournament is going (or how it ended, if completed).
-      Call out the best players, anyone who is underperforming, and note any interesting goal differences or win rates.
-      Format your response using Markdown (make use of bolding, italics, and lists where appropriate).
-    `;
-
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        });
-
-        return NextResponse.json({ summary: response.text });
-    } catch (error: unknown) {
-        console.error('Gemini API Error:', error);
-        return NextResponse.json(
-            { error: getErrorMessage(error, 'Failed to generate AI summary') },
-            { status: 500 }
-        );
-    }
+  try {
+    const limited = await rateLimit(request, 'ai:tournament-summary', 4, 5 * 60);
+    if (limited) return limited;
+    const { tournamentId } = await readJsonBody(request, aiTournamentSchema);
+    const facts = await getTournamentSummaryFacts(tournamentId);
+    const summary = await generateAiText(
+      'Summarize the tournament state. Call out leaders and notable recorded results without speculating about real-world ability.',
+      facts
+    );
+    return NextResponse.json({ summary });
+  } catch (error) {
+    return handleApiError(error, 'Generate tournament summary');
+  }
 }

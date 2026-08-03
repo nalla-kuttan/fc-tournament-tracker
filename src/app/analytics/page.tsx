@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import Box from '@mui/material/Box';
@@ -30,7 +30,6 @@ interface GlobalData {
 }
 
 export default function AnalyticsPage() {
-  const router = useRouter();
   const { data } = useSWR<GlobalData>('/api/analytics/global', fetcher, { revalidateOnFocus: false });
   const summary = data ? getAnalyticsSummary(data.career_stats, data.all_matches, data.all_goals, data.registered_players) : null;
   const rivalries = data ? getRivalries(data.registered_players, data.player_instances, data.all_matches) : [];
@@ -72,35 +71,12 @@ export default function AnalyticsPage() {
 
   return (
     <Box>
-      {/* Spatial Info Panel instead of flat floating text */}
-      <Box className="animate-section" sx={{ mb: 4, mt: 1, perspective: 1000 }}>
-          <Box
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 2,
-              background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              backdropFilter: 'blur(16px)',
-              border: '1px solid rgba(34, 197, 94, 0.2)',
-              borderRadius: '16px',
-              padding: '12px 24px',
-              boxShadow: '0 8px 32px rgba(2, 6, 23, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            <BarChartIcon sx={{ fontSize: 32, color: '#22C55E', filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.5))' }} />
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 800,
-                letterSpacing: '-0.5px',
-                color: '#F8FAFC',
-                textShadow: '0 2px 10px rgba(0,0,0,0.5)',
-              }}
-            >
-              Analytics
-            </Typography>
-          </Box>
+      <Box className="animate-section" sx={{ mb: 3, mt: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <BarChartIcon aria-hidden="true" sx={{ fontSize: 34, color: '#4ADE80' }} />
+        <Box>
+          <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>Analytics</Typography>
+          <Typography color="text.secondary">Explore records, rivalries, rankings, and match trends.</Typography>
+        </Box>
       </Box>
 
       {summary && (
@@ -143,8 +119,9 @@ export default function AnalyticsPage() {
       >
         {items.map((item, index) => (
           <Box
+            component={Link}
+            href={item.href}
             key={item.title}
-            onClick={() => router.push(item.href)}
             className="list-row"
             sx={{
               display: 'flex',
@@ -152,8 +129,11 @@ export default function AnalyticsPage() {
               px: 2,
               py: 2,
               cursor: 'pointer',
+              color: 'inherit',
+              textDecoration: 'none',
               borderBottom: index < items.length - 1 ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
               transition: 'background 150ms ease',
+              '&:focus-visible': { outline: '3px solid #4ADE80', outlineOffset: -3 },
             }}
           >
             {/* Icon */}

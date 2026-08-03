@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
@@ -28,14 +28,15 @@ export default function PlayerCard({
   showDivider?: boolean;
   index?: number;
 }) {
-  const router = useRouter();
   const avatarColor = getAvatarColor(player.id || player.name);
   const archetype = stats ? getPlayerArchetype(stats) : null;
   const imagePath = getPlayerImagePath(player.name);
 
   return (
       <Box
-        onClick={() => router.push(`/players/${player.id}`)}
+        component={Link}
+        href={`/players/${player.id}`}
+        aria-label={`View ${player.name}'s profile`}
         className="list-row"
       sx={{
         display: 'flex',
@@ -43,11 +44,14 @@ export default function PlayerCard({
         px: 2,
         py: 1.75,
         cursor: 'pointer',
+        color: 'inherit',
+        textDecoration: 'none',
         borderBottom: showDivider ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
         animation: `fadeInUp 0.28s ease ${index * 0.03}s both`,
         transition: 'background 150ms ease, transform 150ms ease',
         '&:hover': { transform: 'translateX(2px)' },
         '&:active': { transform: 'scale(0.99)' },
+        '&:focus-visible': { outline: '3px solid rgba(74, 222, 128, 0.7)', outlineOffset: -3 },
       }}
     >
       {/* Avatar */}
@@ -110,12 +114,12 @@ export default function PlayerCard({
           ))}
         </Box>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.25, alignItems: 'center' }}>
-          <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem' }}>
+          <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>
             {player.base_team}
           </Typography>
           {stats && stats.total_matches > 0 && (
             <>
-              <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem' }}>
+              <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>
                 {stats.total_matches} MP
               </Typography>
               <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>
@@ -163,7 +167,7 @@ export default function PlayerCard({
         </Box>
       )}
 
-      <ChevronRightIcon sx={{ color: '#64748B', fontSize: 20 }} />
+      <ChevronRightIcon aria-hidden="true" sx={{ color: '#94A3B8', fontSize: 20 }} />
     </Box>
   );
 }

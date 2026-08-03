@@ -7,7 +7,7 @@ export default function NewPlayerPage() {
   return (
     <Box>
       <BackButton />
-      <Typography variant="h4" fontWeight={700} gutterBottom>
+      <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
         Register Player
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>

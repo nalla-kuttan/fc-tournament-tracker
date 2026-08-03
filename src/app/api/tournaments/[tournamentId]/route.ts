@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
 import { createServerClient, createAdminClient } from '@/lib/supabase/server';
-import { verifyPin } from '@/lib/auth';
+import { handleApiError, rateLimit, readJsonBody, verifyTournamentPin } from '@/lib/api-guards';
+import { pinRequestSchema, tournamentUpdateSchema } from '@/lib/validation';
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ tournamentId: string }> }
 ) {
-  const { tournamentId } = await params;
-  const supabase = createServerClient();
+  try {
+    const { tournamentId } = await params;
+    const supabase = createServerClient();
 
   let tournamentResult = await supabase
     .from('tournament')
@@ -30,14 +32,14 @@ export async function GET(
   }
 
   // Get players
-  const { data: players } = await supabase
+    const { data: players, error: playersError } = await supabase
     .from('player')
     .select('*, registered_player:registered_player_id(id, name, base_team)')
     .eq('tournament_id', tournamentId)
     .order('seed');
 
   // Get matches with player info
-  const { data: matches } = await supabase
+    const { data: matches, error: matchesError } = await supabase
     .from('match')
     .select('*, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team)')
     .eq('tournament_id', tournamentId)
@@ -45,20 +47,24 @@ export async function GET(
     .order('match_number');
 
   // Get goals
-  const { data: goals } = await supabase
-    .from('goal')
-    .select('*, player:player_id(id, name)')
-    .in(
-      'match_id',
-      (matches ?? []).map((m) => m.id)
-    );
+  const matchIds = (matches ?? []).map((match) => match.id);
+  const goalsResult = matchIds.length > 0
+    ? await supabase.from('goal').select('*, player:player_id(id, name)').in('match_id', matchIds)
+    : { data: [], error: null };
 
-  return NextResponse.json({
-    ...tournament,
-    players: players ?? [],
-    matches: matches ?? [],
-    goals: goals ?? [],
-  });
+    if (playersError) throw playersError;
+    if (matchesError) throw matchesError;
+    if (goalsResult.error) throw goalsResult.error;
+
+    return NextResponse.json({
+      ...tournament,
+      players,
+      matches,
+      goals: goalsResult.data ?? [],
+    }, { headers: { 'Cache-Control': 'private, no-store' } });
+  } catch (error) {
+    return handleApiError(error, 'Load tournament');
+  }
 }
 
 export async function PATCH(
@@ -68,25 +74,14 @@ export async function PATCH(
   const { tournamentId } = await params;
 
   try {
-    const body = await request.json();
-    const { pin, status, name, format } = body;
+    const limited = await rateLimit(request, 'tournaments:update', 20);
+    if (limited) return limited;
+    const { pin, status, name, format } = await readJsonBody(request, tournamentUpdateSchema);
 
     // Verify admin PIN
     const supabase = createServerClient();
-    const { data: tournament } = await supabase
-      .from('tournament')
-      .select('pin')
-      .eq('id', tournamentId)
-      .single();
-
-    if (!tournament) {
-      return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
-    }
-
-    const isValid = await verifyPin(pin, tournament.pin);
-    if (!isValid) {
-      return NextResponse.json({ error: 'Invalid PIN' }, { status: 403 });
-    }
+    const pinCheck = await verifyTournamentPin(supabase, tournamentId, pin);
+    if (!pinCheck.ok) return pinCheck.response;
 
     // Build update object with only provided fields
     const updates: Record<string, string> = {};
@@ -124,13 +119,11 @@ export async function PATCH(
       .select('id, name, format, status, created_at')
       .single();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    if (error) throw error;
 
     return NextResponse.json(data);
-  } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  } catch (error) {
+    return handleApiError(error, 'Update tournament');
   }
 }
 
@@ -141,46 +134,22 @@ export async function DELETE(
   const { tournamentId } = await params;
 
   try {
-    const { pin } = await request.json();
+    const limited = await rateLimit(request, 'tournaments:delete', 5, 5 * 60);
+    if (limited) return limited;
+    const { pin } = await readJsonBody(request, pinRequestSchema);
 
     // Verify admin PIN
     const supabase = createServerClient();
-    const { data: tournament } = await supabase
-      .from('tournament')
-      .select('pin')
-      .eq('id', tournamentId)
-      .single();
-
-    if (!tournament) {
-      return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
-    }
-
-    const isValid = await verifyPin(pin, tournament.pin);
-    if (!isValid) {
-      return NextResponse.json({ error: 'Invalid PIN' }, { status: 403 });
-    }
+    const pinCheck = await verifyTournamentPin(supabase, tournamentId, pin);
+    if (!pinCheck.ok) return pinCheck.response;
 
     const adminClient = createAdminClient();
 
-    // Get match IDs for cascading goal deletes
-    const { data: matches } = await adminClient
-      .from('match')
-      .select('id')
-      .eq('tournament_id', tournamentId);
-
-    const matchIds = (matches ?? []).map((m) => m.id);
-
-    // Cascade delete: goals → matches → players → tournament
-    if (matchIds.length > 0) {
-      await adminClient.from('goal').delete().in('match_id', matchIds);
-      await adminClient.from('match').delete().eq('tournament_id', tournamentId);
-    }
-
-    await adminClient.from('player').delete().eq('tournament_id', tournamentId);
-    await adminClient.from('tournament').delete().eq('id', tournamentId);
+    const { error } = await adminClient.from('tournament').delete().eq('id', tournamentId);
+    if (error) throw error;
 
     return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  } catch (error) {
+    return handleApiError(error, 'Delete tournament');
   }
 }

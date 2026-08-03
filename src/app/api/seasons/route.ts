@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { readJsonBody } from '@/lib/api-guards';
+import { handleApiError, rateLimit, readJsonBody } from '@/lib/api-guards';
 import { verifyPin } from '@/lib/auth';
-import { ensureTournamentDerivedSeasons } from '@/lib/competitive-data';
 import { buildTournamentDerivedSeasons } from '@/lib/competitive';
 import { createAdminClient, createServerClient } from '@/lib/supabase/server';
+import { seasonMutationSchema } from '@/lib/validation';
 
 type SeasonMutation = {
   id?: string;
@@ -16,27 +16,35 @@ type SeasonMutation = {
 };
 
 export async function GET() {
-  await ensureTournamentDerivedSeasons();
-  const supabase = createServerClient();
-  const { data, error } = await supabase
-    .from('season')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    const { data: tournaments } = await supabase
-      .from('tournament')
-      .select('id, name, format, status, created_at')
+  try {
+    const supabase = createServerClient();
+    const { data, error } = await supabase
+      .from('season')
+      .select('*')
       .order('created_at', { ascending: false });
-    return NextResponse.json(buildTournamentDerivedSeasons(tournaments ?? []).seasons);
-  }
 
-  return NextResponse.json(data ?? []);
+    if (error) {
+      const fallback = await supabase
+        .from('tournament')
+        .select('id, name, format, status, created_at')
+        .order('created_at', { ascending: false });
+      if (fallback.error) throw fallback.error;
+      return NextResponse.json(buildTournamentDerivedSeasons(fallback.data ?? []).seasons, {
+        headers: { 'Cache-Control': 'private, no-store' },
+      });
+    }
+
+    return NextResponse.json(data ?? [], { headers: { 'Cache-Control': 'private, no-store' } });
+  } catch (error) {
+    return handleApiError(error, 'Load seasons');
+  }
 }
 
 export async function POST(request: Request) {
   try {
-    const body = await readJsonBody<SeasonMutation>(request);
+    const limited = await rateLimit(request, 'seasons:create', 6, 5 * 60);
+    if (limited) return limited;
+    const body = await readJsonBody(request, seasonMutationSchema);
     const adminCheck = await verifySeasonAdmin(body);
     if (!adminCheck.ok) return adminCheck.response;
 
@@ -57,19 +65,19 @@ export async function POST(request: Request) {
       .select()
       .single();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    if (error) throw error;
 
     return NextResponse.json(data, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  } catch (error) {
+    return handleApiError(error, 'Create season');
   }
 }
 
 export async function PATCH(request: Request) {
   try {
-    const body = await readJsonBody<SeasonMutation>(request);
+    const limited = await rateLimit(request, 'seasons:update', 12, 5 * 60);
+    if (limited) return limited;
+    const body = await readJsonBody(request, seasonMutationSchema);
     const adminCheck = await verifySeasonAdmin(body);
     if (!adminCheck.ok) return adminCheck.response;
 
@@ -99,13 +107,11 @@ export async function PATCH(request: Request) {
       .select()
       .single();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    if (error) throw error;
 
     return NextResponse.json(data);
-  } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  } catch (error) {
+    return handleApiError(error, 'Update season');
   }
 }
 

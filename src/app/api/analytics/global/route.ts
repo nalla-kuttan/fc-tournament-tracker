@@ -1,53 +1,44 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
-import { aggregateCareerStats } from '@/lib/algorithms/stats';
+import { aggregateCareerStatsBatch } from '@/lib/algorithms/stats';
+import { handleApiError } from '@/lib/api-guards';
 import type { Match } from '@/lib/types';
 
 export async function GET() {
-  const supabase = createServerClient();
+  try {
+    const supabase = createServerClient();
 
-  // Get all registered players
-  const { data: registeredPlayers } = await supabase
-    .from('registered_player')
-    .select('id, name, base_team');
+    const [registeredResult, playersResult, matchesResult, goalsResult] = await Promise.all([
+      supabase.from('registered_player').select('id, name, base_team'),
+      supabase.from('player').select('id, registered_player_id, name, team'),
+      supabase
+        .from('match')
+        .select('*, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team), tournament:tournament_id(id, name, format)')
+        .eq('is_played', true)
+        .eq('is_bye', false)
+        .order('played_at', { ascending: false }),
+      supabase.from('goal').select('player_id, minute, match_id'),
+    ]);
+
+    const queryError = registeredResult.error || playersResult.error || matchesResult.error || goalsResult.error;
+    if (queryError) throw queryError;
+    const registeredPlayers = registeredResult.data ?? [];
 
   if (!registeredPlayers || registeredPlayers.length === 0) {
-    return NextResponse.json({
+      return NextResponse.json({
       career_stats: [],
       top_scorers: [],
       biggest_wins: [],
     });
   }
 
-  // Get all player instances
-  const { data: allPlayers } = await supabase
-    .from('player')
-    .select('id, registered_player_id, name, team');
-
-  // Get all played matches with stats
-  const { data: allMatches } = await supabase
-    .from('match')
-    .select('*, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team), tournament:tournament_id(id, name, format)')
-    .eq('is_played', true)
-    .eq('is_bye', false)
-    .order('played_at', { ascending: false });
-
-  // Get all goals (include minute and match_id for analytics)
-  const { data: allGoals } = await supabase
-    .from('goal')
-    .select('player_id, minute, match_id');
-
-  const matches = (allMatches ?? []) as Match[];
-  const players = allPlayers ?? [];
-  const goals = allGoals ?? [];
+    const matches = (matchesResult.data ?? []) as Match[];
+    const players = playersResult.data ?? [];
+    const goals = goalsResult.data ?? [];
 
   // Build career stats for every registered player
-  const careerStats = registeredPlayers.map((rp) => {
-    const playerIds = players
-      .filter((p) => p.registered_player_id === rp.id)
-      .map((p) => p.id);
-    return aggregateCareerStats(rp.id, rp.name, rp.base_team, playerIds, matches, goals);
-  }).filter((s) => s.total_matches > 0);
+    const careerStats = aggregateCareerStatsBatch(registeredPlayers, players, matches, goals)
+      .filter((stats) => stats.total_matches > 0);
 
   // Top scorers: sorted by total_goals desc
   const topScorers = [...careerStats]
@@ -112,7 +103,7 @@ export async function GET() {
   const cleanSheetRankings = [...careerStats]
     .sort((a, b) => b.clean_sheets - a.clean_sheets);
 
-  return NextResponse.json({
+    return NextResponse.json({
     career_stats: careerStats.sort((a, b) => b.win_rate - a.win_rate),
     top_scorers: topScorers,
     biggest_wins: biggestWins,
@@ -128,5 +119,8 @@ export async function GET() {
     all_goals: goals,
     registered_players: registeredPlayers,
     player_instances: players,
-  });
+    }, { headers: { 'Cache-Control': 'private, no-store' } });
+  } catch (error) {
+    return handleApiError(error, 'Load global analytics');
+  }
 }

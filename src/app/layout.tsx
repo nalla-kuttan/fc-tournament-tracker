@@ -7,6 +7,8 @@ import theme from '@/theme';
 import { AdminProvider } from '@/contexts/AdminContext';
 import AppShell from '@/components/layout/AppShell';
 import DeferredMusicPlayer from '@/components/layout/DeferredMusicPlayer';
+import PwaManager from '@/components/pwa/PwaManager';
+import DataProvider from '@/components/providers/DataProvider';
 import './globals.css';
 
 const chakraPetch = Chakra_Petch({
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
   title: 'FC Tournament Tracker',
   description: 'Manage and track FIFA/FC tournaments with detailed stats and analytics',
   applicationName: 'FC Tracker',
-  manifest: '/manifest.json',
+  manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -33,8 +35,6 @@ export const viewport: Viewport = {
   themeColor: '#020617',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({
@@ -48,10 +48,13 @@ export default function RootLayout({
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <AdminProvider>
-              <AppShell>{children}</AppShell>
-              <DeferredMusicPlayer />
-            </AdminProvider>
+            <DataProvider>
+              <AdminProvider>
+                <AppShell>{children}</AppShell>
+                <DeferredMusicPlayer />
+                <PwaManager />
+              </AdminProvider>
+            </DataProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

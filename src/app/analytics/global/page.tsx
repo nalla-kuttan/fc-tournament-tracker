@@ -179,7 +179,7 @@ export default function GlobalAnalyticsPage() {
     return (
       <Box>
         <BackButton />
-        <Typography variant="h4" fontWeight={700} gutterBottom>
+        <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
           Global Analytics
         </Typography>
         <Typography color="text.secondary">No match data available yet. Play some matches first!</Typography>
@@ -190,7 +190,7 @@ export default function GlobalAnalyticsPage() {
   return (
     <Box>
       <BackButton />
-      <Typography variant="h4" fontWeight={700} gutterBottom>
+      <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
         Global Analytics
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>

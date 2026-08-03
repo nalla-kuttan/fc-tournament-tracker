@@ -39,7 +39,7 @@ export default function EmptyState({
         {title}
       </Typography>
       {description && (
-        <Typography variant="body1" sx={{ color: '#64748B', mb: 3, maxWidth: 400, mx: 'auto' }}>
+        <Typography variant="body1" sx={{ color: '#94A3B8', mb: 3, maxWidth: 400, mx: 'auto' }}>
           {description}
         </Typography>
       )}

@@ -36,8 +36,8 @@ Gemini integrations add a pundit layer on top of the raw numbers:
 
 ### App Experience
 
-- Responsive glassmorphism UI built with MUI.
-- Progressive Web App support.
+- Responsive, accessible match-night UI built with MUI.
+- Progressive Web App support with an explicit offline indicator and controlled caching.
 - Optional SwiftUI macOS shell that launches and wraps the local Next.js app.
 - In-app music track support via Supabase.
 
@@ -58,7 +58,7 @@ Gemini integrations add a pundit layer on top of the raw numbers:
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 20.9–24
 - npm
 - A Supabase project
 - A Google AI Studio API key for Gemini features
@@ -67,7 +67,7 @@ Gemini integrations add a pundit layer on top of the raw numbers:
 ### 1. Install dependencies
 
 ```bash
-npm install
+npm ci
 ```
 
 ### 2. Create the database
@@ -78,7 +78,7 @@ Open the Supabase SQL editor for your project and run:
 -- contents of supabase-schema.sql
 ```
 
-The schema creates the core tables, RLS policies, realtime publication entries, the `standings` view, and helper functions for atomic match saves and bracket advancement.
+Then apply every pending file in `supabase/migrations/` with the Supabase CLI. The schema creates the core tables; the migrations add atomic tournament/schedule/goal/bracket operations, durable rate limiting, historical season backfill, indexes, and restricted function permissions.
 
 ### 3. Configure environment variables
 
@@ -89,6 +89,7 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 GEMINI_API_KEY=your_google_gemini_api_key
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` is required by server-side API routes that create tournaments, save match results, manage players, and update brackets. Keep it server-only and never expose it in client-side code.
@@ -110,6 +111,9 @@ npm run dev        # Start the Next.js development server
 npm run build      # Build the production web app
 npm run start      # Start the production Next.js server
 npm run lint       # Run ESLint
+npm run typecheck  # Check TypeScript without emitting files
+npm test           # Run algorithm and data-aggregation tests
+npm run check      # Run the complete release gate
 npm run mac:dev    # Build and launch the SwiftUI macOS wrapper
 npm run mac:build  # Compile the Swift package only
 ```
@@ -145,6 +149,7 @@ src/lib/                 Supabase clients, algorithms, guards, types, and analyt
 macos/                   SwiftUI macOS wrapper
 script/                  Local helper scripts
 supabase-schema.sql      Supabase schema, policies, views, and database functions
+supabase/migrations/     Ordered database hardening and data-integrity changes
 ```
 
 ---
@@ -163,5 +168,6 @@ supabase-schema.sql      Supabase schema, policies, views, and database function
 
 - Tournament PINs are hashed with bcrypt before storage.
 - Public reads are enabled through Supabase RLS policies; writes go through protected server API routes.
+- Apply every database migration before deploying a matching application release; the server routes intentionally depend on the atomic RPCs introduced by the production-hardening migration.
 - Gemini features require `GEMINI_API_KEY`. The rest of the tracker can still run without AI responses, but AI endpoints will return configuration errors until the key is present.
 - Player images and visual mappings live in `src/lib/player-images.ts` and related player components.

@@ -102,7 +102,7 @@ export default function TournamentDashboard() {
             <Typography variant="caption" sx={{ color: '#22C55E', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Tournament Command
             </Typography>
-            <Typography variant="h5" fontWeight={800} sx={{ mt: 0.4 }}>
+            <Typography component="h1" variant="h5" fontWeight={800} sx={{ mt: 0.4 }}>
               {hasMatches ? `${pendingCount} fixtures pending` : 'Schedule not generated'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -287,7 +287,7 @@ export default function TournamentDashboard() {
       <AIPunditModal
         open={punditOpen}
         onClose={() => setPunditOpen(false)}
-        tournament={tournament}
+        tournament={{ ...tournament, id: tournamentId }}
         standings={standings}
         matches={tournament.matches}
       />

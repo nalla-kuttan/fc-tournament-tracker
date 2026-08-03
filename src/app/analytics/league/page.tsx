@@ -117,7 +117,7 @@ export default function LeagueAnalyticsPage() {
     return (
       <Box>
         <BackButton />
-        <Typography variant="h4" fontWeight={700} gutterBottom>
+        <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
           League Analytics
         </Typography>
         <Typography color="text.secondary">No active or completed tournaments found.</Typography>
@@ -130,7 +130,7 @@ export default function LeagueAnalyticsPage() {
       <BackButton />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4, flexWrap: 'wrap' }}>
         <Box>
-          <Typography variant="h4" fontWeight={700}>
+          <Typography component="h1" variant="h4" fontWeight={700}>
             League Analytics
           </Typography>
           <Typography variant="body2" color="text.secondary">

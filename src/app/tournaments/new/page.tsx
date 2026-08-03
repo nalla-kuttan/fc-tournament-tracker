@@ -7,7 +7,7 @@ export default function NewTournamentPage() {
   return (
     <Box>
       <BackButton />
-      <Typography variant="h4" fontWeight={700} gutterBottom>
+      <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
         Create Tournament
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>

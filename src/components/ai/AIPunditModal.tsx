@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -14,7 +14,7 @@ import ReactMarkdown from 'react-markdown';
 import type { StandingRow, Match } from '@/lib/types';
 
 interface PunditTournament {
-    id?: string;
+    id: string;
     name?: string;
     format: string;
     status: string;
@@ -32,8 +32,6 @@ export default function AIPunditModal({
     open,
     onClose,
     tournament,
-    standings,
-    matches,
 }: AIPunditModalProps) {
     const [summary, setSummary] = useState('');
     const [loading, setLoading] = useState(false);
@@ -48,7 +46,7 @@ export default function AIPunditModal({
             const res = await fetch('/api/ai/tournament-summary', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tournament, standings, matches }),
+                body: JSON.stringify({ tournamentId: tournament.id }),
             });
 
             const data = await res.json();
@@ -64,14 +62,6 @@ export default function AIPunditModal({
             setLoading(false);
         }
     };
-
-    // Generate on mount if opening and no summary exists
-    React.useEffect(() => {
-        if (open && !summary && !loading && !error) {
-            generateSummary();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open]);
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -114,7 +104,7 @@ export default function AIPunditModal({
                     variant="contained"
                     sx={{ bgcolor: '#F59E0B', '&:hover': { bgcolor: '#e08905' } }}
                 >
-                    Regenerate
+                    {summary ? 'Regenerate' : 'Generate'}
                 </Button>
             </DialogActions>
         </Dialog>

@@ -231,9 +231,9 @@ export default function CreateTournamentForm() {
             {registeredPlayers.length === 0 ? (
               <Alert severity="info">
                 No players registered yet.{' '}
-                <span style={{ color: '#22C55E', cursor: 'pointer' }} onClick={() => setOpenAddPlayer(true)}>
+                <Button size="small" variant="text" onClick={() => setOpenAddPlayer(true)} sx={{ ml: 0.5, minHeight: 44 }}>
                   Register players first
-                </span>
+                </Button>
               </Alert>
             ) : (
               registeredPlayers.map((player) => (

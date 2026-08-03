@@ -10,6 +10,7 @@ import Alert from '@mui/material/Alert';
 import Avatar from '@mui/material/Avatar';
 import CircularProgress from '@mui/material/CircularProgress';
 import CardContent from '@mui/material/CardContent';
+import CardActionArea from '@mui/material/CardActionArea';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import PlayerSelector from '@/components/analytics/PlayerSelector';
@@ -103,7 +104,7 @@ function H2HPageContent() {
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
         <Box>
-          <Typography variant="h4" fontWeight={700} gutterBottom>
+          <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
             Head-to-Head
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -172,8 +173,9 @@ function H2HPageContent() {
           <Grid container spacing={2}>
             {rivalries.slice(0, 6).map((rivalry) => (
               <Grid key={`${rivalry.p1Id}-${rivalry.p2Id}`} size={{ xs: 12, md: 6 }}>
-                <GlassCard sx={{ height: '100%', cursor: 'pointer' }}>
-                  <CardContent onClick={() => chooseRivalry(rivalry)}>
+                <GlassCard sx={{ height: '100%' }}>
+                  <CardActionArea onClick={() => chooseRivalry(rivalry)} aria-label={`Compare ${rivalry.p1Name} and ${rivalry.p2Name}`} sx={{ height: '100%' }}>
+                  <CardContent>
                     <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 1.25, mb: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
                         <Avatar
@@ -213,6 +215,7 @@ function H2HPageContent() {
                       Avg margin {(rivalry.closeness / Math.max(rivalry.matches.length, 1)).toFixed(1)}
                     </Typography>
                   </CardContent>
+                  </CardActionArea>
                 </GlassCard>
               </Grid>
             ))}

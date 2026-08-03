@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
 import { createServerClient, createAdminClient } from '@/lib/supabase/server';
-import { readJsonBody, verifyTournamentPin } from '@/lib/api-guards';
+import { handleApiError, rateLimit, readJsonBody, verifyTournamentPin } from '@/lib/api-guards';
+import { goalsMutationSchema } from '@/lib/validation';
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ matchId: string }> }
 ) {
-  const { matchId } = await params;
-  const supabase = createServerClient();
+  try {
+    const { matchId } = await params;
+    const supabase = createServerClient();
 
   const { data, error } = await supabase
     .from('goal')
@@ -15,11 +17,12 @@ export async function GET(
     .eq('match_id', matchId)
     .order('minute');
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+    if (error) throw error;
 
-  return NextResponse.json(data);
+    return NextResponse.json(data, { headers: { 'Cache-Control': 'private, no-store' } });
+  } catch (error) {
+    return handleApiError(error, 'Load match goals');
+  }
 }
 
 export async function POST(
@@ -29,14 +32,9 @@ export async function POST(
   const { matchId } = await params;
 
   try {
-    const { goals, pin } = await readJsonBody<{
-      goals?: { player_id: string; minute?: number | null }[];
-      pin?: string;
-    }>(request);
-
-    if (!pin) {
-      return NextResponse.json({ error: 'PIN is required' }, { status: 400 });
-    }
+    const limited = await rateLimit(request, 'goals:replace', 30);
+    if (limited) return limited;
+    const { goals, pin } = await readJsonBody(request, goalsMutationSchema);
 
     const supabase = createServerClient();
     const { data: match, error: matchError } = await supabase
@@ -58,7 +56,7 @@ export async function POST(
       return pinCheck.response;
     }
 
-    const submittedGoals = goals ?? [];
+    const submittedGoals = goals;
     const validScorers = new Set([match.home_player_id, match.away_player_id].filter(Boolean));
     const hasInvalidGoal = submittedGoals.some(
       (goal) =>
@@ -72,27 +70,13 @@ export async function POST(
 
     const adminClient = createAdminClient();
 
-    // Delete existing goals for this match (replace all)
-    await adminClient.from('goal').delete().eq('match_id', matchId);
-
-    if (submittedGoals.length > 0) {
-      const goalRows = submittedGoals.map((g) => ({
-        match_id: matchId,
-        player_id: g.player_id,
-        minute: g.minute ?? null,
-      }));
-
-      const { data, error } = await adminClient.from('goal').insert(goalRows).select();
-
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      }
-
-      return NextResponse.json(data, { status: 201 });
-    }
-
-    return NextResponse.json([], { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    const { data, error } = await adminClient.rpc('replace_match_goals_atomic', {
+      p_match_id: matchId,
+      p_goals: submittedGoals,
+    });
+    if (error) throw error;
+    return NextResponse.json(data, { status: 201 });
+  } catch (error) {
+    return handleApiError(error, 'Replace match goals');
   }
 }

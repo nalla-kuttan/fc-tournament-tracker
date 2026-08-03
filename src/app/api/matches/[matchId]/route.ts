@@ -1,12 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerClient, createAdminClient } from '@/lib/supabase/server';
-import { readJsonBody, verifyTournamentPin } from '@/lib/api-guards';
-import type { MatchStats } from '@/lib/types';
-
-interface GoalInput {
-  player_id: string;
-  minute?: number | null;
-}
+import { handleApiError, rateLimit, readJsonBody, verifyTournamentPin } from '@/lib/api-guards';
+import { matchResultSchema } from '@/lib/validation';
 
 export async function GET(
   _request: Request,
@@ -42,14 +37,9 @@ export async function PATCH(
   const { matchId } = await params;
 
   try {
-    const { home_score, away_score, stats, goals, advance_bracket, pin } = await readJsonBody<{
-      home_score: number;
-      away_score: number;
-      stats?: MatchStats;
-      goals?: GoalInput[];
-      advance_bracket?: boolean;
-      pin?: string;
-    }>(request);
+    const limited = await rateLimit(request, 'matches:update', 30);
+    if (limited) return limited;
+    const { home_score, away_score, stats, goals, advance_bracket, pin } = await readJsonBody(request, matchResultSchema);
 
     const supabase = createServerClient();
     const { data: existingMatch, error: matchError } = await supabase
@@ -62,27 +52,16 @@ export async function PATCH(
       return NextResponse.json({ error: 'Match not found' }, { status: 404 });
     }
 
-    if (!pin) {
-      return NextResponse.json({ error: 'PIN is required' }, { status: 400 });
-    }
-
     const pinCheck = await verifyTournamentPin(supabase, existingMatch.tournament_id, pin);
     if (!pinCheck.ok) {
       return pinCheck.response;
-    }
-
-    if (!Number.isInteger(home_score) || !Number.isInteger(away_score) || home_score < 0 || away_score < 0) {
-      return NextResponse.json({ error: 'Scores must be non-negative whole numbers' }, { status: 400 });
     }
 
     if (existingMatch.is_bye) {
       return NextResponse.json({ error: 'BYE matches cannot be edited' }, { status: 400 });
     }
 
-    const submittedGoals = goals ?? [];
-    if (!Array.isArray(submittedGoals)) {
-      return NextResponse.json({ error: 'Goals must be an array' }, { status: 400 });
-    }
+    const submittedGoals = goals;
 
     if (submittedGoals.length !== home_score + away_score) {
       return NextResponse.json({ error: 'Goal scorers must match the final score total' }, { status: 400 });
@@ -112,15 +91,13 @@ export async function PATCH(
       p_away_score: away_score,
       p_stats: stats ?? {},
       p_goals: submittedGoals,
-      p_advance_bracket: advance_bracket ?? false,
+      p_advance_bracket: advance_bracket,
     });
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    if (error) throw error;
 
     return NextResponse.json(data);
-  } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  } catch (error) {
+    return handleApiError(error, 'Save match result');
   }
 }

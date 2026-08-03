@@ -1,15 +1,11 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
-import { motion } from 'framer-motion';
-import Tilt from 'react-parallax-tilt';
+import Typography from '@mui/material/Typography';
 import { getMatchIntelligenceLabels } from '@/lib/competitive';
 import type { Match, MatchStats } from '@/lib/types';
-
-const MotionBox = motion.create(Box);
 
 interface MatchCardProps {
   match: {
@@ -28,8 +24,7 @@ interface MatchCardProps {
   index?: number;
 }
 
-export default function MatchCard({ match, index = 0 }: MatchCardProps) {
-  const router = useRouter();
+export default function MatchCard({ match }: MatchCardProps) {
   const intelligenceMatch: Match = {
     id: match.id,
     tournament_id: match.tournament_id,
@@ -51,150 +46,55 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
 
   if (match.is_bye) {
     return (
-      <MotionBox
-        layout
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          px: 2,
-          py: 2,
-          opacity: 0.4,
-          borderBottom: '1px solid rgba(148, 163, 184, 0.06)',
-        }}
-      >
-        <Typography variant="body2" sx={{ color: '#64748B' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', px: 2, py: 2, borderBottom: '1px solid rgba(148, 163, 184, 0.08)' }}>
+        <Typography variant="body2" sx={{ color: '#94A3B8' }}>
           {match.home_player?.name ?? 'TBD'} — BYE
         </Typography>
-      </MotionBox>
+      </Box>
     );
   }
 
+  const href = `/tournaments/${match.tournament_id}/matches/${match.id}`;
   return (
-    <Tilt
-      tiltMaxAngleX={3}
-      tiltMaxAngleY={3}
-      perspective={1000}
-      transitionSpeed={400}
-      scale={1.01}
-      gyroscope={true}
-    >
-      <MotionBox
-        layout
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => router.push(`/tournaments/${match.tournament_id}/matches/${match.id}`)}
-        className="list-row"
+    <Box
+      component={Link}
+      href={href}
+      aria-label={`Open match ${match.home_player?.name ?? 'TBD'} versus ${match.away_player?.name ?? 'TBD'}`}
+      className="list-row"
       sx={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         px: 2,
         py: 2,
-        cursor: 'pointer',
-        borderBottom: '1px solid rgba(148, 163, 184, 0.06)',
-        background: 'rgba(15, 23, 42, 0.4)',
+        color: 'inherit',
+        textDecoration: 'none',
+        background: '#0F172A',
         borderRadius: '12px',
-        border: '1px solid rgba(148, 163, 184, 0.06)',
-        transition: 'all 200ms ease',
-        transformStyle: 'preserve-3d',
-        '&:hover': {
-          borderColor: 'rgba(34, 197, 94, 0.15)',
-          background: 'rgba(15, 23, 42, 0.6)',
-        },
+        border: '1px solid rgba(148, 163, 184, 0.12)',
+        transition: 'background-color 180ms ease, border-color 180ms ease',
+        '&:hover': { borderColor: 'rgba(148, 163, 184, 0.24)', background: '#111C31' },
+        '&:focus-visible': { outline: '3px solid rgba(74, 222, 128, 0.7)', outlineOffset: 2 },
       }}
     >
-      {/* Home */}
-      <Box sx={{ flex: 1, textAlign: 'right', pr: 1.5, minWidth: 0, transform: 'translateZ(10px)' }}>
-        <Typography variant="body1" fontWeight={600} noWrap sx={{ letterSpacing: '0.01em' }}>
-          {match.home_player?.name ?? 'TBD'}
-        </Typography>
-        <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.75rem' }} noWrap>
-          {match.home_player?.team ?? ''}
+      <Box sx={{ flex: 1, textAlign: 'right', pr: 1.5, minWidth: 0 }}>
+        <Typography variant="body1" fontWeight={600} noWrap>{match.home_player?.name ?? 'TBD'}</Typography>
+        <Typography variant="caption" sx={{ color: '#94A3B8' }} noWrap>{match.home_player?.team ?? ''}</Typography>
+      </Box>
+
+      <Box sx={{ minWidth: 76, textAlign: 'center', py: 0.75, px: 2, borderRadius: '10px', bgcolor: match.is_played ? 'rgba(34, 197, 94, 0.1)' : 'rgba(148, 163, 184, 0.06)' }}>
+        <Typography variant={match.is_played ? 'h6' : 'body2'} fontWeight={700} sx={{ fontVariantNumeric: 'tabular-nums', color: match.is_played ? '#F8FAFC' : '#94A3B8' }}>
+          {match.is_played ? `${match.home_score} – ${match.away_score}` : 'vs'}
         </Typography>
       </Box>
 
-      {/* Score */}
-      <Box
-        sx={{
-          minWidth: 76,
-          textAlign: 'center',
-          py: 0.75,
-          px: 2,
-          borderRadius: '10px',
-          bgcolor: match.is_played ? 'rgba(34, 197, 94, 0.08)' : 'rgba(148, 163, 184, 0.04)',
-          border: match.is_played ? '1px solid rgba(34, 197, 94, 0.12)' : '1px solid rgba(148, 163, 184, 0.06)',
-          transform: 'translateZ(20px)',
-          boxShadow: match.is_played ? '0 4px 12px rgba(34, 197, 94, 0.1)' : 'none',
-        }}
-      >
-        {match.is_played ? (
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            sx={{
-              fontVariantNumeric: 'tabular-nums',
-              letterSpacing: '3px',
-              color: '#F8FAFC',
-            }}
-          >
-            {match.home_score} – {match.away_score}
-          </Typography>
-        ) : (
-          <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
-            vs
-          </Typography>
-        )}
+      <Box sx={{ flex: 1, textAlign: 'left', pl: 1.5, minWidth: 0 }}>
+        <Typography variant="body1" fontWeight={600} noWrap>{match.away_player?.name ?? 'TBD'}</Typography>
+        <Typography variant="caption" sx={{ color: '#94A3B8' }} noWrap>{match.away_player?.team ?? ''}</Typography>
       </Box>
 
-      {/* Away */}
-      <Box sx={{ flex: 1, textAlign: 'left', pl: 1.5, minWidth: 0, transform: 'translateZ(10px)' }}>
-        <Typography variant="body1" fontWeight={600} noWrap sx={{ letterSpacing: '0.01em' }}>
-          {match.away_player?.name ?? 'TBD'}
-        </Typography>
-        <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.75rem' }} noWrap>
-          {match.away_player?.team ?? ''}
-        </Typography>
-      </Box>
-
-      {match.stage && (
-        <Chip
-          label={match.stage}
-          size="small"
-          sx={{
-            bgcolor: 'rgba(59, 130, 246, 0.1)',
-            color: '#3B82F6',
-            fontWeight: 600,
-            fontSize: '0.65rem',
-            height: 22,
-            ml: 1,
-            border: '1px solid rgba(59, 130, 246, 0.15)',
-            letterSpacing: '0.02em',
-          }}
-        />
-      )}
-      {intelligenceLabel && (
-        <Chip
-          label={intelligenceLabel.label}
-          size="small"
-          sx={{
-            display: { xs: 'none', sm: 'inline-flex' },
-            bgcolor: 'rgba(245, 158, 11, 0.12)',
-            color: '#F59E0B',
-            fontWeight: 700,
-            fontSize: '0.65rem',
-            height: 22,
-            ml: 1,
-            border: '1px solid rgba(245, 158, 11, 0.18)',
-          }}
-        />
-      )}
-    </MotionBox>
-  </Tilt>
+      {match.stage && <Chip label={match.stage} size="small" sx={{ color: '#60A5FA', ml: 1 }} />}
+      {intelligenceLabel && <Chip label={intelligenceLabel.label} size="small" sx={{ display: { xs: 'none', sm: 'inline-flex' }, color: '#F59E0B', ml: 1 }} />}
+    </Box>
   );
 }

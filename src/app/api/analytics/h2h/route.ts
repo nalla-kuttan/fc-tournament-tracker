@@ -2,27 +2,33 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { aggregateCareerStats } from '@/lib/algorithms/stats';
 import type { Match } from '@/lib/types';
+import { ApiError, handleApiError } from '@/lib/api-guards';
+import { uuidSchema } from '@/lib/validation';
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const p1Id = searchParams.get('p1');
-  const p2Id = searchParams.get('p2');
+  try {
+    const { searchParams } = new URL(request.url);
+    const p1Id = searchParams.get('p1');
+    const p2Id = searchParams.get('p2');
 
-  if (!p1Id || !p2Id) {
-    return NextResponse.json({ error: 'Both p1 and p2 query params required' }, { status: 400 });
-  }
+    if (!uuidSchema.safeParse(p1Id).success || !uuidSchema.safeParse(p2Id).success || p1Id === p2Id) {
+      throw new ApiError('Choose two different valid players', 400, 'INVALID_REQUEST');
+    }
 
-  const supabase = createServerClient();
+    const supabase = createServerClient();
 
-  // Get registered players
-  const [{ data: rp1 }, { data: rp2 }] = await Promise.all([
-    supabase.from('registered_player').select('*').eq('id', p1Id).single(),
-    supabase.from('registered_player').select('*').eq('id', p2Id).single(),
-  ]);
+    const [player1Result, player2Result] = await Promise.all([
+      supabase.from('registered_player').select('*').eq('id', p1Id!).maybeSingle(),
+      supabase.from('registered_player').select('*').eq('id', p2Id!).maybeSingle(),
+    ]);
+    if (player1Result.error) throw player1Result.error;
+    if (player2Result.error) throw player2Result.error;
+    const rp1 = player1Result.data;
+    const rp2 = player2Result.data;
 
-  if (!rp1 || !rp2) {
-    return NextResponse.json({ error: 'Player(s) not found' }, { status: 404 });
-  }
+    if (!rp1 || !rp2) {
+      throw new ApiError('Player not found', 404, 'NOT_FOUND');
+    }
 
   // Get all player instances for both
   const [{ data: p1Instances }, { data: p2Instances }] = await Promise.all([
@@ -35,18 +41,21 @@ export async function GET(request: Request) {
   const allIds = [...p1Ids, ...p2Ids];
 
   // Get all matches involving either player
-  const { data: allMatches } = await supabase
-    .from('match')
-    .select('*, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team), tournament:tournament_id(id, name)')
-    .or(allIds.map((id) => `home_player_id.eq.${id},away_player_id.eq.${id}`).join(','));
+  const matchResult = allIds.length > 0
+    ? await supabase
+      .from('match')
+      .select('*, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team), tournament:tournament_id(id, name)')
+      .or(allIds.map((id) => `home_player_id.eq.${id},away_player_id.eq.${id}`).join(','))
+    : { data: [], error: null };
+  if (matchResult.error) throw matchResult.error;
 
-  const matches = (allMatches ?? []) as Match[];
+  const matches = (matchResult.data ?? []) as Match[];
 
   // Get all goals
-  const { data: allGoals } = await supabase
-    .from('goal')
-    .select('player_id')
-    .in('player_id', allIds);
+  const goalResult = allIds.length > 0
+    ? await supabase.from('goal').select('player_id').in('player_id', allIds)
+    : { data: [], error: null };
+  if (goalResult.error) throw goalResult.error;
 
   // Find head-to-head matches (both players were opponents)
   const p1Set = new Set(p1Ids);
@@ -80,20 +89,23 @@ export async function GET(request: Request) {
   }
 
   // Career stats
-  const p1Career = aggregateCareerStats(p1Id, rp1.name, rp1.base_team, p1Ids, matches, allGoals ?? []);
-  const p2Career = aggregateCareerStats(p2Id, rp2.name, rp2.base_team, p2Ids, matches, allGoals ?? []);
+  const p1Career = aggregateCareerStats(p1Id!, rp1.name, rp1.base_team, p1Ids, matches, goalResult.data ?? []);
+  const p2Career = aggregateCareerStats(p2Id!, rp2.name, rp2.base_team, p2Ids, matches, goalResult.data ?? []);
 
-  return NextResponse.json({
-    player1: rp1,
-    player2: rp2,
-    total_encounters: h2hMatches.length,
-    player1_wins: p1Wins,
-    player2_wins: p2Wins,
-    draws,
-    player1_goals: p1Goals,
-    player2_goals: p2Goals,
-    matches: h2hMatches,
-    player1_career: p1Career,
-    player2_career: p2Career,
-  });
+    return NextResponse.json({
+      player1: rp1,
+      player2: rp2,
+      total_encounters: h2hMatches.length,
+      player1_wins: p1Wins,
+      player2_wins: p2Wins,
+      draws,
+      player1_goals: p1Goals,
+      player2_goals: p2Goals,
+      matches: h2hMatches,
+      player1_career: p1Career,
+      player2_career: p2Career,
+    }, { headers: { 'Cache-Control': 'private, no-store' } });
+  } catch (error) {
+    return handleApiError(error, 'Load head-to-head analytics');
+  }
 }

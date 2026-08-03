@@ -27,7 +27,7 @@ interface AIMatchReportProps {
     stats: MatchStats;
 }
 
-export default function AIMatchReport({ match, stats }: AIMatchReportProps) {
+export default function AIMatchReport({ match }: AIMatchReportProps) {
     const [report, setReport] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -40,7 +40,7 @@ export default function AIMatchReport({ match, stats }: AIMatchReportProps) {
             const res = await fetch('/api/ai/match-report', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ match, stats }),
+                body: JSON.stringify({ matchId: match.id }),
             });
 
             const data = await res.json();

@@ -43,6 +43,7 @@ typography:
     lineHeight: 1.2
     letterSpacing: "0.02em"
 rounded:
+  indicator: "4px"
   sm: "10px"
   md: "12px"
   lg: "16px"
@@ -56,7 +57,7 @@ spacing:
 components:
   button-primary:
     backgroundColor: "{colors.primary-green}"
-    textColor: "#FFFFFF"
+    textColor: "{colors.pitch-black}"
     rounded: "{rounded.md}"
     padding: "10px 24px"
   button-outlined:
@@ -91,7 +92,7 @@ The interface is product-first. Tables, forms, standings, brackets, player cards
 - Primary green reserved for action, selection, success, and live competitive status.
 - Electric blue used as a secondary analytical accent, never as a competing CTA.
 - Chakra Petch across the product for a technical match-broadcast voice.
-- Glass and glow used sparingly to separate active surfaces from dense data.
+- Solid tonal surfaces establish hierarchy; glow is reserved for active state and focus.
 
 ## 2. Colors
 
@@ -145,7 +146,7 @@ The palette is a restrained dark product system with one competitive primary and
 
 ## 4. Elevation
 
-Depth is a hybrid of tonal layering, glass blur, borders, and restrained shadow. At rest, panels sit on translucent slate with a faint border. Hover and active states may add shadow or green glow only when the user can act on the surface.
+Depth comes from tonal layering, spacing, restrained borders, and selective shadow. At rest, panels use solid slate surfaces. Hover and active states may add shadow or green glow only when the user can act on the surface.
 
 ### Shadow Vocabulary
 - **Panel Ambient** (`0 4px 24px rgba(0, 0, 0, 0.3)`): Default card and paper separation on the dark background.
@@ -160,7 +161,7 @@ Depth is a hybrid of tonal layering, glass blur, borders, and restrained shadow.
 
 ### Buttons
 - **Shape:** Confident rounded rectangle (12px).
-- **Primary:** Pitchline Green gradient, white text, medium density padding (10px 24px), and 600 weight.
+- **Primary:** Solid Pitchline Green with Stadium Black text for strong contrast, medium density padding (10px 24px), and 600 weight.
 - **Hover / Focus:** Brighten the green, lift by 1px, and show a controlled glow or focus ring.
 - **Secondary / Ghost / Tertiary:** Transparent or slate-tinted with ice text; hover may introduce a faint green wash but must not compete with primary action.
 
@@ -170,8 +171,8 @@ Depth is a hybrid of tonal layering, glass blur, borders, and restrained shadow.
 
 ### Cards / Containers
 - **Corner Style:** Rounded but not pill-like (16px for cards, 20px for dialogs).
-- **Background:** Translucent Panel Slate over Stadium Black.
-- **Shadow Strategy:** Use Panel Ambient at rest and Panel Lift only for hover or selected surfaces.
+- **Background:** Solid Panel Slate over Stadium Black.
+- **Shadow Strategy:** Prefer tonal separation at rest and Panel Lift only for hover or selected surfaces.
 - **Border:** Thin low-contrast steel border; active surfaces may shift to green.
 - **Internal Padding:** 16-24px for most cards, tighter for table rows and compact stat modules.
 
@@ -181,7 +182,7 @@ Depth is a hybrid of tonal layering, glass blur, borders, and restrained shadow.
 - **Error / Disabled:** Error state uses Result Red plus text or helper copy. Disabled state lowers opacity and should not rely on color alone.
 
 ### Navigation
-- **Style:** Desktop uses a fixed dark glass sidebar with grouped navigation, icon+text items, and active green selection. Mobile uses bottom navigation with compact labels and icon-forward destinations.
+- **Style:** Desktop uses a fixed dark slate sidebar with grouped navigation, icon+text items, and active green selection. Mobile uses bottom navigation with compact labels and icon-forward destinations.
 - **Typography:** Nav section labels are small, uppercase, and high-weight; item labels stay title case and readable.
 - **Active State:** Green text or icon, faint green background, and clear border/indicator. Avoid hidden active states that depend only on a subtle color shift.
 

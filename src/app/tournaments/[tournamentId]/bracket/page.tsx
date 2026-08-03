@@ -34,7 +34,7 @@ export default function BracketPage() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
+      <Typography component="h1" variant="h5" fontWeight={700} sx={{ mb: 3 }}>
         Knockout Bracket
       </Typography>
       {matches.length === 0 ? (

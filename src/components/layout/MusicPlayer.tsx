@@ -142,7 +142,7 @@ export default function MusicPlayer() {
             <Typography variant="body2" fontWeight={600} noWrap sx={{ fontSize: '0.875rem' }}>
               {currentTrack?.title ?? 'No track'}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.75rem' }} noWrap>
+            <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.75rem' }} noWrap>
               {currentTrack?.artist ?? ''}
             </Typography>
           </Box>
@@ -151,6 +151,7 @@ export default function MusicPlayer() {
         {/* Controls */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <IconButton
+            aria-label="Previous track"
             onClick={prevTrack}
             size="small"
             sx={{
@@ -162,6 +163,7 @@ export default function MusicPlayer() {
             <SkipPreviousIcon />
           </IconButton>
           <IconButton
+            aria-label={isPlaying ? 'Pause music' : 'Play music'}
             onClick={isPlaying ? pause : play}
             sx={{
               color: '#020617',
@@ -178,6 +180,7 @@ export default function MusicPlayer() {
             {isPlaying ? <PauseIcon sx={{ fontSize: 20 }} /> : <PlayArrowIcon sx={{ fontSize: 20 }} />}
           </IconButton>
           <IconButton
+            aria-label="Next track"
             onClick={nextTrack}
             size="small"
             sx={{
@@ -192,10 +195,11 @@ export default function MusicPlayer() {
 
         {/* Progress */}
         <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="caption" sx={{ color: '#64748B', minWidth: 40, fontSize: '0.7rem' }}>
+          <Typography variant="caption" sx={{ color: '#94A3B8', minWidth: 40, fontSize: '0.7rem' }}>
             {formatTime(progress)}
           </Typography>
           <Slider
+            aria-label="Track position"
             value={progress}
             max={duration || 100}
             onChange={(_, v) => {
@@ -221,7 +225,7 @@ export default function MusicPlayer() {
               },
             }}
           />
-          <Typography variant="caption" sx={{ color: '#64748B', minWidth: 40, fontSize: '0.7rem' }}>
+          <Typography variant="caption" sx={{ color: '#94A3B8', minWidth: 40, fontSize: '0.7rem' }}>
             {formatTime(duration)}
           </Typography>
         </Box>
@@ -229,10 +233,11 @@ export default function MusicPlayer() {
         {/* Volume */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, width: 120 }}>
           <IconButton
+            aria-label={volume === 0 ? 'Unmute music' : 'Mute music'}
             onClick={() => setVolume((v) => (v === 0 ? 0.5 : 0))}
             size="small"
             sx={{
-              color: '#64748B',
+              color: '#94A3B8',
               transition: 'color 150ms ease',
               '&:hover': { color: '#94A3B8' },
             }}
@@ -240,13 +245,14 @@ export default function MusicPlayer() {
             {volume === 0 ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
           </IconButton>
           <Slider
+            aria-label="Music volume"
             value={volume}
             max={1}
             step={0.05}
             onChange={(_, v) => setVolume(v as number)}
             size="small"
             sx={{
-              color: '#64748B',
+              color: '#94A3B8',
               '& .MuiSlider-thumb': {
                 width: 10,
                 height: 10,

@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient, createServerClient } from '@/lib/supabase/server';
-import { readJsonBody } from '@/lib/api-guards';
+import { handleApiError, rateLimit, readJsonBody } from '@/lib/api-guards';
+import { playerMutationSchema } from '@/lib/validation';
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ playerId: string }> }
 ) {
-  const { playerId } = await params;
-  const supabase = createServerClient();
+  try {
+    const { playerId } = await params;
+    const supabase = createServerClient();
 
   const { data: player, error } = await supabase
     .from('registered_player')
@@ -20,13 +22,20 @@ export async function GET(
   }
 
   // Get all tournament participations
-  const { data: participations } = await supabase
+    const { data: participations, error: participationError } = await supabase
     .from('player')
     .select('*, tournament:tournament_id(id, name, format, status)')
     .eq('registered_player_id', playerId)
     .order('created_at', { ascending: false });
 
-  return NextResponse.json({ ...player, participations: participations ?? [] });
+    if (participationError) throw participationError;
+    return NextResponse.json(
+      { ...player, participations: participations ?? [] },
+      { headers: { 'Cache-Control': 'private, no-store' } }
+    );
+  } catch (error) {
+    return handleApiError(error, 'Load player');
+  }
 }
 
 export async function PATCH(
@@ -36,17 +45,9 @@ export async function PATCH(
   const { playerId } = await params;
 
   try {
-    const { name, base_team } = await readJsonBody<{ name?: string; base_team?: string }>(request);
-    const trimmedName = name?.trim();
-    const trimmedTeam = base_team?.trim();
-
-    if (!trimmedName || !trimmedTeam) {
-      return NextResponse.json({ error: 'Name and base_team are required' }, { status: 400 });
-    }
-
-    if (trimmedName.length > 80 || trimmedTeam.length > 80) {
-      return NextResponse.json({ error: 'Name and base_team must be 80 characters or fewer' }, { status: 400 });
-    }
+    const limited = await rateLimit(request, 'players:update', 20);
+    if (limited) return limited;
+    const { name: trimmedName, base_team: trimmedTeam } = await readJsonBody(request, playerMutationSchema);
 
     const supabase = createAdminClient();
     const { data, error } = await supabase
@@ -60,11 +61,11 @@ export async function PATCH(
       if (error.code === '23505') {
         return NextResponse.json({ error: 'Player name already exists' }, { status: 409 });
       }
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      throw error;
     }
 
     return NextResponse.json(data);
-  } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  } catch (error) {
+    return handleApiError(error, 'Update player');
   }
 }

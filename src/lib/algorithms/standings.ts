@@ -77,41 +77,57 @@ export function calculateStandings(
     s.form = s.form.slice(-5);
   }
 
-  // Sort with H2H tiebreaker
-  return standings.sort((a, b) => {
+  const baseSorted = standings.sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
     if (b.goal_difference !== a.goal_difference) return b.goal_difference - a.goal_difference;
     if (b.goals_for !== a.goals_for) return b.goals_for - a.goals_for;
-    return resolveH2H(a.player_id, b.player_id, playedMatches);
+    return a.player_name.localeCompare(b.player_name) || a.player_id.localeCompare(b.player_id);
   });
+
+  // Resolve each complete tie group as a mini-table. Pairwise comparison is not
+  // transitive for three-way ties and can produce engine-dependent ordering.
+  const resolved: StandingRow[] = [];
+  for (let start = 0; start < baseSorted.length;) {
+    let end = start + 1;
+    while (end < baseSorted.length && hasSamePrimaryRecord(baseSorted[start], baseSorted[end])) end++;
+    const group = baseSorted.slice(start, end);
+    resolved.push(...resolveTieGroup(group, playedMatches));
+    start = end;
+  }
+  return resolved;
 }
 
-/**
- * Head-to-head tiebreaker: compare direct encounters between two players.
- * Returns negative if player A is better, positive if player B is better.
- */
-function resolveH2H(playerA: string, playerB: string, matches: Match[]): number {
-  const h2h = matches.filter(
-    (m) =>
-      (m.home_player_id === playerA && m.away_player_id === playerB) ||
-      (m.home_player_id === playerB && m.away_player_id === playerA)
-  );
+function hasSamePrimaryRecord(a: StandingRow, b: StandingRow) {
+  return a.points === b.points && a.goal_difference === b.goal_difference && a.goals_for === b.goals_for;
+}
 
-  let aPoints = 0;
-  let bPoints = 0;
+function resolveTieGroup(group: StandingRow[], matches: Match[]) {
+  if (group.length < 2) return group;
+  const ids = new Set(group.map((row) => row.player_id));
+  const mini = new Map(group.map((row) => [row.player_id, { points: 0, goalDifference: 0, goalsFor: 0 }]));
 
-  for (const m of h2h) {
-    const aIsHome = m.home_player_id === playerA;
-    const aScore = aIsHome ? m.home_score! : m.away_score!;
-    const bScore = aIsHome ? m.away_score! : m.home_score!;
-
-    if (aScore > bScore) aPoints += 3;
-    else if (aScore < bScore) bPoints += 3;
-    else {
-      aPoints += 1;
-      bPoints += 1;
-    }
+  for (const match of matches) {
+    if (!match.home_player_id || !match.away_player_id || !ids.has(match.home_player_id) || !ids.has(match.away_player_id)) continue;
+    const home = mini.get(match.home_player_id)!;
+    const away = mini.get(match.away_player_id)!;
+    const homeScore = match.home_score ?? 0;
+    const awayScore = match.away_score ?? 0;
+    home.goalsFor += homeScore;
+    away.goalsFor += awayScore;
+    home.goalDifference += homeScore - awayScore;
+    away.goalDifference += awayScore - homeScore;
+    if (homeScore > awayScore) home.points += 3;
+    else if (awayScore > homeScore) away.points += 3;
+    else { home.points += 1; away.points += 1; }
   }
 
-  return bPoints - aPoints;
+  return group.sort((a, b) => {
+    const aMini = mini.get(a.player_id)!;
+    const bMini = mini.get(b.player_id)!;
+    return bMini.points - aMini.points
+      || bMini.goalDifference - aMini.goalDifference
+      || bMini.goalsFor - aMini.goalsFor
+      || a.player_name.localeCompare(b.player_name)
+      || a.player_id.localeCompare(b.player_id);
+  });
 }

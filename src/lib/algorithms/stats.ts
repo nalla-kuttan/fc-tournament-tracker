@@ -95,6 +95,88 @@ export function aggregateCareerStats(
   };
 }
 
+export function aggregateCareerStatsBatch(
+  registeredPlayers: Array<{ id: string; name: string; base_team: string }>,
+  playerInstances: Array<{ id: string; registered_player_id: string }>,
+  matches: Match[],
+  goals: Array<{ player_id: string }>
+): CareerStats[] {
+  type MutableStats = CareerStats & {
+    xgSum: number; xgCount: number; ratingSum: number; ratingCount: number;
+    possessionSum: number; possessionCount: number;
+  };
+  const instanceToRegistered = new Map(playerInstances.map((player) => [player.id, player.registered_player_id]));
+  const stats = new Map<string, MutableStats>(registeredPlayers.map((player) => [player.id, {
+    registered_player_id: player.id,
+    player_name: player.name,
+    base_team: player.base_team,
+    total_matches: 0, wins: 0, draws: 0, losses: 0, total_goals: 0,
+    total_conceded: 0, clean_sheets: 0, avg_xg: 0, avg_rating: 0,
+    avg_possession: 0, motm_awards: 0, win_rate: 0, goals_per_match: 0,
+    xgSum: 0, xgCount: 0, ratingSum: 0, ratingCount: 0,
+    possessionSum: 0, possessionCount: 0,
+  }]));
+
+  for (const match of matches) {
+    if (!match.is_played || match.is_bye || !match.home_player_id || !match.away_player_id) continue;
+    const home = stats.get(instanceToRegistered.get(match.home_player_id) ?? '');
+    const away = stats.get(instanceToRegistered.get(match.away_player_id) ?? '');
+    if (!home || !away) continue;
+    const homeScore = match.home_score ?? 0;
+    const awayScore = match.away_score ?? 0;
+    home.total_matches++; away.total_matches++;
+    home.total_conceded += awayScore; away.total_conceded += homeScore;
+    if (awayScore === 0) home.clean_sheets++;
+    if (homeScore === 0) away.clean_sheets++;
+    if (homeScore > awayScore) { home.wins++; away.losses++; }
+    else if (awayScore > homeScore) { away.wins++; home.losses++; }
+    else { home.draws++; away.draws++; }
+
+    const matchStats = match.stats as MatchStats | null;
+    if (matchStats) {
+      addMetric(home, matchStats.home_xg, 'xgSum', 'xgCount');
+      addMetric(away, matchStats.away_xg, 'xgSum', 'xgCount');
+      addMetric(home, matchStats.home_rating, 'ratingSum', 'ratingCount');
+      addMetric(away, matchStats.away_rating, 'ratingSum', 'ratingCount');
+      addMetric(home, matchStats.home_possession, 'possessionSum', 'possessionCount');
+      addMetric(away, matchStats.away_possession, 'possessionSum', 'possessionCount');
+      const motmRegisteredId = matchStats.motm_player_id ? instanceToRegistered.get(matchStats.motm_player_id) : null;
+      if (motmRegisteredId) {
+        const motm = stats.get(motmRegisteredId);
+        if (motm) motm.motm_awards++;
+      }
+    }
+  }
+
+  for (const goal of goals) {
+    const player = stats.get(instanceToRegistered.get(goal.player_id) ?? '');
+    if (player) player.total_goals++;
+  }
+
+  return [...stats.values()].map((row) => {
+    const { xgSum, xgCount, ratingSum, ratingCount, possessionSum, possessionCount, ...career } = row;
+    return {
+      ...career,
+      avg_xg: xgCount ? xgSum / xgCount : 0,
+      avg_rating: ratingCount ? ratingSum / ratingCount : 0,
+      avg_possession: possessionCount ? possessionSum / possessionCount : 0,
+      win_rate: career.total_matches ? (career.wins / career.total_matches) * 100 : 0,
+      goals_per_match: career.total_matches ? career.total_goals / career.total_matches : 0,
+    };
+  });
+}
+
+function addMetric(
+  row: { xgSum: number; xgCount: number; ratingSum: number; ratingCount: number; possessionSum: number; possessionCount: number },
+  value: number | null | undefined,
+  sumKey: 'xgSum' | 'ratingSum' | 'possessionSum',
+  countKey: 'xgCount' | 'ratingCount' | 'possessionCount'
+) {
+  if (value == null || !Number.isFinite(value)) return;
+  row[sumKey] += value;
+  row[countKey] += 1;
+}
+
 /**
  * Normalize career stats to 0-100 scale for radar chart.
  * Uses reasonable maximums for a small tournament context.

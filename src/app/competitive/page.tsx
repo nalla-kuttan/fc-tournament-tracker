@@ -169,7 +169,7 @@ export default function CompetitivePage() {
         <Typography sx={{ color: '#4ADE80', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.12em' }}>
           Competitive
         </Typography>
-        <Typography variant="h3" sx={{ fontWeight: 950 }}>
+        <Typography component="h1" variant="h3" sx={{ fontWeight: 950 }}>
           Season Race & Legacy Board
         </Typography>
         <Typography sx={{ color: '#94A3B8', maxWidth: 760 }}>

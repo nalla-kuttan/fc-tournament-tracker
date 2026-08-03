@@ -44,7 +44,7 @@ export default function AIAnalystPage() {
         <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
             <AutoAwesomeIcon sx={{ color: '#60A5FA', fontSize: 34 }} />
-            <Typography variant="h4" fontWeight={900}>
+            <Typography component="h1" variant="h4" fontWeight={900}>
               AI Analyst
             </Typography>
           </Box>

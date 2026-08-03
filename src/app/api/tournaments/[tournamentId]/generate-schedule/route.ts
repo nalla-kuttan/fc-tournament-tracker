@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createServerClient, createAdminClient } from '@/lib/supabase/server';
-import { verifyPin } from '@/lib/auth';
+import { ApiError, handleApiError, rateLimit, readJsonBody, verifyTournamentPin } from '@/lib/api-guards';
 import { generateRoundRobin } from '@/lib/algorithms/round-robin';
-import { generateKnockoutBracket, getNextMatchNumber, isHomeSlotInNextMatch } from '@/lib/algorithms/knockout';
+import { generateKnockoutBracket } from '@/lib/algorithms/knockout';
+import { createAdminClient, createServerClient } from '@/lib/supabase/server';
+import { pinRequestSchema } from '@/lib/validation';
 
 export async function POST(
   request: Request,
@@ -11,124 +12,51 @@ export async function POST(
   const { tournamentId } = await params;
 
   try {
-    const { pin } = await request.json();
+    const limited = await rateLimit(request, 'schedule:create', 6, 5 * 60);
+    if (limited) return limited;
+    const { pin } = await readJsonBody(request, pinRequestSchema);
 
-    // Verify admin
     const supabase = createServerClient();
-    const { data: tournament } = await supabase
-      .from('tournament')
-      .select('*')
-      .eq('id', tournamentId)
-      .single();
+    const pinCheck = await verifyTournamentPin(supabase, tournamentId, pin);
+    if (!pinCheck.ok) return pinCheck.response;
 
-    if (!tournament) {
-      return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
-    }
+    const [{ data: tournament, error: tournamentError }, { data: players, error: playersError }] = await Promise.all([
+      supabase.from('tournament').select('id, format').eq('id', tournamentId).single(),
+      supabase.from('player').select('id, seed').eq('tournament_id', tournamentId).order('seed'),
+    ]);
 
-    const isValid = await verifyPin(pin, tournament.pin);
-    if (!isValid) {
-      return NextResponse.json({ error: 'Invalid PIN' }, { status: 403 });
-    }
+    if (tournamentError || !tournament) throw new ApiError('Tournament not found', 404, 'NOT_FOUND');
+    if (playersError) throw playersError;
+    if (!players || players.length < 2) throw new ApiError('Add at least two players before generating a schedule');
 
-    // Check if schedule already exists
-    const { data: existingMatches } = await supabase
-      .from('match')
-      .select('id')
-      .eq('tournament_id', tournamentId)
-      .limit(1);
-
-    if (existingMatches && existingMatches.length > 0) {
-      return NextResponse.json({ error: 'Schedule already generated' }, { status: 409 });
-    }
-
-    // Get players
-    const { data: players } = await supabase
-      .from('player')
-      .select('id, seed')
-      .eq('tournament_id', tournamentId)
-      .order('seed');
-
-    if (!players || players.length < 2) {
-      return NextResponse.json({ error: 'Need at least 2 players' }, { status: 400 });
-    }
-
-    const playerIds = players.map((p) => p.id);
-    const adminClient = createAdminClient();
-
-    let schedule;
-    if (tournament.format === 'knockout') {
-      schedule = generateKnockoutBracket(playerIds);
-    } else {
-      // league or cup (cup uses league format for group stage)
-      schedule = generateRoundRobin(playerIds);
-    }
-
-    // Insert matches
-    const matchRows = schedule.map((m, idx) => ({
-      tournament_id: tournamentId,
-      home_player_id: m.home_player_id || null,
-      away_player_id: m.away_player_id || null,
-      round_number: m.round_number,
-      match_number: m.match_number,
-      stage: m.stage,
-      is_bye: m.is_bye,
-      match_order: idx + 1,
+    const playerIds = players.map((player) => player.id);
+    const schedule = tournament.format === 'knockout'
+      ? generateKnockoutBracket(playerIds)
+      : generateRoundRobin(playerIds);
+    const matchRows = schedule.map((match, index) => ({
+      home_player_id: match.home_player_id || null,
+      away_player_id: match.away_player_id || null,
+      round_number: match.round_number,
+      match_number: match.match_number,
+      stage: match.stage,
+      is_bye: match.is_bye,
+      match_order: index + 1,
     }));
 
-    const { data: insertedMatches, error: insertError } = await adminClient
-      .from('match')
-      .insert(matchRows)
-      .select();
-
-    if (insertError) {
-      if (insertError.code === '23505') {
-        return NextResponse.json({ error: 'Schedule already generated' }, { status: 409 });
+    const adminClient = createAdminClient();
+    const { data, error } = await adminClient.rpc('create_schedule_atomic', {
+      p_tournament_id: tournamentId,
+      p_match_rows: matchRows,
+    });
+    if (error) {
+      if (error.code === '23505' || error.message.includes('already generated')) {
+        throw new ApiError('Schedule already generated', 409, 'CONFLICT');
       }
-      return NextResponse.json({ error: insertError.message }, { status: 500 });
+      throw error;
     }
 
-    // For knockout: auto-advance BYE matches
-    if (tournament.format === 'knockout' && insertedMatches) {
-      const byeMatches = insertedMatches.filter((m) => m.is_bye);
-      const round1Count = insertedMatches.filter((m) => m.round_number === 1).length;
-      const totalMatchCount = insertedMatches.length;
-
-      for (const byeMatch of byeMatches) {
-        // Mark BYE as played
-        await adminClient
-          .from('match')
-          .update({ is_played: true, home_score: 0, away_score: 0, played_at: new Date().toISOString() })
-          .eq('id', byeMatch.id);
-
-        // Advance the real player to the next round
-        const nextMatchNum = getNextMatchNumber(byeMatch.match_number, round1Count, totalMatchCount);
-        if (nextMatchNum !== null) {
-          const isHome = isHomeSlotInNextMatch(byeMatch.match_number, round1Count);
-          const nextMatch = insertedMatches.find((m) => m.match_number === nextMatchNum);
-
-          if (nextMatch) {
-            await adminClient
-              .from('match')
-              .update(
-                isHome
-                  ? { home_player_id: byeMatch.home_player_id }
-                  : { away_player_id: byeMatch.home_player_id }
-              )
-              .eq('id', nextMatch.id);
-          }
-        }
-      }
-    }
-
-    // Update tournament status to active
-    await adminClient
-      .from('tournament')
-      .update({ status: 'active' })
-      .eq('id', tournamentId);
-
-    return NextResponse.json({ success: true, matchCount: insertedMatches?.length ?? 0 }, { status: 201 });
-  } catch (err) {
-    console.error('Generate schedule error:', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json(data, { status: 201 });
+  } catch (error) {
+    return handleApiError(error, 'Generate tournament schedule');
   }
 }

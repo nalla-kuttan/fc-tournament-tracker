@@ -37,7 +37,7 @@ export default function TournamentPlayersPage() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
+      <Typography component="h1" variant="h5" fontWeight={700} sx={{ mb: 3 }}>
         Players ({players.length})
       </Typography>
       <Grid container spacing={2}>

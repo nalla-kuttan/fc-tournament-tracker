@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
+import { handleApiError } from '@/lib/api-guards';
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ tournamentId: string }> }
 ) {
-  const { tournamentId } = await params;
-  const supabase = createServerClient();
+  try {
+    const { tournamentId } = await params;
+    const supabase = createServerClient();
 
   const { data: matches, error } = await supabase
     .from('match')
@@ -14,9 +16,7 @@ export async function GET(
     .eq('tournament_id', tournamentId)
     .order('match_number');
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+    if (error) throw error;
 
   // Group matches by stage/round
   const rounds: Record<string, typeof matches> = {};
@@ -26,5 +26,11 @@ export async function GET(
     rounds[stage].push(match);
   }
 
-  return NextResponse.json({ matches: matches ?? [], rounds });
+    return NextResponse.json(
+      { matches: matches ?? [], rounds },
+      { headers: { 'Cache-Control': 'private, no-store' } }
+    );
+  } catch (error) {
+    return handleApiError(error, 'Load bracket');
+  }
 }

@@ -1,29 +1,19 @@
 import { NextResponse } from 'next/server';
-import { verifyPin } from '@/lib/auth';
 import { createServerClient } from '@/lib/supabase/server';
+import { handleApiError, rateLimit, readJsonBody, verifyTournamentPin } from '@/lib/api-guards';
+import { verifyPinRequestSchema } from '@/lib/validation';
 
 export async function POST(request: Request) {
   try {
-    const { tournamentId, pin } = await request.json();
-
-    if (!tournamentId || !pin) {
-      return NextResponse.json({ success: false, error: 'Missing tournamentId or pin' }, { status: 400 });
-    }
+    const limited = await rateLimit(request, 'pin:verify', 6, 5 * 60);
+    if (limited) return limited;
+    const { tournamentId, pin } = await readJsonBody(request, verifyPinRequestSchema);
 
     const supabase = createServerClient();
-    const { data: tournament, error } = await supabase
-      .from('tournament')
-      .select('pin')
-      .eq('id', tournamentId)
-      .single();
-
-    if (error || !tournament) {
-      return NextResponse.json({ success: false, error: 'Tournament not found' }, { status: 404 });
-    }
-
-    const isValid = await verifyPin(pin, tournament.pin);
-    return NextResponse.json({ success: isValid });
-  } catch {
-    return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
+    const pinCheck = await verifyTournamentPin(supabase, tournamentId, pin);
+    if (!pinCheck.ok) return NextResponse.json({ success: false }, { status: pinCheck.response.status });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return handleApiError(error, 'Verify tournament PIN');
   }
 }

@@ -203,7 +203,7 @@ export default function PlayerProfilePage() {
             <Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'flex-start', mb: 1 }}>
                 <Box sx={{ minWidth: 0 }}>
-                  <Typography variant="h3" fontWeight={900} noWrap sx={{ fontSize: { xs: '2rem', sm: '2.5rem' } }}>
+                  <Typography component="h1" variant="h3" fontWeight={900} noWrap sx={{ fontSize: { xs: '2rem', sm: '2.5rem' } }}>
                     {player.name}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">

@@ -1,60 +1,21 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
-import { getErrorMessage, rateLimit, readJsonBody } from '@/lib/api-guards';
-import type { CareerStats } from '@/lib/types';
-
-type StatQueryRequest = {
-    query?: string;
-    careerStats?: CareerStats[];
-};
+import { generateAiText } from '@/lib/ai';
+import { getGlobalStatFacts } from '@/lib/ai-data';
+import { handleApiError, rateLimit, readJsonBody } from '@/lib/api-guards';
+import { aiStatQuerySchema } from '@/lib/validation';
 
 export async function POST(request: Request) {
-    try {
-        const limited = rateLimit(request, 'ai:stat-query', 8);
-        if (limited) return limited;
-
-        if (!process.env.GEMINI_API_KEY) {
-            return NextResponse.json(
-                { error: 'Gemini API key is not configured' },
-                { status: 500 }
-            );
-        }
-
-        const { query, careerStats } = await readJsonBody<StatQueryRequest>(request);
-
-        if (!query?.trim() || !careerStats) {
-            return NextResponse.json(
-                { error: 'Query and career stats are required' },
-                { status: 400 }
-            );
-        }
-
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        const prompt = `
-      You are the "AI Analyst" for the FC Tournament Tracker app.
-      A user has asked you a natural language question about the global career stats.
-
-      User Question: "${query.trim()}"
-
-      Here is the raw global career stats data:
-      ${JSON.stringify(careerStats, null, 2)}
-
-      Answer the user's question directly, accurately, and with a touch of sports-broadcaster flair.
-      If the data does not contain the answer, politely say so.
-      Format your response using Markdown (make use of bolding, italics, and lists where appropriate).
-    `;
-
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        });
-
-        return NextResponse.json({ answer: response.text });
-    } catch (error: unknown) {
-        console.error('Gemini API Error:', error);
-        return NextResponse.json(
-            { error: getErrorMessage(error, 'Failed to answer query') },
-            { status: 500 }
-        );
-    }
+  try {
+    const limited = await rateLimit(request, 'ai:stat-query', 4, 5 * 60);
+    if (limited) return limited;
+    const { query } = await readJsonBody(request, aiStatQuerySchema);
+    const careerStats = await getGlobalStatFacts();
+    const answer = await generateAiText(
+      `Answer this user question directly from the supplied career statistics: ${JSON.stringify(query)}`,
+      { careerStats }
+    );
+    return NextResponse.json({ answer });
+  } catch (error) {
+    return handleApiError(error, 'Answer AI statistics question');
+  }
 }

@@ -52,7 +52,7 @@ export default function MatchesPage() {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1.5, flexDirection: { xs: 'column', sm: 'row' }, mb: 2 }}>
         <Box>
-          <Typography variant="h5" fontWeight={700}>
+          <Typography component="h1" variant="h5" fontWeight={700}>
             Match Queue
           </Typography>
           <Typography variant="body2" color="text.secondary">

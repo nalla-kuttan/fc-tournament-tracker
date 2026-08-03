@@ -1,4 +1,4 @@
-import { createAdminClient, createServerClient } from '@/lib/supabase/server';
+import { createServerClient } from '@/lib/supabase/server';
 import { buildTournamentDerivedSeasons, getDerivedSeasonId } from '@/lib/competitive';
 import type { Match, Player, RegisteredPlayer, Season, Tournament } from '@/lib/types';
 
@@ -12,7 +12,6 @@ export interface CompetitiveData {
 
 export async function getCompetitiveData(): Promise<CompetitiveData> {
   const supabase = createServerClient();
-  await ensureTournamentDerivedSeasons();
 
   const [{ data: registeredPlayers }, { data: playerInstances }] = await Promise.all([
     supabase.from('registered_player').select('*').order('name'),
@@ -96,43 +95,4 @@ export function resolveCompetitiveScope(searchParams: URLSearchParams): {
     scope: requestedScope === 'season' ? 'season' : 'all-time',
     seasonId: searchParams.get('seasonId'),
   };
-}
-
-export async function ensureTournamentDerivedSeasons() {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
-
-  const adminClient = createAdminClient();
-  const { data: tournaments } = await adminClient
-    .from('tournament')
-    .select('id, name, status, season_id, created_at')
-    .is('season_id', null);
-
-  const missing = tournaments ?? [];
-  if (missing.length === 0) return;
-
-  for (const tournament of missing) {
-    const { data: season, error: seasonError } = await adminClient
-      .from('season')
-      .upsert(
-        {
-          name: tournament.name,
-          status: tournament.status === 'completed' ? 'completed' : tournament.status === 'active' ? 'active' : 'archived',
-          starts_at: tournament.created_at,
-          ends_at: tournament.status === 'completed' ? tournament.created_at : null,
-          source_tournament_id: tournament.id,
-          created_at: tournament.created_at,
-        },
-        { onConflict: 'source_tournament_id' }
-      )
-      .select('id')
-      .single();
-
-    if (seasonError || !season?.id) continue;
-
-    await adminClient
-      .from('tournament')
-      .update({ season_id: season.id })
-      .eq('id', tournament.id)
-      .is('season_id', null);
-  }
 }

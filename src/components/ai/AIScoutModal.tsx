@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -24,7 +24,6 @@ export default function AIScoutModal({
     open,
     onClose,
     player,
-    stats,
 }: AIScoutModalProps) {
     const [report, setReport] = useState('');
     const [loading, setLoading] = useState(false);
@@ -39,7 +38,7 @@ export default function AIScoutModal({
             const res = await fetch('/api/ai/player-scout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ player, stats }),
+                body: JSON.stringify({ playerId: player.id }),
             });
 
             const data = await res.json();
@@ -55,14 +54,6 @@ export default function AIScoutModal({
             setLoading(false);
         }
     };
-
-    // Generate on mount if opening and no report exists
-    React.useEffect(() => {
-        if (open && !report && !loading && !error) {
-            generateReport();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open]);
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -105,7 +96,7 @@ export default function AIScoutModal({
                     variant="contained"
                     sx={{ bgcolor: '#22C55E', '&:hover': { bgcolor: '#0062cc' } }}
                 >
-                    Regenerate
+                    {report ? 'Regenerate' : 'Generate'}
                 </Button>
             </DialogActions>
         </Dialog>

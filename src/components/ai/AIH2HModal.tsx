@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -26,7 +26,6 @@ export default function AIH2HModal({
     onClose,
     player1,
     player2,
-    h2hData,
 }: AIH2HModalProps) {
     const [analysis, setAnalysis] = useState('');
     const [loading, setLoading] = useState(false);
@@ -41,7 +40,7 @@ export default function AIH2HModal({
             const res = await fetch('/api/ai/h2h', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ player1, player2, h2hData }),
+                body: JSON.stringify({ player1Id: player1.id, player2Id: player2.id }),
             });
 
             const data = await res.json();
@@ -57,14 +56,6 @@ export default function AIH2HModal({
             setLoading(false);
         }
     };
-
-    // Generate on mount if opening and no analysis exists
-    React.useEffect(() => {
-        if (open && !analysis && !loading && !error) {
-            generateAnalysis();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open]);
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -107,7 +98,7 @@ export default function AIH2HModal({
                     variant="contained"
                     sx={{ bgcolor: '#22C55E', '&:hover': { bgcolor: '#2aa649' } }}
                 >
-                    Regenerate
+                    {analysis ? 'Regenerate' : 'Generate'}
                 </Button>
             </DialogActions>
         </Dialog>

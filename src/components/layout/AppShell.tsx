@@ -32,7 +32,7 @@ const COLORS = {
   pitchBlack: '#020617',
   textIce: '#F8FAFC',
   textSteel: '#94A3B8',
-  textMuted: '#64748B',
+  textMuted: '#94A3B8',
   green: '#22C55E',
   greenLight: '#4ADE80',
   blue: '#3B82F6',
@@ -342,6 +342,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
           }}
         >
           <Box
+            component="button"
+            type="button"
+            aria-label="Go to dashboard"
             onClick={() => router.push('/')}
             sx={{
               display: { xs: 'flex', lg: 'none' },
@@ -350,6 +353,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
               flex: 1,
               minWidth: 0,
               cursor: 'pointer',
+              appearance: 'none',
+              border: 0,
+              p: 0,
+              background: 'transparent',
+              textAlign: 'left',
+              font: 'inherit',
             }}
           >
             <SportsSoccerIcon sx={{ color: '#22C55E', fontSize: 28, filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.45))' }} />
@@ -516,6 +525,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
         elevation={0}
       >
         <BottomNavigation
+          component="nav"
+          aria-label="Primary mobile navigation"
           value={activeMobileTab >= 0 ? activeMobileTab : 0}
           onChange={(_, newValue) => router.push(MOBILE_NAV_ITEMS[newValue].path)}
           sx={{

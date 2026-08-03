@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
@@ -30,13 +30,14 @@ const FORMAT_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: 
 };
 
 export default function TournamentCard({ tournament, showDivider = true, index = 0 }: { tournament: Tournament; showDivider?: boolean; index?: number }) {
-  const router = useRouter();
   const statusConfig = TOURNAMENT_STATUSES[tournament.status];
   const formatConfig = FORMAT_CONFIG[tournament.format] || FORMAT_CONFIG.league;
 
   return (
       <Box
-        onClick={() => router.push(`/tournaments/${tournament.id}`)}
+        component={Link}
+        href={`/tournaments/${tournament.id}`}
+        aria-label={`Open ${tournament.name}`}
         className="list-row"
         sx={{
           display: 'flex',
@@ -44,6 +45,8 @@ export default function TournamentCard({ tournament, showDivider = true, index =
           px: 2,
           py: 2,
           cursor: 'pointer',
+          color: 'inherit',
+          textDecoration: 'none',
           borderBottom: showDivider ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
           animation: `fadeInUp 0.28s ease ${index * 0.035}s both`,
           transition: 'background 150ms ease, transform 150ms ease',
@@ -53,6 +56,7 @@ export default function TournamentCard({ tournament, showDivider = true, index =
           '&:active': {
             transform: 'scale(0.99)',
           },
+          '&:focus-visible': { outline: '3px solid rgba(74, 222, 128, 0.7)', outlineOffset: -3 },
         }}
       >
       {/* Format icon - SVG instead of emoji */}
@@ -79,7 +83,7 @@ export default function TournamentCard({ tournament, showDivider = true, index =
         <Typography variant="body1" fontWeight={600} noWrap sx={{ letterSpacing: '0.01em' }}>
           {tournament.name}
         </Typography>
-        <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem' }}>
+        <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>
           {tournament.format.charAt(0).toUpperCase() + tournament.format.slice(1)} &middot; {new Date(tournament.created_at).toLocaleDateString()}
         </Typography>
       </Box>
@@ -101,7 +105,7 @@ export default function TournamentCard({ tournament, showDivider = true, index =
           }}
         />
 
-        <ChevronRightIcon sx={{ color: '#64748B', fontSize: 20 }} />
+        <ChevronRightIcon aria-hidden="true" sx={{ color: '#94A3B8', fontSize: 20 }} />
       </Box>
     </Box>
   );

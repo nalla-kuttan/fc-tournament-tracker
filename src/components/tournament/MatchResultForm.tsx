@@ -314,7 +314,7 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
                 }}
                 sx={{ width: 80 }}
               />
-              <IconButton onClick={() => removeGoal(idx)} color="error" size="small">
+              <IconButton aria-label={`Remove goal ${idx + 1}`} onClick={() => removeGoal(idx)} color="error" size="small">
                 <DeleteIcon />
               </IconButton>
             </Box>
