@@ -17,8 +17,11 @@ export async function fetcher(url: string) {
     ? await response.json().catch(() => null)
     : null;
   if (!response.ok) {
+    const fallbackMessage = response.status >= 500
+      ? 'Live data could not be loaded. Please retry.'
+      : `The request could not be completed (${response.status}).`;
     throw new FetchError(
-      body?.error || `Request failed with status ${response.status}`,
+      body?.error || fallbackMessage,
       response.status,
       body?.code,
       body?.requestId

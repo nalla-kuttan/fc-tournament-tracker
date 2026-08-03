@@ -17,29 +17,28 @@ export default function EmptyState({
     <Box
       sx={{
         textAlign: 'center',
-        py: 8,
+        py: { xs: 5, sm: 7 },
         px: 3,
-        background: 'rgba(15, 23, 42, 0.4)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(148, 163, 184, 0.06)',
-        borderRadius: '20px',
+        background: '#0F172A',
+        border: '1px solid rgba(148, 163, 184, 0.12)',
+        borderRadius: '16px',
       }}
     >
       <Box
         sx={{
           fontSize: 64,
           mb: 2,
-          opacity: 0.3,
-          filter: 'grayscale(0.3)',
+          color: '#60A5FA',
+          opacity: 0.8,
         }}
       >
         {icon}
       </Box>
-      <Typography variant="h5" sx={{ color: '#94A3B8', fontWeight: 600 }} gutterBottom>
+      <Typography component="h2" variant="h5" sx={{ color: '#F8FAFC', fontWeight: 700 }} gutterBottom>
         {title}
       </Typography>
       {description && (
-        <Typography variant="body1" sx={{ color: '#94A3B8', mb: 3, maxWidth: 400, mx: 'auto' }}>
+        <Typography variant="body1" sx={{ color: '#B6C3D5', mb: 3, maxWidth: 480, mx: 'auto' }}>
           {description}
         </Typography>
       )}

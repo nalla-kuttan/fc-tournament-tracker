@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import Box from '@mui/material/Box';
@@ -15,7 +16,13 @@ import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Chip from '@mui/material/Chip';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import Skeleton from '@mui/material/Skeleton';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import GlassCard from '@/components/shared/GlassCard';
+import EmptyState from '@/components/shared/EmptyState';
 import StatLeaderboard from '@/components/analytics/StatLeaderboard';
 import BiggestWinsTable from '@/components/analytics/BiggestWinsTable';
 import SeasonAwards from '@/components/analytics/SeasonAwards';
@@ -85,7 +92,7 @@ export default function GlobalAnalyticsPage() {
   const [format, setFormat] = useState('all');
   const [dateRange, setDateRange] = useState('all');
   const [nowMs] = useState(() => Date.now());
-  const { data, isLoading: loading } = useSWR<GlobalData>('/api/analytics/global', fetcher);
+  const { data, error, isLoading: loading, mutate } = useSWR<GlobalData>('/api/analytics/global', fetcher, { onError: () => undefined });
 
   const filteredMatches = useMemo(() => {
     if (!data) return [];
@@ -169,8 +176,30 @@ export default function GlobalAnalyticsPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
+      <Box aria-label="Loading global analytics" sx={{ py: 2 }}>
+        <Skeleton width={220} height={46} />
+        <Skeleton width={360} height={28} />
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2, mt: 3 }}>
+          {[1, 2, 3].map((item) => <Skeleton key={item} variant="rounded" height={180} />)}
+        </Box>
+      </Box>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <Box>
+        <BackButton />
+        <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
+          Global Analytics
+        </Typography>
+        <Alert
+          severity="error"
+          action={<Button color="inherit" startIcon={<RefreshIcon />} onClick={() => void mutate()}>Retry</Button>}
+          sx={{ maxWidth: 760 }}
+        >
+          {error instanceof Error ? error.message : 'Analytics could not be loaded.'}
+        </Alert>
       </Box>
     );
   }
@@ -182,7 +211,16 @@ export default function GlobalAnalyticsPage() {
         <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
           Global Analytics
         </Typography>
-        <Typography color="text.secondary">No match data available yet. Play some matches first!</Typography>
+        <EmptyState
+          icon={<SportsSoccerIcon fontSize="inherit" />}
+          title="Your analytics story starts after kickoff"
+          description="Create a tournament and record the first result to unlock rankings, form, records, and match trends."
+          action={
+            <Button component={Link} href="/tournaments/new" variant="contained">
+              Create Tournament
+            </Button>
+          }
+        />
       </Box>
     );
   }
@@ -242,7 +280,7 @@ export default function GlobalAnalyticsPage() {
         <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, gap: 2, flexDirection: { xs: 'column', md: 'row' }, mb: 2 }}>
             <Box>
-              <Typography variant="h6" fontWeight={800}>
+              <Typography variant="h6" fontWeight={700}>
                 What matters now
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -263,10 +301,10 @@ export default function GlobalAnalyticsPage() {
                     border: '1px solid rgba(148, 163, 184, 0.1)',
                   }}
                 >
-                  <Typography variant="caption" sx={{ color: '#94A3B8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  <Typography variant="caption" sx={{ color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                     {card.label}
                   </Typography>
-                  <Typography variant="h6" fontWeight={900} noWrap sx={{ mt: 0.5, color: card.color }}>
+                  <Typography variant="h6" fontWeight={700} noWrap sx={{ mt: 0.5, color: card.color }}>
                     {card.value}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }} noWrap>

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import PublicIcon from '@mui/icons-material/Public';
@@ -15,6 +17,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import PeopleIcon from '@mui/icons-material/People';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Grid';
 import GlassCard from '@/components/shared/GlassCard';
@@ -30,7 +33,7 @@ interface GlobalData {
 }
 
 export default function AnalyticsPage() {
-  const { data } = useSWR<GlobalData>('/api/analytics/global', fetcher, { revalidateOnFocus: false });
+  const { data, error, mutate } = useSWR<GlobalData>('/api/analytics/global', fetcher, { onError: () => undefined, revalidateOnFocus: false });
   const summary = data ? getAnalyticsSummary(data.career_stats, data.all_matches, data.all_goals, data.registered_players) : null;
   const rivalries = data ? getRivalries(data.registered_players, data.player_instances, data.all_matches) : [];
 
@@ -47,8 +50,8 @@ export default function AnalyticsPage() {
       title: 'Global Analytics',
       description: summary?.topScorer ? `${summary.topScorer.player_name} leads with ${summary.topScorer.total_goals} goals` : 'All-time career stats and rankings',
       icon: <PublicIcon sx={{ fontSize: 24, color: '#3B82F6' }} />,
-      iconBg: 'rgba(168, 85, 247, 0.1)',
-      iconBorder: 'rgba(168, 85, 247, 0.15)',
+      iconBg: 'rgba(59, 130, 246, 0.1)',
+      iconBorder: 'rgba(59, 130, 246, 0.15)',
       href: '/analytics/global',
     },
     {
@@ -74,10 +77,20 @@ export default function AnalyticsPage() {
       <Box className="animate-section" sx={{ mb: 3, mt: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <BarChartIcon aria-hidden="true" sx={{ fontSize: 34, color: '#4ADE80' }} />
         <Box>
-          <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>Analytics</Typography>
+          <Typography component="h1" variant="h4" sx={{ fontWeight: 700 }}>Insights</Typography>
           <Typography color="text.secondary">Explore records, rivalries, rankings, and match trends.</Typography>
         </Box>
       </Box>
+
+      {error && (
+        <Alert
+          severity="error"
+          action={<Button color="inherit" startIcon={<RefreshIcon />} onClick={() => void mutate()}>Retry</Button>}
+          sx={{ mb: 2 }}
+        >
+          Live summaries are unavailable, but you can still open an insight below.
+        </Alert>
+      )}
 
       {summary && (
         <Grid container spacing={1.5} className="animate-section" sx={{ mb: 3 }}>
@@ -92,7 +105,7 @@ export default function AnalyticsPage() {
                 <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.75, '&:last-child': { pb: 1.75 } }}>
                   <Box sx={{ color: stat.color, display: 'flex' }}>{stat.icon}</Box>
                   <Box>
-                    <Typography variant="h6" fontWeight={800} sx={{ lineHeight: 1 }}>
+                    <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1 }}>
                       {stat.value}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -159,12 +172,12 @@ export default function AnalyticsPage() {
               <Typography variant="body1" fontWeight={600} sx={{ letterSpacing: '0.01em' }}>
                 {item.title}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem' }}>
+              <Typography variant="caption" sx={{ color: '#B6C3D5', fontSize: '0.875rem' }}>
                 {item.description}
               </Typography>
             </Box>
 
-            <ChevronRightIcon sx={{ color: '#64748B', fontSize: 20 }} />
+            <ChevronRightIcon sx={{ color: '#94A3B8', fontSize: 20 }} />
           </Box>
         ))}
       </Box>

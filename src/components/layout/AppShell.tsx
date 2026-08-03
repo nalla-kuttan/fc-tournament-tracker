@@ -1,6 +1,7 @@
 'use client';
 
 import { KeyboardEvent, ReactNode, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import useSWR from 'swr';
 import BottomNavigation from '@mui/material/BottomNavigation';
@@ -12,6 +13,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Divider from '@mui/material/Divider';
 import InputBase from '@mui/material/InputBase';
+import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
@@ -41,28 +43,24 @@ const COLORS = {
 
 const NAV_GROUPS = [
   {
-    label: 'Dashboard',
+    label: 'Play',
     items: [
-      { label: 'Dashboard', path: '/', icon: <HomeRoundedIcon /> },
-    ],
-  },
-  {
-    label: 'Players',
-    items: [
+      { label: 'Home', path: '/', icon: <HomeRoundedIcon /> },
       { label: 'Players', path: '/players', icon: <GroupsIcon /> },
     ],
   },
   {
-    label: 'Analytics',
+    label: 'Insights',
     items: [
-      { label: 'Rivalry', path: '/analytics/h2h', icon: <SportsSoccerIcon /> },
-      { label: 'Analytics', path: '/analytics/global', icon: <LeaderboardIcon /> },
+      { label: 'Overview', path: '/analytics', icon: <AnalyticsIcon /> },
+      { label: 'Rivalries', path: '/analytics/h2h', icon: <SportsSoccerIcon /> },
+      { label: 'Global Stats', path: '/analytics/global', icon: <LeaderboardIcon /> },
       { label: 'Leagues', path: '/analytics/league', icon: <TableChartIcon /> },
       { label: 'AI Analyst', path: '/analytics/ai', icon: <AutoAwesomeIcon /> },
     ],
   },
   {
-    label: 'Competitive',
+    label: 'Legacy',
     items: [
       { label: 'Competitive', path: '/competitive', icon: <EmojiEventsIcon /> },
     ],
@@ -70,10 +68,9 @@ const NAV_GROUPS = [
 ];
 
 const MOBILE_NAV_ITEMS = [
-  { label: 'Dashboard', path: '/', icon: <HomeRoundedIcon /> },
+  { label: 'Home', path: '/', icon: <HomeRoundedIcon /> },
   { label: 'Players', path: '/players', icon: <GroupsIcon /> },
-  { label: 'Analytics', path: '/analytics', icon: <AnalyticsIcon /> },
-  { label: 'AI', path: '/analytics/ai', icon: <AutoAwesomeIcon /> },
+  { label: 'Insights', path: '/analytics', icon: <AnalyticsIcon /> },
   { label: 'Compete', path: '/competitive', icon: <EmojiEventsIcon /> },
 ];
 
@@ -85,15 +82,16 @@ type SearchResult = {
   kind: 'Player' | 'Tournament';
 };
 
-function isActive(pathname: string, path: string, label: string) {
-  if (label === 'Dashboard') return pathname === '/';
-  if (label === 'Players') return pathname.startsWith('/players');
-  if (label === 'Rivalry') return pathname.startsWith('/analytics/h2h');
-  if (label === 'Analytics') return pathname === '/analytics' || pathname === '/analytics/global' || pathname === '/analytics/league';
-  if (label === 'Leagues') return pathname.startsWith('/analytics/league');
-  if (label === 'AI Analyst' || label === 'AI') return pathname.startsWith('/analytics/ai');
-  if (label === 'Competitive' || label === 'Compete') return pathname.startsWith('/competitive');
-  return pathname === path;
+function isActive(pathname: string, path: string) {
+  if (path === '/') return pathname === '/' || pathname.startsWith('/tournaments');
+  if (path === '/analytics') return pathname === '/analytics';
+  return pathname === path || pathname.startsWith(`${path}/`);
+}
+
+function isMobileActive(pathname: string, path: string) {
+  if (path === '/') return pathname === '/' || pathname.startsWith('/tournaments');
+  if (path === '/analytics') return pathname.startsWith('/analytics');
+  return pathname === path || pathname.startsWith(`${path}/`);
 }
 
 export default function AppShell({ children }: { children: ReactNode }) {
@@ -101,19 +99,20 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [activeResultIndex, setActiveResultIndex] = useState(0);
   const activeSearch = searchOpen || query.trim().length > 0;
-  const { data: tournaments = [], isLoading: loadingTournaments } = useSWR<Tournament[]>(
+  const { data: tournaments = [], error: tournamentSearchError, isLoading: loadingTournaments, mutate: retryTournamentSearch } = useSWR<Tournament[]>(
     activeSearch ? '/api/tournaments' : null,
     fetcher,
-    { revalidateOnFocus: false }
+    { onError: () => undefined, revalidateOnFocus: false }
   );
-  const { data: players = [], isLoading: loadingPlayers } = useSWR<RegisteredPlayer[]>(
+  const { data: players = [], error: playerSearchError, isLoading: loadingPlayers, mutate: retryPlayerSearch } = useSWR<RegisteredPlayer[]>(
     activeSearch ? '/api/players' : null,
     fetcher,
-    { revalidateOnFocus: false }
+    { onError: () => undefined, revalidateOnFocus: false }
   );
 
-  const activeMobileTab = MOBILE_NAV_ITEMS.findIndex((item) => isActive(pathname, item.path, item.label));
+  const activeMobileTab = MOBILE_NAV_ITEMS.findIndex((item) => isMobileActive(pathname, item.path));
   const trimmedQuery = query.trim().toLowerCase();
   const searchResults = useMemo<SearchResult[]>(() => {
     if (trimmedQuery.length < 2) return [];
@@ -145,6 +144,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
     return [...tournamentMatches, ...playerMatches].slice(0, 6);
   }, [players, tournaments, trimmedQuery]);
   const searchLoading = loadingTournaments || loadingPlayers;
+  const searchError = tournamentSearchError ?? playerSearchError;
 
   const navigateTo = (path: string) => {
     setQuery('');
@@ -157,9 +157,19 @@ export default function AppShell({ children }: { children: ReactNode }) {
       setSearchOpen(false);
       return;
     }
-    if (event.key === 'Enter' && searchResults[0]) {
+    if (event.key === 'ArrowDown' && searchResults.length > 0) {
       event.preventDefault();
-      navigateTo(searchResults[0].path);
+      setActiveResultIndex((index) => (index + 1) % searchResults.length);
+      return;
+    }
+    if (event.key === 'ArrowUp' && searchResults.length > 0) {
+      event.preventDefault();
+      setActiveResultIndex((index) => (index - 1 + searchResults.length) % searchResults.length);
+      return;
+    }
+    if (event.key === 'Enter' && searchResults[activeResultIndex]) {
+      event.preventDefault();
+      navigateTo(searchResults[activeResultIndex].path);
     }
   };
 
@@ -168,25 +178,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
       sx={{
         minHeight: '100vh',
         color: COLORS.textIce,
-        background:
-          'linear-gradient(180deg, rgba(2, 6, 23, 0.88), rgba(2, 6, 23, 0.97)), radial-gradient(circle at 45% 28%, rgba(34, 197, 94, 0.16), transparent 28%), radial-gradient(circle at 90% 0%, rgba(59, 130, 246, 0.18), transparent 24%), linear-gradient(135deg, #020617 0%, #0F172A 48%, #020617 100%)',
+        background: 'radial-gradient(circle at 84% 0%, rgba(59, 130, 246, 0.1), transparent 28%), #020617',
         position: 'relative',
         overflowX: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'fixed',
-          inset: 0,
-          pointerEvents: 'none',
-          opacity: 0.22,
-          background:
-            'linear-gradient(90deg, transparent 0 8%, rgba(34, 197, 94, 0.18) 8.2% 8.5%, transparent 8.7% 100%), linear-gradient(0deg, transparent 0 68%, rgba(148, 163, 184, 0.16) 68.2% 68.4%, transparent 68.6% 100%)',
-          backgroundSize: '120px 100%, 100% 86px',
-          maskImage: 'linear-gradient(to bottom, transparent, black 20%, black 82%, transparent)',
-        },
       }}
     >
       <Box
-        component="aside"
+        component="nav"
+        aria-label="Primary navigation"
         sx={{
           display: { xs: 'none', lg: 'flex' },
           position: 'fixed',
@@ -197,10 +196,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           flexDirection: 'column',
           borderRadius: '16px',
           border: '1px solid rgba(34, 197, 94, 0.24)',
-          background: 'rgba(2, 10, 20, 0.76)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          boxShadow: '0 24px 70px rgba(0, 0, 0, 0.42)',
+          background: '#07111F',
           overflow: 'hidden',
           zIndex: 20,
         }}
@@ -214,17 +210,16 @@ export default function AppShell({ children }: { children: ReactNode }) {
               display: 'grid',
               placeItems: 'center',
               color: COLORS.pitchBlack,
-              background: 'linear-gradient(135deg, #4ADE80, #22C55E)',
-              boxShadow: '0 0 24px rgba(34, 197, 94, 0.36)',
+              background: '#4ADE80',
             }}
           >
             <SportsSoccerIcon sx={{ fontSize: 26 }} />
           </Box>
           <Box>
-            <Typography sx={{ fontWeight: 950, fontSize: '1.38rem', lineHeight: 0.9, color: '#4ADE80' }}>
+            <Typography sx={{ fontWeight: 700, fontSize: '1.38rem', lineHeight: 0.9, color: '#4ADE80' }}>
               FC
             </Typography>
-            <Typography sx={{ fontSize: '0.68rem', letterSpacing: '0.14em', fontWeight: 800, color: COLORS.textIce }}>
+            <Typography sx={{ fontSize: '0.875rem', letterSpacing: '0.14em', fontWeight: 700, color: COLORS.textIce }}>
               TOURNAMENT TRACKER
             </Typography>
           </Box>
@@ -239,9 +234,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 sx={{
                   px: 1.25,
                   mb: 0.75,
-                  fontSize: '0.66rem',
-                  fontWeight: 900,
-                  letterSpacing: '0.12em',
+                  fontSize: '0.875rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.06em',
                   textTransform: 'uppercase',
                   color: COLORS.textSteel,
                 }}
@@ -249,13 +244,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 {group.label}
               </Typography>
               {group.items.map((item) => {
-                const active = isActive(pathname, item.path, item.label);
+                const active = isActive(pathname, item.path);
                 return (
                   <Button
                     key={`${group.label}-${item.label}`}
+                    aria-current={active ? 'page' : undefined}
+                    component={Link}
+                    href={item.path}
                     fullWidth
                     startIcon={item.icon}
-                    onClick={() => router.push(item.path)}
                     sx={{
                       justifyContent: 'flex-start',
                       mb: 0.35,
@@ -263,11 +260,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
                       py: 1.05,
                       borderRadius: '10px',
                       fontSize: '0.9rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       color: active ? COLORS.textIce : '#B7C4D6',
                       bgcolor: active ? 'rgba(34, 197, 94, 0.2)' : 'transparent',
                       border: active ? '1px solid rgba(34, 197, 94, 0.55)' : '1px solid transparent',
-                      boxShadow: active ? 'inset 4px 0 0 rgba(74, 222, 128, 0.9), 0 0 22px rgba(34, 197, 94, 0.13)' : 'none',
+                      boxShadow: 'none',
                       '&:hover': {
                         bgcolor: active ? 'rgba(34, 197, 94, 0.24)' : 'rgba(148, 163, 184, 0.07)',
                       },
@@ -284,43 +281,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
           ))}
         </Box>
 
-        <Box sx={{ p: 1.5 }}>
-          <Box
-            sx={{
-              p: 1.5,
-              borderRadius: '16px',
-              border: '1px solid rgba(148, 163, 184, 0.12)',
-              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 197, 94, 0.08))',
-            }}
-          >
-            <Typography sx={{ fontWeight: 900, fontSize: '0.9rem' }}>Kick Off Vibes</Typography>
-            <Typography sx={{ color: COLORS.textSteel, fontSize: '0.76rem', mb: 1.25 }}>by Inner Celestial</Typography>
-            <Box
-              sx={{
-                height: 34,
-                borderRadius: '10px',
-                display: 'grid',
-                gridTemplateColumns: '1.2fr 0.8fr 0.55fr',
-                gap: 0.5,
-                opacity: 0.9,
-                '& > span': {
-                  borderRadius: '10px',
-                  background: 'rgba(34, 197, 94, 0.18)',
-                },
-                '& > span:nth-of-type(2)': {
-                  background: 'rgba(59, 130, 246, 0.16)',
-                },
-                '& > span:nth-of-type(3)': {
-                  background: 'rgba(245, 158, 11, 0.14)',
-                },
-              }}
-            >
-              <span />
-              <span />
-              <span />
-            </Box>
-          </Box>
-        </Box>
       </Box>
 
       <Box sx={{ minHeight: '100vh', pl: { lg: `${SIDEBAR_WIDTH + 28}px` } }}>
@@ -361,24 +321,38 @@ export default function AppShell({ children }: { children: ReactNode }) {
               font: 'inherit',
             }}
           >
-            <SportsSoccerIcon sx={{ color: '#22C55E', fontSize: 28, filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.45))' }} />
+            <SportsSoccerIcon sx={{ color: '#22C55E', fontSize: 28 }} />
             <Box sx={{ minWidth: 0 }}>
-              <Typography sx={{ fontWeight: 950, color: '#F8FAFC', lineHeight: 1 }}>
+              <Typography sx={{ fontWeight: 700, color: '#F8FAFC', lineHeight: 1 }}>
                 FC Tracker
               </Typography>
-              <Typography sx={{ color: '#94A3B8', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em' }}>
-                TOURNAMENT HUB
+              <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem', fontWeight: 600 }}>
+                Tournament hub
               </Typography>
             </Box>
           </Box>
 
           <ClickAwayListener onClickAway={() => setSearchOpen(false)}>
-            <Box
+            <Box sx={{ display: 'contents' }}>
+              <IconButton
+                aria-label="Search players and tournaments"
+                aria-expanded={searchOpen}
+                onClick={() => setSearchOpen((open) => !open)}
+                sx={{ display: { xs: 'inline-flex', lg: 'none' }, ml: 'auto', color: searchOpen ? '#4ADE80' : '#B6C3D5' }}
+              >
+                <SearchIcon />
+              </IconButton>
+
+              <Box
               sx={{
-                display: { xs: 'none', lg: 'block' },
-                width: 420,
+                display: { xs: searchOpen ? 'block' : 'none', lg: 'block' },
+                width: { xs: 'auto', lg: 420 },
                 ml: 'auto',
-                position: 'relative',
+                position: { xs: 'fixed', lg: 'relative' },
+                top: { xs: 72, lg: 'auto' },
+                left: { xs: 12, lg: 'auto' },
+                right: { xs: 12, lg: 'auto' },
+                zIndex: 50,
               }}
             >
               <Box
@@ -391,7 +365,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   py: 0.65,
                   borderRadius: '16px',
                   border: '1px solid rgba(148, 163, 184, 0.18)',
-                  background: 'rgba(15, 23, 42, 0.68)',
+                  background: '#0F172A',
                   boxShadow: searchOpen ? '0 0 0 3px rgba(34, 197, 94, 0.1)' : 'inset 0 1px 0 rgba(255, 255, 255, 0.04)',
                 }}
               >
@@ -400,16 +374,22 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   value={query}
                   onChange={(event) => {
                     setQuery(event.target.value);
+                    setActiveResultIndex(0);
                     setSearchOpen(true);
                   }}
                   onFocus={() => setSearchOpen(true)}
                   onKeyDown={handleSearchKeyDown}
                   placeholder="Search players, tournaments..."
-                  inputProps={{ 'aria-label': 'Search players and tournaments' }}
+                  inputProps={{
+                    'aria-label': 'Search players and tournaments',
+                    'aria-controls': searchOpen ? 'global-search-results' : undefined,
+                    'aria-activedescendant': searchResults[activeResultIndex]?.id,
+                    'aria-autocomplete': 'list',
+                  }}
                   sx={{
                     flex: 1,
                     color: '#F8FAFC',
-                    fontSize: '0.86rem',
+                    fontSize: '0.9rem',
                     '& input::placeholder': { color: '#94A3B8', opacity: 1 },
                   }}
                 />
@@ -428,30 +408,52 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     overflow: 'hidden',
                     borderRadius: '16px',
                     border: '1px solid rgba(148, 163, 184, 0.14)',
-                    background: 'rgba(15, 23, 42, 0.97)',
-                    boxShadow: '0 22px 56px rgba(0, 0, 0, 0.42)',
+                    background: '#0F172A',
+                    boxShadow: '0 6px 8px rgba(0, 0, 0, 0.32)',
                   }}
                 >
-                  {trimmedQuery.length < 2 ? (
+                  {searchError ? (
                     <Box sx={{ p: 1.5 }}>
-                      <Typography sx={{ color: '#94A3B8', fontSize: '0.82rem' }}>
+                      <Typography sx={{ color: '#F8FAFC', fontWeight: 700 }}>Search is unavailable</Typography>
+                      <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem', mb: 1 }}>
+                        Check the connection or deployment configuration, then retry.
+                      </Typography>
+                      <Button
+                        size="small"
+                        startIcon={<SearchIcon />}
+                        onClick={() => {
+                          void retryTournamentSearch();
+                          void retryPlayerSearch();
+                        }}
+                      >
+                        Retry search
+                      </Button>
+                    </Box>
+                  ) : trimmedQuery.length < 2 ? (
+                    <Box sx={{ p: 1.5 }}>
+                      <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem' }}>
                         Type at least two characters to find a player or tournament.
                       </Typography>
                     </Box>
                   ) : searchResults.length === 0 && !searchLoading ? (
                     <Box sx={{ p: 1.5 }}>
-                      <Typography sx={{ color: '#F8FAFC', fontWeight: 800 }}>No results found</Typography>
-                      <Typography sx={{ color: '#94A3B8', fontSize: '0.82rem' }}>
+                      <Typography sx={{ color: '#F8FAFC', fontWeight: 700 }}>No results found</Typography>
+                      <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem' }}>
                         Try a player name, team, tournament, or format.
                       </Typography>
                     </Box>
                   ) : (
-                    <Box sx={{ py: 0.5 }}>
-                      {searchResults.map((result) => (
+                    <Box id="global-search-results" role="listbox" aria-label="Search results" sx={{ py: 0.5 }}>
+                      {searchResults.map((result, index) => (
                         <Button
                           key={result.id}
+                          id={result.id}
+                          role="option"
+                          aria-selected={index === activeResultIndex}
                           fullWidth
                           onClick={() => navigateTo(result.path)}
+                          onFocus={() => setActiveResultIndex(index)}
+                          onMouseEnter={() => setActiveResultIndex(index)}
                           sx={{
                             justifyContent: 'space-between',
                             gap: 1.5,
@@ -460,14 +462,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
                             borderRadius: 0,
                             color: '#F8FAFC',
                             textAlign: 'left',
-                            '&:hover': { background: 'rgba(34, 197, 94, 0.08)' },
+                            background: index === activeResultIndex ? 'rgba(34, 197, 94, 0.08)' : 'transparent',
+                            '&:hover': { background: 'rgba(34, 197, 94, 0.1)' },
                           }}
                         >
                           <Box sx={{ minWidth: 0 }}>
-                            <Typography sx={{ fontWeight: 850, fontSize: '0.9rem' }} noWrap>
+                            <Typography sx={{ fontWeight: 700, fontSize: '0.9rem' }} noWrap>
                               {result.label}
                             </Typography>
-                            <Typography sx={{ color: '#94A3B8', fontSize: '0.74rem' }} noWrap>
+                            <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem' }} noWrap>
                               {result.meta}
                             </Typography>
                           </Box>
@@ -478,7 +481,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                               flexShrink: 0,
                               color: result.kind === 'Player' ? '#60A5FA' : '#22C55E',
                               bgcolor: result.kind === 'Player' ? 'rgba(59, 130, 246, 0.12)' : 'rgba(34, 197, 94, 0.12)',
-                              fontWeight: 850,
+                              fontWeight: 700,
                             }}
                           />
                         </Button>
@@ -487,6 +490,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   )}
                 </Paper>
               )}
+              </Box>
             </Box>
           </ClickAwayListener>
 
@@ -519,7 +523,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
           borderTop: '1px solid rgba(148, 163, 184, 0.09)',
-          boxShadow: '0 -12px 40px rgba(0, 0, 0, 0.36)',
           borderRadius: 0,
         }}
         elevation={0}
@@ -540,21 +543,23 @@ export default function AppShell({ children }: { children: ReactNode }) {
               pt: 1,
               '&.Mui-selected': { color: '#22C55E' },
               '& .MuiBottomNavigationAction-label': {
-                fontSize: '0.66rem',
-                fontWeight: 800,
+                fontSize: '0.875rem',
+                fontWeight: 700,
                 mt: 0.25,
-                '&.Mui-selected': { fontSize: '0.66rem' },
+                '&.Mui-selected': { fontSize: '0.875rem' },
               },
               '& .MuiSvgIcon-root': { fontSize: 25 },
-              '&.Mui-selected .MuiSvgIcon-root': {
-                filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.48))',
-              },
             },
           }}
           showLabels
         >
           {MOBILE_NAV_ITEMS.map((item) => (
-            <BottomNavigationAction key={`${item.label}-${item.path}`} label={item.label} icon={item.icon} />
+            <BottomNavigationAction
+              key={`${item.label}-${item.path}`}
+              aria-current={isMobileActive(pathname, item.path) ? 'page' : undefined}
+              label={item.label}
+              icon={item.icon}
+            />
           ))}
         </BottomNavigation>
       </Paper>

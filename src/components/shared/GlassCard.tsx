@@ -3,7 +3,11 @@
 import Card from '@mui/material/Card';
 import type { CardProps } from '@mui/material/Card';
 
-export default function GlassCard({ sx, children, ...props }: CardProps) {
+type GlassCardProps = CardProps & {
+  interactive?: boolean;
+};
+
+export default function GlassCard({ sx, children, interactive = false, ...props }: GlassCardProps) {
   return (
     <Card
       sx={{
@@ -13,10 +17,16 @@ export default function GlassCard({ sx, children, ...props }: CardProps) {
         borderRadius: '16px',
         overflow: 'hidden',
         transition: 'background-color 180ms ease, border-color 180ms ease',
-        '&:hover': {
-          borderColor: 'rgba(148, 163, 184, 0.2)',
-          background: '#111C31',
-        },
+        ...(interactive && {
+          cursor: 'pointer',
+          '&:hover': {
+            borderColor: 'rgba(148, 163, 184, 0.28)',
+            background: '#111C31',
+          },
+          '&:active': {
+            background: '#0D1729',
+          },
+        }),
         ...sx,
       }}
       {...props}

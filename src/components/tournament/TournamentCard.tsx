@@ -25,11 +25,11 @@ const FORMAT_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: 
   cup: {
     icon: <MilitaryTechIcon sx={{ fontSize: 22, color: '#3B82F6' }} />,
     color: '#3B82F6',
-    bg: 'rgba(168, 85, 247, 0.1)',
+    bg: 'rgba(59, 130, 246, 0.1)',
   },
 };
 
-export default function TournamentCard({ tournament, showDivider = true, index = 0 }: { tournament: Tournament; showDivider?: boolean; index?: number }) {
+export default function TournamentCard({ tournament, showDivider = true }: { tournament: Tournament; showDivider?: boolean; index?: number }) {
   const statusConfig = TOURNAMENT_STATUSES[tournament.status];
   const formatConfig = FORMAT_CONFIG[tournament.format] || FORMAT_CONFIG.league;
 
@@ -48,7 +48,6 @@ export default function TournamentCard({ tournament, showDivider = true, index =
           color: 'inherit',
           textDecoration: 'none',
           borderBottom: showDivider ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
-          animation: `fadeInUp 0.28s ease ${index * 0.035}s both`,
           transition: 'background 150ms ease, transform 150ms ease',
           '&:hover': {
             transform: 'translateX(2px)',
@@ -83,7 +82,7 @@ export default function TournamentCard({ tournament, showDivider = true, index =
         <Typography variant="body1" fontWeight={600} noWrap sx={{ letterSpacing: '0.01em' }}>
           {tournament.name}
         </Typography>
-        <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>
+        <Typography variant="caption" sx={{ color: '#B6C3D5', fontSize: '0.875rem' }}>
           {tournament.format.charAt(0).toUpperCase() + tournament.format.slice(1)} &middot; {new Date(tournament.created_at).toLocaleDateString()}
         </Typography>
       </Box>
@@ -97,8 +96,8 @@ export default function TournamentCard({ tournament, showDivider = true, index =
             bgcolor: `${statusConfig.color}12`,
             color: statusConfig.color,
             fontWeight: 600,
-            fontSize: '0.7rem',
-            height: 26,
+            fontSize: '0.875rem',
+            height: 30,
             mr: 1,
             border: `1px solid ${statusConfig.color}25`,
             letterSpacing: '0.02em',

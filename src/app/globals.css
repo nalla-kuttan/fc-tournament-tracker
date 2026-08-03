@@ -91,6 +91,7 @@ html {
 body {
   background: #020617;
   font-family: 'Chakra Petch', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-synthesis: none;
 }
 
 a {
@@ -129,8 +130,8 @@ p {
 }
 
 .glass-card:hover {
-  border-color: rgba(148, 163, 184, 0.2);
-  background: #111c31;
+  border-color: rgba(148, 163, 184, 0.12);
+  background: #0f172a;
 }
 
 /* ─── List Row Hover ─── */

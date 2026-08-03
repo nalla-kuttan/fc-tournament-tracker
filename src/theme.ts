@@ -93,10 +93,6 @@ const theme = createTheme({
           boxShadow: 'none',
           borderRadius: 16,
           transition: 'background-color 180ms cubic-bezier(0.16, 1, 0.3, 1), border-color 180ms cubic-bezier(0.16, 1, 0.3, 1)',
-          '&:hover': {
-            borderColor: 'rgba(148, 163, 184, 0.2)',
-            background: '#111C31',
-          },
         },
       },
     },

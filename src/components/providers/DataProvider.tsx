@@ -2,9 +2,43 @@
 
 import { useMemo, useState } from 'react';
 import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 import Snackbar from '@mui/material/Snackbar';
-import { SWRConfig } from 'swr';
+import { SWRConfig, useSWRConfig } from 'swr';
 import { FetchError, fetcher } from '@/lib/fetcher';
+
+function DataErrorNotice({ message, onClose }: { message: string; onClose: () => void }) {
+  const { mutate } = useSWRConfig();
+
+  const retry = () => {
+    onClose();
+    void mutate(() => true);
+  };
+
+  return (
+    <Snackbar
+      open={Boolean(message)}
+      autoHideDuration={10_000}
+      onClose={onClose}
+      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      sx={{ top: { xs: '72px !important', lg: '24px !important' }, px: 1.5 }}
+    >
+      <Alert
+        severity="error"
+        variant="filled"
+        onClose={onClose}
+        action={
+          <Button color="inherit" size="small" onClick={retry} sx={{ minHeight: 40, px: 1.25 }}>
+            Retry
+          </Button>
+        }
+        sx={{ width: 'min(560px, calc(100vw - 24px))', '& .MuiAlert-action': { alignItems: 'center' } }}
+      >
+        {message}
+      </Alert>
+    </Snackbar>
+  );
+}
 
 export default function DataProvider({ children }: { children: React.ReactNode }) {
   const [message, setMessage] = useState('');
@@ -25,22 +59,7 @@ export default function DataProvider({ children }: { children: React.ReactNode }
   return (
     <SWRConfig value={value}>
       {children}
-      <Snackbar
-        open={Boolean(message)}
-        autoHideDuration={8_000}
-        onClose={() => setMessage('')}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        sx={{ bottom: { xs: '88px !important', lg: '24px !important' } }}
-      >
-        <Alert
-          severity="error"
-          variant="filled"
-          onClose={() => setMessage('')}
-          sx={{ maxWidth: 560, '& .MuiAlert-action button': { minWidth: 44, minHeight: 44 } }}
-        >
-          {message}
-        </Alert>
-      </Snackbar>
+      <DataErrorNotice message={message} onClose={() => setMessage('')} />
     </SWRConfig>
   );
 }

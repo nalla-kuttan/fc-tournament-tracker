@@ -1,11 +1,13 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import useSWR from 'swr';
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
-import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
@@ -13,9 +15,12 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Skeleton from '@mui/material/Skeleton';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import GlassCard from '@/components/shared/GlassCard';
 import EmptyState from '@/components/shared/EmptyState';
@@ -43,18 +48,28 @@ interface RecordsResponse {
 const tabLabels = ['Season', 'Ratings', 'Records', 'Trophy Cabinet'];
 const ALL_TIME_VALUE = 'all-time';
 
-function MetricCard({ label, value, detail }: { label: string; value: string | number; detail: string }) {
+function CompetitiveSignals({ signals }: { signals: Array<{ label: string; value: string | number; detail: string }> }) {
   return (
-    <GlassCard>
-      <CardContent>
-        <Typography sx={{ color: '#94A3B8', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase' }}>
-          {label}
-        </Typography>
-        <Typography sx={{ fontSize: '2rem', fontWeight: 950, color: '#F8FAFC', lineHeight: 1.05 }}>
-          {value}
-        </Typography>
-        <Typography sx={{ color: '#B6C3D5', fontSize: '0.86rem' }}>{detail}</Typography>
-      </CardContent>
+    <GlassCard sx={{ mb: 3 }}>
+      <Box role="list" aria-label="Competitive summary" sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, minmax(0, 1fr))' } }}>
+        {signals.map((signal, index) => (
+          <Box
+            role="listitem"
+            key={signal.label}
+            sx={{
+              p: 2,
+              borderTop: { xs: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.1)', sm: 'none' },
+              borderLeft: { xs: 'none', sm: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.1)' },
+            }}
+          >
+            <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem' }}>{signal.label}</Typography>
+            <Typography sx={{ fontSize: '1.35rem', fontWeight: 700, color: '#F8FAFC', lineHeight: 1.2 }} noWrap>
+              {signal.value}
+            </Typography>
+            <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem' }}>{signal.detail}</Typography>
+          </Box>
+        ))}
+      </Box>
     </GlassCard>
   );
 }
@@ -69,10 +84,10 @@ function RatingTable({ rows }: { rows: CompetitiveRatingRow[] }) {
       {rows.slice(0, 10).map((row) => (
         <GlassCard key={row.player.id}>
           <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5, '&:last-child': { pb: 1.5 } }}>
-            <Typography sx={{ width: 34, color: '#4ADE80', fontWeight: 950 }}>#{row.rank}</Typography>
+            <Typography sx={{ width: 34, color: '#4ADE80', fontWeight: 700 }}>#{row.rank}</Typography>
             <Box sx={{ minWidth: 0, flex: 1 }}>
-              <Typography sx={{ fontWeight: 900 }} noWrap>{row.player.name}</Typography>
-              <Typography sx={{ color: '#94A3B8', fontSize: '0.82rem' }} noWrap>
+              <Typography sx={{ fontWeight: 700 }} noWrap>{row.player.name}</Typography>
+              <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }} noWrap>
                 {row.player.base_team} · {row.matches} matches · peak {row.peakRating}
               </Typography>
             </Box>
@@ -87,8 +102,8 @@ function RatingTable({ rows }: { rows: CompetitiveRatingRow[] }) {
               ))}
             </Stack>
             <Box sx={{ textAlign: 'right', minWidth: 78 }}>
-              <Typography sx={{ fontWeight: 950, fontSize: '1.2rem' }}>{row.rating}</Typography>
-              <Typography sx={{ color: row.movement >= 0 ? '#4ADE80' : '#EF4444', fontSize: '0.78rem', fontWeight: 800 }}>
+              <Typography sx={{ fontWeight: 700, fontSize: '1.2rem' }}>{row.rating}</Typography>
+              <Typography sx={{ color: row.movement >= 0 ? '#4ADE80' : '#EF4444', fontSize: '0.875rem', fontWeight: 700 }}>
                 {row.movement >= 0 ? '+' : ''}{row.movement}
               </Typography>
             </Box>
@@ -111,17 +126,17 @@ function RecordBoard({
   return (
     <GlassCard sx={{ height: '100%' }}>
       <CardContent>
-        <Typography sx={{ fontWeight: 900, mb: 1.25 }}>{title}</Typography>
+        <Typography sx={{ fontWeight: 700, mb: 1.25 }}>{title}</Typography>
         {rows.length === 0 ? (
           <Typography sx={{ color: '#94A3B8', fontSize: '0.9rem' }}>No records yet</Typography>
         ) : (
           <Stack spacing={1}>
             {rows.slice(0, 5).map((row, index) => (
               <Box key={`${title}-${row.playerName}-${index}`} sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-                <Typography sx={{ width: 26, color: '#4ADE80', fontWeight: 900 }}>#{index + 1}</Typography>
+                <Typography sx={{ width: 26, color: '#4ADE80', fontWeight: 700 }}>#{index + 1}</Typography>
                 <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Typography sx={{ fontWeight: 800 }} noWrap>{row.playerName}</Typography>
-                  <Typography sx={{ color: '#94A3B8', fontSize: '0.78rem' }} noWrap>{row.detail}</Typography>
+                  <Typography sx={{ fontWeight: 700 }} noWrap>{row.playerName}</Typography>
+                  <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }} noWrap>{row.detail}</Typography>
                 </Box>
                 <Chip label={`${row.value}${suffix}`} size="small" color={index === 0 ? 'primary' : 'default'} />
               </Box>
@@ -136,17 +151,19 @@ function RecordBoard({
 export default function CompetitivePage() {
   const [tab, setTab] = useState(0);
   const [selectedSeasonId, setSelectedSeasonId] = useState('');
-  const { data, isLoading } = useSWR<CompetitiveOverview>('/api/competitive/overview', fetcher);
+  const { data, error, isLoading, mutate } = useSWR<CompetitiveOverview>('/api/competitive/overview', fetcher, { onError: () => undefined });
   const defaultSeason = data?.activeSeason ?? data?.seasons[0] ?? null;
   const effectiveSeasonId = selectedSeasonId || ALL_TIME_VALUE;
   const isAllTimeLens = effectiveSeasonId === ALL_TIME_VALUE;
-  const { data: selectedRatingsData } = useSWR<RatingsResponse>(
+  const { data: selectedRatingsData, error: ratingsError, mutate: retryRatings } = useSWR<RatingsResponse>(
     effectiveSeasonId && !isAllTimeLens ? `/api/competitive/ratings?scope=season&seasonId=${effectiveSeasonId}` : null,
-    fetcher
+    fetcher,
+    { onError: () => undefined }
   );
-  const { data: selectedRecordsData } = useSWR<RecordsResponse>(
+  const { data: selectedRecordsData, error: recordsError, mutate: retryRecords } = useSWR<RecordsResponse>(
     effectiveSeasonId && !isAllTimeLens ? `/api/competitive/records?scope=season&seasonId=${effectiveSeasonId}` : null,
-    fetcher
+    fetcher,
+    { onError: () => undefined }
   );
   const selectedSeason = data?.seasons.find((season) => season.id === effectiveSeasonId) ?? defaultSeason;
   const selectedSeasonRatings = isAllTimeLens
@@ -158,37 +175,75 @@ export default function CompetitivePage() {
     [data?.latestIntelligence, effectiveSeasonId, isAllTimeLens]
   );
   const topSeason = selectedSeasonRatings[0] ?? null;
-  const topAllTime = data?.allTimeRatings[0] ?? null;
   const topWin = selectedSeasonRecords?.biggestWins[0] ?? null;
   const intelligenceCount = selectedSeasonIntelligence.reduce((sum, row) => sum + row.labels.length, 0);
   const activeTabLabel = useMemo(() => tabLabels[tab] ?? tabLabels[0], [tab]);
+  const hasCompetitiveHistory = Boolean(
+    data && (data.seasons.length > 0 || data.allTimeRatings.length > 0 || data.latestIntelligence.length > 0)
+  );
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}>
-        <Typography sx={{ color: '#4ADE80', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.12em' }}>
-          Competitive
+      <Box sx={{ mb: 3, maxWidth: 760 }}>
+        <Typography component="h1" sx={{ fontWeight: 700, fontSize: { xs: '1.75rem', sm: '2.35rem' }, lineHeight: 1.1 }}>
+          Season Race
         </Typography>
-        <Typography component="h1" variant="h3" sx={{ fontWeight: 950 }}>
-          Season Race & Legacy Board
-        </Typography>
-        <Typography sx={{ color: '#94A3B8', maxWidth: 760 }}>
-          Ratings, records, trophies, and match intelligence across current and previous seasons.
+        <Typography sx={{ color: '#B6C3D5', mt: 0.75 }}>
+          Ratings, records, trophies, and match intelligence across every season.
         </Typography>
       </Box>
 
       {isLoading && (
-        <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 260 }}>
-          <CircularProgress />
+        <Box aria-label="Loading competitive history">
+          <Skeleton variant="rounded" height={120} sx={{ mb: 2 }} />
+          <Skeleton variant="rounded" height={260} />
         </Box>
       )}
 
-      {!isLoading && data && (
+      {!isLoading && error && !data && (
+        <Alert
+          severity="error"
+          action={<Button color="inherit" startIcon={<RefreshIcon />} onClick={() => void mutate()}>Retry</Button>}
+        >
+          {error instanceof Error ? error.message : 'Competitive history could not be loaded.'}
+        </Alert>
+      )}
+
+      {!isLoading && data && !hasCompetitiveHistory && (
+        <EmptyState
+          icon={<SportsSoccerIcon fontSize="inherit" />}
+          title="Build your competitive history"
+          description="Record the first tournament result to unlock ratings, records, trophies, and season storylines."
+          action={<Button component={Link} href="/tournaments/new" variant="contained">Create Tournament</Button>}
+        />
+      )}
+
+      {!isLoading && data && hasCompetitiveHistory && (
         <>
+          {(ratingsError || recordsError) && (
+            <Alert
+              severity="error"
+              action={
+                <Button
+                  color="inherit"
+                  startIcon={<RefreshIcon />}
+                  onClick={() => {
+                    void retryRatings();
+                    void retryRecords();
+                  }}
+                >
+                  Retry
+                </Button>
+              }
+              sx={{ mb: 2 }}
+            >
+              The selected season could not be refreshed. Previously loaded competitive data remains visible.
+            </Alert>
+          )}
           <GlassCard sx={{ mb: 2 }}>
             <CardContent sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr auto' }, gap: 2, alignItems: 'center' }}>
               <Box>
-                <Typography sx={{ fontWeight: 900, color: '#F8FAFC' }}>
+                <Typography sx={{ fontWeight: 700, color: '#F8FAFC' }}>
                   Season Lens
                 </Typography>
                 <Typography sx={{ color: '#94A3B8', fontSize: '0.9rem' }}>
@@ -213,30 +268,31 @@ export default function CompetitivePage() {
             </CardContent>
           </GlassCard>
 
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <MetricCard
-                label={isAllTimeLens ? 'Selected Lens' : 'Selected Season'}
-                value={isAllTimeLens ? 'All-time' : selectedSeason?.name ?? 'None'}
-                detail={isAllTimeLens ? 'Every recorded tournament' : selectedSeason ? `${selectedSeason.status} campaign` : 'No season selected'}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <MetricCard label={isAllTimeLens ? 'All-Time Leader' : 'Season Leader'} value={topSeason?.player.name ?? '-'} detail={topSeason ? `${topSeason.rating} rating` : 'No matches'} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <MetricCard label="All-Time #1" value={topAllTime?.player.name ?? '-'} detail={topAllTime ? `${topAllTime.rating} rating` : 'No played matches'} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <MetricCard label="Intel Tags" value={intelligenceCount} detail="Recent competitive storylines" />
-            </Grid>
-          </Grid>
+          <CompetitiveSignals
+            signals={[
+              {
+                label: isAllTimeLens ? 'Current view' : 'Selected season',
+                value: isAllTimeLens ? 'All-time' : selectedSeason?.name ?? 'None',
+                detail: isAllTimeLens ? 'Every recorded tournament' : selectedSeason ? `${selectedSeason.status} campaign` : 'No season selected',
+              },
+              {
+                label: isAllTimeLens ? 'All-time leader' : 'Season leader',
+                value: topSeason?.player.name ?? 'Not ranked',
+                detail: topSeason ? `${topSeason.rating} rating` : 'Play a match to rank players',
+              },
+              {
+                label: 'Match storylines',
+                value: intelligenceCount,
+                detail: 'Recent competitive signals',
+              },
+            ]}
+          />
 
           <Tabs value={tab} onChange={(_, next) => setTab(next)} sx={{ mb: 2 }}>
             {tabLabels.map((label) => <Tab key={label} label={label} />)}
           </Tabs>
 
-          <Typography sx={{ mb: 1.5, fontWeight: 900, color: '#F8FAFC' }}>{activeTabLabel}</Typography>
+          <Typography sx={{ mb: 1.5, fontWeight: 700, color: '#F8FAFC' }}>{activeTabLabel}</Typography>
 
           {tab === 0 && (
             <Grid container spacing={2}>
@@ -253,7 +309,7 @@ export default function CompetitivePage() {
                       <CardContent>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
                           <WhatshotIcon sx={{ color: '#F59E0B' }} />
-                          <Typography sx={{ fontWeight: 900 }}>
+                          <Typography sx={{ fontWeight: 700 }}>
                             {row.match.home_player?.name ?? 'Home'} {row.match.home_score}-{row.match.away_score} {row.match.away_player?.name ?? 'Away'}
                           </Typography>
                         </Stack>
@@ -272,11 +328,21 @@ export default function CompetitivePage() {
 
           {tab === 2 && (
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <MetricCard label="Biggest Win" value={topWin?.scoreline ?? '-'} detail={topWin ? `${topWin.playerName} vs ${topWin.opponentName}` : 'No wins yet'} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <MetricCard label="Longest Streak" value={selectedSeasonRecords?.longestWinStreaks[0]?.streak ?? '-'} detail={selectedSeasonRecords?.longestWinStreaks[0]?.playerName ?? 'No streaks yet'} />
+              <Grid size={{ xs: 12 }}>
+                <CompetitiveSignals
+                  signals={[
+                    {
+                      label: 'Biggest win',
+                      value: topWin?.scoreline ?? 'No result',
+                      detail: topWin ? `${topWin.playerName} vs ${topWin.opponentName}` : 'No wins yet',
+                    },
+                    {
+                      label: 'Longest streak',
+                      value: selectedSeasonRecords?.longestWinStreaks[0]?.streak ?? 'No streak',
+                      detail: selectedSeasonRecords?.longestWinStreaks[0]?.playerName ?? 'No streaks yet',
+                    },
+                  ]}
+                />
               </Grid>
               <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 <RecordBoard title="Top Scorers" rows={selectedSeasonRecords?.topScorers ?? []} />
@@ -307,7 +373,7 @@ export default function CompetitivePage() {
               </Grid>
               {isAllTimeLens && (
                 <Grid size={{ xs: 12 }}>
-                  <Typography sx={{ mt: 1, mb: 0.5, fontWeight: 950, color: '#F8FAFC' }}>
+                  <Typography sx={{ mt: 1, mb: 0.5, fontWeight: 700, color: '#F8FAFC' }}>
                     Best Individual Seasons
                   </Typography>
                 </Grid>
@@ -390,14 +456,14 @@ export default function CompetitivePage() {
               <Grid size={{ xs: 12, md: 6 }}>
                 <GlassCard sx={{ height: '100%' }}>
                   <CardContent>
-                    <Typography sx={{ fontWeight: 900, mb: 1.25 }}>Biggest Losses</Typography>
+                    <Typography sx={{ fontWeight: 700, mb: 1.25 }}>Biggest Losses</Typography>
                     <Stack spacing={1}>
                       {(selectedSeasonRecords?.biggestLosses ?? []).slice(0, 5).map((row, index) => (
                         <Box key={`${row.matchId}-${row.playerId}`} sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-                          <Typography sx={{ width: 26, color: '#EF4444', fontWeight: 900 }}>#{index + 1}</Typography>
+                          <Typography sx={{ width: 26, color: '#EF4444', fontWeight: 700 }}>#{index + 1}</Typography>
                           <Box sx={{ minWidth: 0, flex: 1 }}>
-                            <Typography sx={{ fontWeight: 800 }} noWrap>{row.playerName} vs {row.opponentName}</Typography>
-                            <Typography sx={{ color: '#94A3B8', fontSize: '0.78rem' }} noWrap>{row.goalDifference} goal margin</Typography>
+                            <Typography sx={{ fontWeight: 700 }} noWrap>{row.playerName} vs {row.opponentName}</Typography>
+                            <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }} noWrap>{row.goalDifference} goal margin</Typography>
                           </Box>
                           <Chip label={row.scoreline} size="small" />
                         </Box>
@@ -409,14 +475,14 @@ export default function CompetitivePage() {
               <Grid size={{ xs: 12, md: 6 }}>
                 <GlassCard sx={{ height: '100%' }}>
                   <CardContent>
-                    <Typography sx={{ fontWeight: 900, mb: 1.25 }}>Highest-Scoring Matches</Typography>
+                    <Typography sx={{ fontWeight: 700, mb: 1.25 }}>Highest-Scoring Matches</Typography>
                     <Stack spacing={1}>
                       {(selectedSeasonRecords?.highestScoringMatches ?? []).slice(0, 5).map((row, index) => (
                         <Box key={row.matchId} sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-                          <Typography sx={{ width: 26, color: '#F59E0B', fontWeight: 900 }}>#{index + 1}</Typography>
+                          <Typography sx={{ width: 26, color: '#F59E0B', fontWeight: 700 }}>#{index + 1}</Typography>
                           <Box sx={{ minWidth: 0, flex: 1 }}>
-                            <Typography sx={{ fontWeight: 800 }} noWrap>{row.label}</Typography>
-                            <Typography sx={{ color: '#94A3B8', fontSize: '0.78rem' }} noWrap>{row.detail}</Typography>
+                            <Typography sx={{ fontWeight: 700 }} noWrap>{row.label}</Typography>
+                            <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }} noWrap>{row.detail}</Typography>
                           </Box>
                           <Chip label={`${row.scoreline} · ${row.totalGoals}`} size="small" />
                         </Box>
@@ -435,8 +501,8 @@ export default function CompetitivePage() {
                       <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <ShowChartIcon sx={{ color: '#60A5FA' }} />
                         <Box sx={{ flex: 1 }}>
-                          <Typography sx={{ fontWeight: 900 }}>{row.winnerName} upset {row.loserName}</Typography>
-                          <Typography sx={{ color: '#94A3B8', fontSize: '0.86rem' }}>{row.detail}</Typography>
+                          <Typography sx={{ fontWeight: 700 }}>{row.winnerName} upset {row.loserName}</Typography>
+                          <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }}>{row.detail}</Typography>
                         </Box>
                         <Chip label={row.upsetScore} color="primary" />
                       </CardContent>
@@ -457,8 +523,8 @@ export default function CompetitivePage() {
                   <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <EmojiEventsIcon sx={{ color: '#F59E0B', fontSize: 34 }} />
                     <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography sx={{ fontWeight: 950 }} noWrap>{row.player.name}</Typography>
-                      <Typography sx={{ color: '#94A3B8', fontSize: '0.86rem' }} noWrap>
+                      <Typography sx={{ fontWeight: 700 }} noWrap>{row.player.name}</Typography>
+                      <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }} noWrap>
                         Best season: {row.bestSeason ?? 'TBD'}
                       </Typography>
                     </Box>
