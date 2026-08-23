@@ -15,9 +15,9 @@ import { createClient } from '@/lib/supabase/client';
 
 function AnalyticsRealtimeSync() {
   const { mutate } = useSWRConfig();
-  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
+    const supabase = createClient();
     const revalidator = createBatchedAnalyticsRevalidator(() => {
       void mutate(isAnalyticsDataKey);
     });
@@ -27,7 +27,7 @@ function AnalyticsRealtimeSync() {
       revalidator.dispose();
       unsubscribe();
     };
-  }, [mutate, supabase]);
+  }, [mutate]);
 
   return null;
 }
