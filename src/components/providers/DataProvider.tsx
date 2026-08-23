@@ -1,11 +1,36 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Snackbar from '@mui/material/Snackbar';
 import { SWRConfig, useSWRConfig } from 'swr';
+import {
+  createBatchedAnalyticsRevalidator,
+  isAnalyticsDataKey,
+  subscribeToAnalyticsChanges,
+} from '@/lib/analytics-realtime';
 import { FetchError, fetcher } from '@/lib/fetcher';
+import { createClient } from '@/lib/supabase/client';
+
+function AnalyticsRealtimeSync() {
+  const { mutate } = useSWRConfig();
+  const supabase = useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    const revalidator = createBatchedAnalyticsRevalidator(() => {
+      void mutate(isAnalyticsDataKey);
+    });
+    const unsubscribe = subscribeToAnalyticsChanges(supabase, revalidator.schedule);
+
+    return () => {
+      revalidator.dispose();
+      unsubscribe();
+    };
+  }, [mutate, supabase]);
+
+  return null;
+}
 
 function DataErrorNotice({ message, onClose }: { message: string; onClose: () => void }) {
   const { mutate } = useSWRConfig();
@@ -58,6 +83,7 @@ export default function DataProvider({ children }: { children: React.ReactNode }
 
   return (
     <SWRConfig value={value}>
+      <AnalyticsRealtimeSync />
       {children}
       <DataErrorNotice message={message} onClose={() => setMessage('')} />
     </SWRConfig>

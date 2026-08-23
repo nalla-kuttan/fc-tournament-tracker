@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
+import useSWR from 'swr';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
@@ -17,6 +18,7 @@ import BiggestWinsTable from '@/components/analytics/BiggestWinsTable';
 import BackButton from '@/components/shared/BackButton';
 import type { Tournament } from '@/lib/types';
 import { getLeagueStory, getTitleRace } from '@/lib/analytics-insights';
+import { fetcher } from '@/lib/fetcher';
 
 interface PlayerStat {
   player_id: string;
@@ -73,37 +75,21 @@ function toLeaderboard(stats: PlayerStat[], valueFn: (s: PlayerStat) => string) 
 }
 
 export default function LeagueAnalyticsPage() {
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedId, setSelectedId] = useState('');
-  const [data, setData] = useState<LeagueData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [dataLoading, setDataLoading] = useState(false);
-
-  const loadLeagueData = async (tournamentId: string) => {
-    setDataLoading(true);
-    try {
-      const res = await fetch(`/api/analytics/league/${tournamentId}`);
-      const nextData = await res.json();
-      setData(nextData);
-    } finally {
-      setDataLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetch('/api/tournaments')
-      .then((r) => r.json())
-      .then((t: Tournament[]) => {
-        const active = t.filter((x) => x.status === 'active' || x.status === 'completed');
-        setTournaments(active);
-        if (active.length > 0) {
-          setSelectedId(active[0].id);
-          loadLeagueData(active[0].id);
-        }
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  const { data: allTournaments, isLoading: loading } = useSWR<Tournament[]>('/api/tournaments', fetcher);
+  const tournaments = useMemo(
+    () => (allTournaments ?? []).filter((tournament) => (
+      tournament.status === 'active' || tournament.status === 'completed'
+    )),
+    [allTournaments]
+  );
+  const activeSelectedId = tournaments.some((tournament) => tournament.id === selectedId)
+    ? selectedId
+    : tournaments[0]?.id ?? '';
+  const { data, isLoading: dataLoading } = useSWR<LeagueData>(
+    activeSelectedId ? `/api/analytics/league/${activeSelectedId}` : null,
+    fetcher
+  );
 
   if (loading) {
     return (
@@ -140,12 +126,9 @@ export default function LeagueAnalyticsPage() {
         <FormControl size="small" sx={{ minWidth: 240 }}>
           <InputLabel>Tournament</InputLabel>
           <Select
-            value={selectedId}
+            value={activeSelectedId}
             label="Tournament"
-            onChange={(e) => {
-              setSelectedId(e.target.value);
-              loadLeagueData(e.target.value);
-            }}
+            onChange={(e) => setSelectedId(e.target.value)}
           >
             {tournaments.map((t) => (
               <MenuItem key={t.id} value={t.id}>

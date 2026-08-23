@@ -1,7 +1,8 @@
 'use client';
 
-import { Suspense, useEffect, useState, useCallback } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import useSWR from 'swr';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -19,6 +20,7 @@ import BackButton from '@/components/shared/BackButton';
 import AIH2HModal from '@/components/ai/AIH2HModal';
 import GlassCard from '@/components/shared/GlassCard';
 import { getRivalries, type GoalLite, type RivalrySummary } from '@/lib/analytics-insights';
+import { fetcher } from '@/lib/fetcher';
 import { getPlayerImagePath } from '@/lib/player-images';
 import type { RegisteredPlayer, H2HData, CareerStats, Match } from '@/lib/types';
 
@@ -30,72 +32,47 @@ interface GlobalData {
   player_instances: { id: string; registered_player_id: string; name: string; team: string }[];
 }
 
+const EMPTY_PLAYERS: RegisteredPlayer[] = [];
+
 function H2HPageContent() {
   const searchParams = useSearchParams();
-  const [player1, setPlayer1] = useState<RegisteredPlayer | null>(null);
-  const [player2, setPlayer2] = useState<RegisteredPlayer | null>(null);
-  const [h2hData, setH2hData] = useState<H2HData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const requestedPlayer1Id = searchParams.get('p1') ?? '';
+  const requestedPlayer2Id = searchParams.get('p2') ?? '';
+  const requestedComparisonKey = requestedPlayer1Id && requestedPlayer2Id
+    ? `/api/analytics/h2h?p1=${requestedPlayer1Id}&p2=${requestedPlayer2Id}`
+    : null;
+  const [player1Id, setPlayer1Id] = useState<string | null>(null);
+  const [player2Id, setPlayer2Id] = useState<string | null>(null);
+  const [comparisonKey, setComparisonKey] = useState<string | null>(null);
   const [h2hModalOpen, setH2hModalOpen] = useState(false);
-  const [rivalries, setRivalries] = useState<RivalrySummary[]>([]);
-  const [players, setPlayers] = useState<RegisteredPlayer[]>([]);
-
-  const loadComparison = useCallback(async (first: RegisteredPlayer | null, second: RegisteredPlayer | null) => {
-    if (!first || !second) return;
-
-    setLoading(true);
-    setError('');
-    setH2hData(null);
-
-    try {
-      const res = await fetch(`/api/analytics/h2h?p1=${first.id}&p2=${second.id}`);
-      if (!res.ok) {
-        throw new Error('Failed to load H2H data');
-      }
-      const data = await res.json();
-      setH2hData(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { data: globalData } = useSWR<GlobalData>('/api/analytics/global', fetcher);
+  const { data: h2hData, error, isLoading: loading } = useSWR<H2HData>(
+    comparisonKey ?? requestedComparisonKey,
+    fetcher
+  );
+  const players = globalData?.registered_players ?? EMPTY_PLAYERS;
+  const player1 = players.find((player) => player.id === (player1Id ?? requestedPlayer1Id)) ?? null;
+  const player2 = players.find((player) => player.id === (player2Id ?? requestedPlayer2Id)) ?? null;
+  const rivalries = useMemo(
+    () => globalData
+      ? getRivalries(globalData.registered_players, globalData.player_instances, globalData.all_matches)
+      : [],
+    [globalData]
+  );
 
   const handleCompare = () => {
-    void loadComparison(player1, player2);
+    if (!player1 || !player2) return;
+    setComparisonKey(`/api/analytics/h2h?p1=${player1.id}&p2=${player2.id}`);
   };
-
-  useEffect(() => {
-    const p1 = searchParams.get('p1');
-    const p2 = searchParams.get('p2');
-    if (!p1 || !p2) return;
-
-    const first = players.find((player) => player.id === p1) ?? null;
-    const second = players.find((player) => player.id === p2) ?? null;
-    setPlayer1(first);
-    setPlayer2(second);
-    if (first && second) {
-      void loadComparison(first, second);
-    }
-  }, [loadComparison, players, searchParams]);
-
-  useEffect(() => {
-    fetch('/api/analytics/global')
-      .then((response) => response.json())
-      .then((data: GlobalData) => {
-        setPlayers(data.registered_players);
-        setRivalries(getRivalries(data.registered_players, data.player_instances, data.all_matches));
-      })
-      .catch(() => {});
-  }, []);
 
   const chooseRivalry = (rivalry: RivalrySummary) => {
     const first = players.find((player) => player.id === rivalry.p1Id) ?? null;
     const second = players.find((player) => player.id === rivalry.p2Id) ?? null;
-    setPlayer1(first);
-    setPlayer2(second);
-    if (first && second) void loadComparison(first, second);
+    setPlayer1Id(first?.id ?? '');
+    setPlayer2Id(second?.id ?? '');
+    if (first && second) {
+      setComparisonKey(`/api/analytics/h2h?p1=${first.id}&p2=${second.id}`);
+    }
   };
 
   return (
@@ -125,7 +102,7 @@ function H2HPageContent() {
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
+          {error instanceof Error ? error.message : 'Something went wrong'}
         </Alert>
       )}
 
@@ -135,7 +112,7 @@ function H2HPageContent() {
           <PlayerSelector
             label="Player 1"
             value={player1}
-            onChange={setPlayer1}
+            onChange={(player) => setPlayer1Id(player?.id ?? '')}
             excludeId={player2?.id}
           />
         </Grid>
@@ -146,7 +123,7 @@ function H2HPageContent() {
           <PlayerSelector
             label="Player 2"
             value={player2}
-            onChange={setPlayer2}
+            onChange={(player) => setPlayer2Id(player?.id ?? '')}
             excludeId={player1?.id}
           />
         </Grid>
