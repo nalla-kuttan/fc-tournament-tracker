@@ -77,3 +77,35 @@ export interface PerformanceRecords {
   expectedPointsSurplus: RecordEntry[];
   pressurePerformance: RecordEntry[];
 }
+
+export interface RivalryRecord extends RecordEntry {
+  opponentId: string;
+  opponentName: string;
+  meetings: number;
+  wins: number;
+  draws: number;
+  losses: number;
+}
+
+export interface RivalryRecords {
+  mostPlayed: RivalryRecord[];
+  dominance: RivalryRecord[];
+  reversals: RivalryRecord[];
+  nemesisIndex: RivalryRecord[];
+  closest: RivalryRecord[];
+}
+
+export interface TeamRecord extends RecordEntry {
+  team: string;
+  matches: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalDifference: number;
+}
+
+export interface TeamRecords {
+  clubSpecialists: TeamRecord[];
+  bestCombinations: TeamRecord[];
+  versatileWinners: RecordEntry[];
+}
