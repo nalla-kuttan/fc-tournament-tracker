@@ -65,3 +65,15 @@ export interface CampaignRecords {
   bestGoalDifference: CampaignRecord[];
   largestTitleMargins: CampaignRecord[];
 }
+
+export interface PerformanceRecords {
+  finishingEfficiency: RecordEntry[];
+  xgOverperformance: RecordEntry[];
+  defensiveXgOverperformance: RecordEntry[];
+  counterpunchWinRate: RecordEntry[];
+  motmRate: RecordEntry[];
+  defensiveWorkRate: RecordEntry[];
+  ratingConsistency: RecordEntry[];
+  expectedPointsSurplus: RecordEntry[];
+  pressurePerformance: RecordEntry[];
+}

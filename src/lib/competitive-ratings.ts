@@ -2,7 +2,7 @@ import type { Match, Player, RegisteredPlayer } from './types';
 
 export type CompetitivePlayerInstance = Pick<
   Player,
-  'id' | 'registered_player_id' | 'name' | 'team' | 'tournament_id'
+  'id' | 'registered_player_id' | 'tournament_id'
 >;
 
 export type CompetitiveScope = { scope: 'season' | 'all-time'; seasonId?: string | null };
