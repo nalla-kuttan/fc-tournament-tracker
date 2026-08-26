@@ -50,3 +50,18 @@ export interface RunsRecords {
   fourPlusGoals: RecordEntry[];
   bestMatchOutput: RecordEntry[];
 }
+
+export interface CampaignRecord extends RecordEntry {
+  tournamentId: string;
+  tournamentName: string;
+  wins: number;
+  draws: number;
+  losses: number;
+}
+
+export interface CampaignRecords {
+  perfectCampaigns: CampaignRecord[];
+  unbeatenCampaigns: CampaignRecord[];
+  bestGoalDifference: CampaignRecord[];
+  largestTitleMargins: CampaignRecord[];
+}
