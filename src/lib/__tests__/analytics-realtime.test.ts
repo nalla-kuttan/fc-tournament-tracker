@@ -19,6 +19,9 @@ describe('analytics realtime synchronization', () => {
     expect(isAnalyticsDataKey('/api/analytics/global')).toBe(true);
     expect(isAnalyticsDataKey('/api/analytics/h2h?p1=one&p2=two')).toBe(true);
     expect(isAnalyticsDataKey('/api/analytics/league/tournament-one')).toBe(true);
+    expect(isAnalyticsDataKey('/api/competitive/overview')).toBe(true);
+    expect(isAnalyticsDataKey('/api/competitive/records?scope=season&seasonId=s1')).toBe(true);
+    expect(isAnalyticsDataKey('/api/competitive/ratings')).toBe(true);
     expect(isAnalyticsDataKey('/api/tournaments')).toBe(true);
     expect(isAnalyticsDataKey('/api/players')).toBe(false);
     expect(isAnalyticsDataKey('/api/music')).toBe(false);

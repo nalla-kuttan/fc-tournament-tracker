@@ -10,7 +10,7 @@ export async function GET() {
 
     const [registeredResult, playersResult, matchesResult, goalsResult] = await Promise.all([
       supabase.from('registered_player').select('id, name, base_team'),
-      supabase.from('player').select('id, registered_player_id, name, team'),
+      supabase.from('player').select('id, tournament_id, registered_player_id, name, team'),
       supabase
         .from('match')
         .select('*, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team), tournament:tournament_id(id, name, format)')

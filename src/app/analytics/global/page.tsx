@@ -26,8 +26,12 @@ import EmptyState from '@/components/shared/EmptyState';
 import StatLeaderboard from '@/components/analytics/StatLeaderboard';
 import BiggestWinsTable from '@/components/analytics/BiggestWinsTable';
 import SeasonAwards from '@/components/analytics/SeasonAwards';
+import AdvancedHighlights from '@/components/analytics/AdvancedHighlights';
 import BackButton from '@/components/shared/BackButton';
 import type { CareerStats, Match } from '@/lib/types';
+import { hasTimedGoals } from '@/lib/analytics-visibility';
+import { calculatePerformanceRecords } from '@/lib/records';
+import type { PerformanceRecords } from '@/lib/records/types';
 import {
   getClutchRankings,
   getFormRankings,
@@ -74,7 +78,22 @@ interface GlobalData {
   all_matches: Match[];
   all_goals: GoalLite[];
   registered_players: { id: string; name: string; base_team: string }[];
-  player_instances: { id: string; registered_player_id: string; name: string; team: string }[];
+  player_instances: { id: string; tournament_id: string; registered_player_id: string; name: string; team: string }[];
+}
+
+function filterPerformanceRecords(records: PerformanceRecords, eligiblePlayerIds: Set<string>): PerformanceRecords {
+  const eligible = (rows: PerformanceRecords[keyof PerformanceRecords]) => rows.filter((row) => eligiblePlayerIds.has(row.playerId));
+  return {
+    finishingEfficiency: eligible(records.finishingEfficiency),
+    xgOverperformance: eligible(records.xgOverperformance),
+    defensiveXgOverperformance: eligible(records.defensiveXgOverperformance),
+    counterpunchWinRate: eligible(records.counterpunchWinRate),
+    motmRate: eligible(records.motmRate),
+    defensiveWorkRate: eligible(records.defensiveWorkRate),
+    ratingConsistency: eligible(records.ratingConsistency),
+    expectedPointsSurplus: eligible(records.expectedPointsSurplus),
+    pressurePerformance: eligible(records.pressurePerformance),
+  };
 }
 
 function toLeaderboard(stats: CareerStats[], valueFn: (s: CareerStats) => string) {
@@ -120,6 +139,13 @@ export default function GlobalAnalyticsPage() {
       return passesSearch && stat.total_matches >= minMatches;
     });
   }, [data, minMatches, query]);
+  const hasTimedGoalData = useMemo(() => hasTimedGoals(filteredGoals), [filteredGoals]);
+  const advancedPerformance = useMemo(() => {
+    if (!data) return null;
+    const records = calculatePerformanceRecords(data.registered_players, data.player_instances, filteredMatches);
+    const eligiblePlayerIds = new Set(filteredStats.map((stat) => stat.registered_player_id));
+    return filterPerformanceRecords(records, eligiblePlayerIds);
+  }, [data, filteredMatches, filteredStats]);
 
   const powerRankings = useMemo(
     () => data ? getPowerRankings(data.registered_players, data.player_instances, filteredMatches) : [],
@@ -131,8 +157,8 @@ export default function GlobalAnalyticsPage() {
   );
   const teamAnalytics = useMemo(() => getTeamAnalytics(filteredMatches), [filteredMatches]);
   const clutchRankings = useMemo(
-    () => data ? getClutchRankings(filteredGoals, data.player_instances, data.registered_players) : [],
-    [data, filteredGoals]
+    () => data && hasTimedGoalData ? getClutchRankings(filteredGoals, data.player_instances, data.registered_players) : [],
+    [data, filteredGoals, hasTimedGoalData]
   );
   const upsets = useMemo(
     () => data ? getUpsets(filteredMatches, data.registered_players, data.player_instances) : [],
@@ -320,8 +346,10 @@ export default function GlobalAnalyticsPage() {
       {/* Season Awards */}
       <SeasonAwards stats={filteredStats} />
 
+      {advancedPerformance ? <AdvancedHighlights records={advancedPerformance} /> : null}
+
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: hasTimedGoalData ? 4 : 6 }}>
           <StatLeaderboard
             title="Power Rankings"
             valueLabel="Power"
@@ -334,7 +362,7 @@ export default function GlobalAnalyticsPage() {
             accentColor="#3B82F6"
           />
         </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: hasTimedGoalData ? 4 : 6 }}>
           <StatLeaderboard
             title="Recent Form"
             valueLabel="Last 5"
@@ -347,19 +375,21 @@ export default function GlobalAnalyticsPage() {
             accentColor="#22C55E"
           />
         </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <StatLeaderboard
-            title="Clutch Goals"
-            valueLabel="Score"
-            entries={clutchRankings.slice(0, 8).map((row, index) => ({
-              rank: index + 1,
-              name: row.playerName,
-              team: row.team,
-              value: `${row.clutchScore}`,
-            }))}
-            accentColor="#F59E0B"
-          />
-        </Grid>
+        {hasTimedGoalData ? (
+          <Grid size={{ xs: 12, md: 4 }}>
+            <StatLeaderboard
+              title="Clutch Goals"
+              valueLabel="Score"
+              entries={clutchRankings.slice(0, 8).map((row, index) => ({
+                rank: index + 1,
+                name: row.playerName,
+                team: row.team,
+                value: `${row.clutchScore}`,
+              }))}
+              accentColor="#F59E0B"
+            />
+          </Grid>
+        ) : null}
       </Grid>
 
       {/* Career Overview Table */}
@@ -535,7 +565,7 @@ export default function GlobalAnalyticsPage() {
       </Grid>
 
       {/* Goal Distribution by Minute */}
-      {filteredGoals.length > 0 && (
+      {hasTimedGoalData && (
         <GlassCard sx={{ mb: 4 }}>
           <CardContent>
             <Typography variant="h6" fontWeight={600} gutterBottom>

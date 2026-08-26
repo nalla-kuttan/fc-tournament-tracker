@@ -22,7 +22,7 @@ interface AnalyticsRealtimeClient<TChannel extends AnalyticsRealtimeChannel> {
 
 export function isAnalyticsDataKey(key: unknown) {
   return typeof key === 'string'
-    && (key.startsWith('/api/analytics/') || key === '/api/tournaments');
+    && (key.startsWith('/api/analytics/') || key.startsWith('/api/competitive/') || key === '/api/tournaments');
 }
 
 export function createBatchedAnalyticsRevalidator(
