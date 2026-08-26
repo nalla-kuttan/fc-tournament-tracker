@@ -39,6 +39,7 @@ import {
   getInitials,
   getPlayerHighlights,
   getPlayerMatchInsights,
+  getPlayerTags,
   getRecentForm,
   getTeamHistory,
 } from '@/lib/player-insights';
@@ -137,6 +138,7 @@ export default function PlayerProfilePage() {
   const avatarColor = getAvatarColor(player.id);
   const imagePath = getPlayerImagePath(player.name);
   const archetypeHighlight = highlights.find((highlight) => highlight.label === 'Archetype');
+  const playerTags = stats ? getPlayerTags(stats) : [];
 
   return (
     <Box>
@@ -217,6 +219,20 @@ export default function PlayerProfilePage() {
 
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1.5 }}>
                 <Chip label={player.base_team} variant="outlined" />
+                {playerTags.map((tag) => (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                      color: '#93C5FD',
+                      borderColor: 'rgba(96, 165, 250, 0.32)',
+                      bgcolor: 'rgba(59, 130, 246, 0.08)',
+                      fontWeight: 700,
+                    }}
+                  />
+                ))}
                 {form.map((result, index) => (
                   <Chip
                     key={`${result}-${index}`}

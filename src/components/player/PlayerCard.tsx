@@ -7,7 +7,7 @@ import Chip from '@mui/material/Chip';
 import PersonIcon from '@mui/icons-material/Person';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import type { CareerStats, RegisteredPlayer } from '@/lib/types';
-import { getAvatarColor, getInitials, getPlayerArchetype } from '@/lib/player-insights';
+import { getAvatarColor, getInitials, getPlayerArchetype, getPlayerTags } from '@/lib/player-insights';
 import { getPlayerImagePath } from '@/lib/player-images';
 import ArchetypeIcon from '@/components/player/ArchetypeIcon';
 
@@ -30,6 +30,7 @@ export default function PlayerCard({
 }) {
   const avatarColor = getAvatarColor(player.id || player.name);
   const archetype = stats ? getPlayerArchetype(stats) : null;
+  const tags = stats ? getPlayerTags(stats) : [];
   const imagePath = getPlayerImagePath(player.name);
 
   return (
@@ -136,6 +137,26 @@ export default function PlayerCard({
             </>
           )}
         </Box>
+        {tags.length > 0 ? (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.75 }} aria-label="Player tags">
+            {tags.map((tag) => (
+              <Chip
+                key={tag}
+                label={tag}
+                size="small"
+                variant="outlined"
+                sx={{
+                  height: 20,
+                  color: '#93C5FD',
+                  borderColor: 'rgba(96, 165, 250, 0.28)',
+                  bgcolor: 'rgba(59, 130, 246, 0.08)',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                }}
+              />
+            ))}
+          </Box>
+        ) : null}
       </Box>
 
       {archetype && (

@@ -34,6 +34,20 @@ export interface TeamHistoryRow {
   winRate: number;
 }
 
+export type PlayerTag =
+  | 'xG Beater'
+  | 'Goal Machine'
+  | 'Clean Sheet Specialist'
+  | 'Elite Rated'
+  | 'Possession Boss'
+  | 'MOTM Magnet'
+  | 'Winning Habit'
+  | 'Veteran'
+  | 'Entertainer'
+  | 'Counter Threat';
+
+const MIN_PERFORMANCE_SAMPLE = 10;
+
 export function getInitials(name: string) {
   return name
     .split(/\s+/)
@@ -193,9 +207,45 @@ export function getPlayerArchetype(stats: CareerStats) {
   if (stats.clean_sheets / Math.max(stats.total_matches, 1) >= 0.45) return 'Defensive Wall';
   if (stats.avg_possession >= 58) return 'Possession Controller';
   if (stats.motm_awards >= Math.max(2, stats.total_matches * 0.3)) return 'Big Game Player';
+
+  if (stats.total_matches >= MIN_PERFORMANCE_SAMPLE) {
+    const cleanSheetRate = stats.clean_sheets / stats.total_matches;
+    const concededPerMatch = stats.total_conceded / stats.total_matches;
+    const goalsToXg = stats.avg_xg > 0 ? stats.goals_per_match / stats.avg_xg : 0;
+
+    if (stats.goals_per_match >= 1.5 && goalsToXg >= 1.25) return 'Clinical Finisher';
+    if (stats.avg_possession < 48 && stats.win_rate >= 60) return 'Counterpuncher';
+    if (concededPerMatch <= 1.25 && cleanSheetRate >= 0.25) return 'Iron Curtain';
+    if (stats.avg_rating >= 8.2) return 'Rating Machine';
+    if (stats.goals_per_match >= 2) return 'Relentless Attacker';
+  }
+
   if (stats.win_rate >= 70) return 'Serial Winner';
   if (stats.total_goals + stats.total_conceded >= stats.total_matches * 5) return 'Chaos Ball';
   return 'Balanced Operator';
+}
+
+export function getPlayerTags(stats: CareerStats): PlayerTag[] {
+  if (stats.total_matches < MIN_PERFORMANCE_SAMPLE) return [];
+
+  const tags: PlayerTag[] = [];
+  const cleanSheetRate = stats.clean_sheets / stats.total_matches;
+  const goalsToXg = stats.avg_xg > 0 ? stats.goals_per_match / stats.avg_xg : 0;
+  const motmRate = stats.motm_awards / stats.total_matches;
+  const totalGoalsPerMatch = (stats.total_goals + stats.total_conceded) / stats.total_matches;
+
+  if (goalsToXg >= 1.2) tags.push('xG Beater');
+  if (stats.goals_per_match >= 2) tags.push('Goal Machine');
+  if (cleanSheetRate >= 0.3) tags.push('Clean Sheet Specialist');
+  if (stats.avg_rating >= 8) tags.push('Elite Rated');
+  if (stats.avg_possession >= 55) tags.push('Possession Boss');
+  if (motmRate >= 0.25) tags.push('MOTM Magnet');
+  if (stats.win_rate >= 65) tags.push('Winning Habit');
+  if (stats.total_matches >= 30) tags.push('Veteran');
+  if (totalGoalsPerMatch >= 5) tags.push('Entertainer');
+  if (stats.avg_possession < 48 && stats.win_rate >= 55) tags.push('Counter Threat');
+
+  return tags.slice(0, 3);
 }
 
 export function calculateEloRatings(

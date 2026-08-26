@@ -40,6 +40,31 @@ const ARCHETYPE_META: Record<string, { color: string; label: string; path: strin
     label: 'Chaos Ball',
     path: 'M12 2a10 10 0 0 0-3.3 19.4l.8-2.1A7.8 7.8 0 0 1 4.2 12c0-1.3.3-2.5.9-3.5L8 11H5v2h6V7H9v2.4L6.3 6.7A7.8 7.8 0 0 1 19.8 12c0 1.3-.3 2.5-.9 3.5L16 13h3v-2h-6v6h2v-2.4l2.7 2.7A10 10 0 0 0 12 2Z',
   },
+  'Clinical Finisher': {
+    color: '#F97316',
+    label: 'Clinical Finisher',
+    path: 'M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 2a8 8 0 0 1 7.7 6H16.9a5 5 0 0 0-2.9-2.9V4.3A8 8 0 0 1 12 4Zm0 5a3 3 0 1 1-3 3 3 3 0 0 1 3-3Zm-2-4.7v2.8A5 5 0 0 0 7.1 10H4.3A8 8 0 0 1 10 4.3ZM4.3 14h2.8a5 5 0 0 0 2.9 2.9v2.8A8 8 0 0 1 4.3 14Zm9.7 5.7v-2.8a5 5 0 0 0 2.9-2.9h2.8a8 8 0 0 1-5.7 5.7Z',
+  },
+  Counterpuncher: {
+    color: '#A78BFA',
+    label: 'Counterpuncher',
+    path: 'M4 4h8v2H7.4l3.3 3.3-1.4 1.4L6 7.4V12H4V4Zm16 16h-8v-2h4.6l-3.3-3.3 1.4-1.4 3.3 3.3V12h2v8ZM8.5 13.5l5-5 2 2-5 5h-2v-2Zm-3 3 2-2v2h2l-2 2h-2v-2Z',
+  },
+  'Iron Curtain': {
+    color: '#14B8A6',
+    label: 'Iron Curtain',
+    path: 'M3 3h18v18H3V3Zm2 2v4h4V5H5Zm6 0v4h4V5h-4Zm6 0v4h2V5h-2ZM5 11v4h4v-4H5Zm6 0v4h4v-4h-4Zm6 0v4h2v-4h-2ZM5 17v2h4v-2H5Zm6 0v2h4v-2h-4Zm6 0v2h2v-2h-2Z',
+  },
+  'Rating Machine': {
+    color: '#EAB308',
+    label: 'Rating Machine',
+    path: 'M12 2 15 8l6.5.9-4.7 4.6 1.1 6.5-5.9-3.1L6.1 20l1.1-6.5-4.7-4.6L9 8l3-6Zm0 4.5-1.7 3.4-3.8.5 2.8 2.7-.7 3.8 3.4-1.8 3.4 1.8-.7-3.8 2.8-2.7-3.8-.5L12 6.5Z',
+  },
+  'Relentless Attacker': {
+    color: '#EF4444',
+    label: 'Relentless Attacker',
+    path: 'm13 2-1 7h5l-8 13 1-8H5l8-12Zm-1.6 9-.4 3h2.5l-1 2.8L15.2 11h-3.8Z',
+  },
   'Balanced Operator': {
     color: '#60A5FA',
     label: 'Balanced Operator',
