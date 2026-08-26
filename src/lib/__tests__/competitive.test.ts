@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildCompetitiveRatingTimeline,
   buildTournamentDerivedSeasons,
   calculateCompetitiveRatings,
   calculateCompetitiveRecords,
@@ -146,6 +147,21 @@ describe('competitive helpers', () => {
       recentForm: ['W'],
       matches: 1,
     });
+  });
+
+  it('captures ratings before each match without future leakage', () => {
+    const timeline = buildCompetitiveRatingTimeline(players, playerInstances, matches, { scope: 'all-time' });
+
+    expect(timeline.get('m-1')).toMatchObject({
+      homeRegisteredPlayerId: 'rp-a',
+      awayRegisteredPlayerId: 'rp-b',
+      homeRating: 1000,
+      awayRating: 1000,
+    });
+    expect(timeline.get('m-2')?.homeRating).toBeLessThan(1000);
+    expect(timeline.get('m-2')?.awayRating).toBe(1000);
+    expect(timeline.get('m-3')?.homeRating).not.toBe(1000);
+    expect(timeline.get('m-3')?.awayRating).not.toBe(1000);
   });
 
   it('calculates trophy and record rows across season and all-time scopes', () => {

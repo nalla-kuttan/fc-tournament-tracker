@@ -1,23 +1,20 @@
 import type { Match, MatchStats, Player, RegisteredPlayer, Season, Tournament } from './types';
+import {
+  calculateCompetitiveRatings,
+  type CompetitivePlayerInstance,
+  type CompetitiveScope,
+} from './competitive-ratings';
+
+export { buildCompetitiveRatingTimeline, calculateCompetitiveRatings } from './competitive-ratings';
+export type { CompetitiveRatingRow, CompetitiveRatingSnapshot } from './competitive-ratings';
 
 type TournamentWithSeason = Pick<Tournament, 'id' | 'name' | 'format' | 'status' | 'created_at' | 'season_id'>;
-type PlayerInstance = Pick<Player, 'id' | 'registered_player_id' | 'name' | 'team' | 'tournament_id'>;
-type ScopeOptions = { scope: 'season' | 'all-time'; seasonId?: string | null };
+type PlayerInstance = CompetitivePlayerInstance;
+type ScopeOptions = CompetitiveScope;
 
 export interface TournamentSeasonAssignment {
   tournamentId: string;
   seasonId: string;
-}
-
-export interface CompetitiveRatingRow {
-  player: Pick<RegisteredPlayer, 'id' | 'name' | 'base_team'>;
-  rank: number;
-  rating: number;
-  previousRating: number;
-  movement: number;
-  peakRating: number;
-  matches: number;
-  recentForm: ('W' | 'D' | 'L')[];
 }
 
 export interface MatchIntelligenceLabel {
@@ -134,68 +131,6 @@ export function buildTournamentDerivedSeasons(tournaments: TournamentWithSeason[
 
 export function getDerivedSeasonId(tournamentId: string) {
   return `season-${tournamentId}`;
-}
-
-export function calculateCompetitiveRatings(
-  players: Pick<RegisteredPlayer, 'id' | 'name' | 'base_team'>[],
-  playerInstances: PlayerInstance[],
-  matches: Match[],
-  options: ScopeOptions
-): CompetitiveRatingRow[] {
-  const instanceToRegistered = new Map(playerInstances.map((player) => [player.id, player.registered_player_id]));
-  const ratingMap = new Map(players.map((player) => [player.id, 1000]));
-  const peakMap = new Map(players.map((player) => [player.id, 1000]));
-  const matchesMap = new Map(players.map((player) => [player.id, 0]));
-  const formMap = new Map(players.map((player) => [player.id, [] as ('W' | 'D' | 'L')[]]));
-  const filteredMatches = filterMatchesByScope(matches, options)
-    .filter((match) => match.is_played && !match.is_bye && match.home_player_id && match.away_player_id)
-    .sort((a, b) => (a.played_at ?? '').localeCompare(b.played_at ?? ''));
-
-  for (const match of filteredMatches) {
-    const homeRegisteredId = instanceToRegistered.get(match.home_player_id ?? '');
-    const awayRegisteredId = instanceToRegistered.get(match.away_player_id ?? '');
-    if (!homeRegisteredId || !awayRegisteredId) continue;
-
-    const homeRating = ratingMap.get(homeRegisteredId) ?? 1000;
-    const awayRating = ratingMap.get(awayRegisteredId) ?? 1000;
-    const homeGoals = match.home_score ?? 0;
-    const awayGoals = match.away_score ?? 0;
-    const expectedHome = 1 / (1 + Math.pow(10, (awayRating - homeRating) / 400));
-    const homeResult = homeGoals > awayGoals ? 1 : homeGoals === awayGoals ? 0.5 : 0;
-    const marginBonus = Math.min(Math.abs(homeGoals - awayGoals), 5) * 2;
-    const k = 28 + marginBonus;
-    const homeNext = Math.round(homeRating + k * (homeResult - expectedHome));
-    const awayNext = Math.round(awayRating + k * ((1 - homeResult) - (1 - expectedHome)));
-
-    ratingMap.set(homeRegisteredId, homeNext);
-    ratingMap.set(awayRegisteredId, awayNext);
-    peakMap.set(homeRegisteredId, Math.max(peakMap.get(homeRegisteredId) ?? 1000, homeNext));
-    peakMap.set(awayRegisteredId, Math.max(peakMap.get(awayRegisteredId) ?? 1000, awayNext));
-    matchesMap.set(homeRegisteredId, (matchesMap.get(homeRegisteredId) ?? 0) + 1);
-    matchesMap.set(awayRegisteredId, (matchesMap.get(awayRegisteredId) ?? 0) + 1);
-    formMap.get(homeRegisteredId)?.unshift(homeGoals > awayGoals ? 'W' : homeGoals < awayGoals ? 'L' : 'D');
-    formMap.get(awayRegisteredId)?.unshift(awayGoals > homeGoals ? 'W' : awayGoals < homeGoals ? 'L' : 'D');
-  }
-
-  return players
-    .map((player) => {
-      const rating = ratingMap.get(player.id) ?? 1000;
-      const recentForm = (formMap.get(player.id) ?? []).slice(0, 5);
-      const previousRating = estimatePreviousRating(rating, recentForm[0]);
-      return {
-        player,
-        rank: 0,
-        rating,
-        previousRating,
-        movement: rating - previousRating,
-        peakRating: peakMap.get(player.id) ?? rating,
-        matches: matchesMap.get(player.id) ?? 0,
-        recentForm,
-      };
-    })
-    .filter((row) => row.matches > 0)
-    .sort((a, b) => b.rating - a.rating || b.peakRating - a.peakRating || a.player.name.localeCompare(b.player.name))
-    .map((row, index) => ({ ...row, rank: index + 1 }));
 }
 
 export function calculateCompetitiveRecords(
@@ -369,12 +304,6 @@ export function getMatchIntelligenceLabels(
 function filterMatchesByScope(matches: Match[], options: ScopeOptions) {
   if (options.scope === 'all-time') return matches;
   return matches.filter((match) => match.season_id === options.seasonId);
-}
-
-function estimatePreviousRating(rating: number, latestForm?: 'W' | 'D' | 'L') {
-  if (latestForm === 'W') return rating - 18;
-  if (latestForm === 'L') return rating + 18;
-  return rating;
 }
 
 function getWinnerAndLoser(match: Match) {
