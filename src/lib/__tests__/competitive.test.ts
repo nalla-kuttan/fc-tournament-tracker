@@ -200,6 +200,11 @@ describe('competitive helpers', () => {
       seasonName: 'Friday League',
       value: 50,
     });
+    expect(records.expanded.runs.bestMatchOutput[0]).toMatchObject({ playerName: 'Ayaan', value: 5 });
+    expect(records.expanded.campaigns.bestGoalDifference).toEqual([]);
+    expect(records.expanded).toHaveProperty('performance');
+    expect(records.expanded).toHaveProperty('rivalries');
+    expect(records.expanded).toHaveProperty('teams');
   });
 
   it('labels comeback, upset, defensive, goal rush, and rivalry swing matches', () => {

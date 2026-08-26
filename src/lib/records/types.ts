@@ -109,3 +109,11 @@ export interface TeamRecords {
   bestCombinations: TeamRecord[];
   versatileWinners: RecordEntry[];
 }
+
+export interface ExpandedRecords {
+  runs: RunsRecords;
+  campaigns: CampaignRecords;
+  performance: PerformanceRecords;
+  rivalries: RivalryRecords;
+  teams: TeamRecords;
+}

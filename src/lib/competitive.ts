@@ -1,15 +1,15 @@
 import type { Match, MatchStats, Player, RegisteredPlayer, Season, Tournament } from './types';
 import {
   calculateCompetitiveRatings,
-  type CompetitivePlayerInstance,
   type CompetitiveScope,
 } from './competitive-ratings';
+import { calculateExpandedRecords, type ExpandedRecords } from './records';
 
 export { buildCompetitiveRatingTimeline, calculateCompetitiveRatings } from './competitive-ratings';
 export type { CompetitiveRatingRow, CompetitiveRatingSnapshot } from './competitive-ratings';
 
 type TournamentWithSeason = Pick<Tournament, 'id' | 'name' | 'format' | 'status' | 'created_at' | 'season_id'>;
-type PlayerInstance = CompetitivePlayerInstance;
+type PlayerInstance = Pick<Player, 'id' | 'registered_player_id' | 'name' | 'team' | 'tournament_id'>;
 type ScopeOptions = CompetitiveScope;
 
 export interface TournamentSeasonAssignment {
@@ -81,6 +81,7 @@ export interface IndividualSeasonRecord {
 }
 
 export interface CompetitiveRecords {
+  expanded: ExpandedRecords;
   trophyCabinet: TrophyCabinetRow[];
   biggestWins: BiggestWinRecord[];
   biggestLosses: BiggestWinRecord[];
@@ -232,6 +233,7 @@ export function calculateCompetitiveRecords(
     .slice(0, 10);
 
   return {
+    expanded: calculateExpandedRecords(players, playerInstances, tournaments, matches, options),
     trophyCabinet: [...trophyMap.values()]
       .filter((row) => row.titles > 0 || row.finals > 0)
       .sort((a, b) => b.titles - a.titles || b.finals - a.finals || a.player.name.localeCompare(b.player.name)),
