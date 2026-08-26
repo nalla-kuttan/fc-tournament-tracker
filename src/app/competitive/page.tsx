@@ -24,6 +24,8 @@ import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import GlassCard from '@/components/shared/GlassCard';
 import EmptyState from '@/components/shared/EmptyState';
+import ExpandedRecords from '@/components/competitive/ExpandedRecords';
+import RecordBoard from '@/components/competitive/RecordBoard';
 import { fetcher } from '@/lib/fetcher';
 import type { CompetitiveRatingRow, CompetitiveRecords, MatchIntelligenceLabel } from '@/lib/competitive';
 import type { Match, Season } from '@/lib/types';
@@ -111,40 +113,6 @@ function RatingTable({ rows }: { rows: CompetitiveRatingRow[] }) {
         </GlassCard>
       ))}
     </Stack>
-  );
-}
-
-function RecordBoard({
-  title,
-  rows,
-  suffix = '',
-}: {
-  title: string;
-  rows: Array<{ playerName: string; value: number | string; detail: string }>;
-  suffix?: string;
-}) {
-  return (
-    <GlassCard sx={{ height: '100%' }}>
-      <CardContent>
-        <Typography sx={{ fontWeight: 700, mb: 1.25 }}>{title}</Typography>
-        {rows.length === 0 ? (
-          <Typography sx={{ color: '#94A3B8', fontSize: '0.9rem' }}>No records yet</Typography>
-        ) : (
-          <Stack spacing={1}>
-            {rows.slice(0, 5).map((row, index) => (
-              <Box key={`${title}-${row.playerName}-${index}`} sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-                <Typography sx={{ width: 26, color: '#4ADE80', fontWeight: 700 }}>#{index + 1}</Typography>
-                <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Typography sx={{ fontWeight: 700 }} noWrap>{row.playerName}</Typography>
-                  <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }} noWrap>{row.detail}</Typography>
-                </Box>
-                <Chip label={`${row.value}${suffix}`} size="small" color={index === 0 ? 'primary' : 'default'} />
-              </Box>
-            ))}
-          </Stack>
-        )}
-      </CardContent>
-    </GlassCard>
   );
 }
 
@@ -510,6 +478,11 @@ export default function CompetitivePage() {
                   ))}
                 </Stack>
               </Grid>
+              {selectedSeasonRecords?.expanded ? (
+                <Grid size={{ xs: 12 }}>
+                  <ExpandedRecords records={selectedSeasonRecords.expanded} />
+                </Grid>
+              ) : null}
             </Grid>
           )}
 

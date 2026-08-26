@@ -1,8 +1,5 @@
 import type { Match, MatchStats, Player, RegisteredPlayer, Season, Tournament } from './types';
-import {
-  calculateCompetitiveRatings,
-  type CompetitiveScope,
-} from './competitive-ratings';
+import { type CompetitiveScope } from './competitive-ratings';
 import { calculateExpandedRecords, type ExpandedRecords } from './records';
 
 export { buildCompetitiveRatingTimeline, calculateCompetitiveRatings } from './competitive-ratings';
