@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { aggregateCareerStatsBatch } from '@/lib/algorithms/stats';
 import { handleApiError } from '@/lib/api-guards';
+import { fetchAllRows } from '@/lib/supabase/pagination';
 import type { Match } from '@/lib/types';
 
 export async function GET() {
@@ -17,7 +18,13 @@ export async function GET() {
         .eq('is_played', true)
         .eq('is_bye', false)
         .order('played_at', { ascending: false }),
-      supabase.from('goal').select('player_id, minute, match_id'),
+      fetchAllRows<{ player_id: string; minute: number | null; match_id: string }>((from, to) => (
+        supabase
+          .from('goal')
+          .select('player_id, minute, match_id')
+          .order('id', { ascending: true })
+          .range(from, to)
+      )),
     ]);
 
     const queryError = registeredResult.error || playersResult.error || matchesResult.error || goalsResult.error;
