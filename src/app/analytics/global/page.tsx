@@ -177,13 +177,13 @@ export default function GlobalAnalyticsPage() {
         label: 'Control Room Read',
         value: powerLeader?.player.name ?? '-',
         detail: powerLeader ? `${powerLeader.rating} power rating` : 'No power ranking yet',
-        color: '#3B82F6',
+        color: '#7E8CC2',
       },
       {
         label: 'Hot Form',
         value: formLeader?.player.name ?? '-',
         detail: formLeader?.form.length ? `Last five: ${formLeader.form.join('')}` : 'No recent run yet',
-        color: '#22C55E',
+        color: '#EA6C56',
       },
       {
         label: 'Goal Threat',
@@ -195,7 +195,7 @@ export default function GlobalAnalyticsPage() {
         label: 'Latest Result',
         value: latestMatch ? `${latestMatch.home_score}-${latestMatch.away_score}` : '-',
         detail: latestMatch ? `${latestMatch.home_player?.name ?? 'Home'} vs ${latestMatch.away_player?.name ?? 'Away'}` : 'No played match in this lens',
-        color: '#94A3B8',
+        color: '#C9B9BE',
       },
     ];
   }, [filteredStats, formRankings, latestMatch, powerRankings]);
@@ -313,7 +313,7 @@ export default function GlobalAnalyticsPage() {
                 Current read for this analytics lens before the deep tables.
               </Typography>
             </Box>
-            <Chip size="small" label={format === 'all' ? 'All formats' : format} sx={{ color: '#22C55E', borderColor: 'rgba(34, 197, 94, 0.24)' }} />
+            <Chip size="small" label={format === 'all' ? 'All formats' : format} sx={{ color: '#EA6C56', borderColor: 'rgba(234, 108, 86, 0.24)' }} />
           </Box>
           <Grid container spacing={1.5}>
             {topStoryCards.map((card) => (
@@ -323,11 +323,11 @@ export default function GlobalAnalyticsPage() {
                     p: 1.5,
                     height: '100%',
                     borderRadius: '12px',
-                    bgcolor: 'rgba(2, 6, 23, 0.32)',
-                    border: '1px solid rgba(148, 163, 184, 0.1)',
+                    bgcolor: 'rgba(18, 8, 12, 0.32)',
+                    border: '1px solid rgba(201, 185, 190, 0.1)',
                   }}
                 >
-                  <Typography variant="caption" sx={{ color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  <Typography variant="caption" sx={{ color: '#C9B9BE', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                     {card.label}
                   </Typography>
                   <Typography variant="h6" fontWeight={700} noWrap sx={{ mt: 0.5, color: card.color }}>
@@ -359,7 +359,7 @@ export default function GlobalAnalyticsPage() {
               team: row.player.base_team,
               value: String(row.rating),
             }))}
-            accentColor="#3B82F6"
+            accentColor="#7E8CC2"
           />
         </Grid>
         <Grid size={{ xs: 12, md: hasTimedGoalData ? 4 : 6 }}>
@@ -372,7 +372,7 @@ export default function GlobalAnalyticsPage() {
               team: row.player.base_team,
               value: row.form.join(''),
             }))}
-            accentColor="#22C55E"
+            accentColor="#EA6C56"
           />
         </Grid>
         {hasTimedGoalData ? (
@@ -402,7 +402,7 @@ export default function GlobalAnalyticsPage() {
           <Box sx={{ overflowX: 'auto' }}>
             <Box sx={{ minWidth: 700 }}>
               {/* Header */}
-              <Box sx={{ display: 'flex', py: 1, borderBottom: '1px solid rgba(148, 163, 184, 0.06)' }}>
+              <Box sx={{ display: 'flex', py: 1, borderBottom: '1px solid rgba(201, 185, 190, 0.06)' }}>
                 {['Player', 'P', 'W', 'D', 'L', 'GF', 'GA', 'CS', 'Win%', 'G/M', 'xG', 'Rtg', 'Poss%', 'MOTM'].map((h) => (
                   <Typography
                     key={h}
@@ -430,7 +430,7 @@ export default function GlobalAnalyticsPage() {
                       display: 'flex',
                       py: 1,
                       borderBottom: '1px solid rgba(255,255,255,0.04)',
-                      '&:hover': { bgcolor: 'rgba(59,130,246,0.04)' },
+                      '&:hover': { bgcolor: 'rgba(51, 64, 117,0.04)' },
                     }}
                   >
                     <Box sx={{ width: 140, flexShrink: 0, px: 0.5 }}>
@@ -474,7 +474,7 @@ export default function GlobalAnalyticsPage() {
             title="Top Scorers"
             valueLabel="Goals"
             entries={toLeaderboard(data.top_scorers, (s) => String(s.total_goals))}
-            accentColor="#22C55E"
+            accentColor="#EA6C56"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -490,7 +490,7 @@ export default function GlobalAnalyticsPage() {
             title="Goals Per Match"
             valueLabel="G/M"
             entries={toLeaderboard(data.goals_per_match_rankings, (s) => s.goals_per_match.toFixed(2))}
-            accentColor="#22C55E"
+            accentColor="#EA6C56"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -498,7 +498,7 @@ export default function GlobalAnalyticsPage() {
             title="Avg xG"
             valueLabel="xG"
             entries={toLeaderboard(data.xg_rankings, (s) => s.avg_xg.toFixed(2))}
-            accentColor="#3B82F6"
+            accentColor="#7E8CC2"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -506,7 +506,7 @@ export default function GlobalAnalyticsPage() {
             title="Possession"
             valueLabel="Avg%"
             entries={toLeaderboard(data.possession_rankings, (s) => `${s.avg_possession.toFixed(0)}%`)}
-            accentColor="#22C55E"
+            accentColor="#EA6C56"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -522,7 +522,7 @@ export default function GlobalAnalyticsPage() {
             title="Clean Sheets"
             valueLabel="CS"
             entries={toLeaderboard(data.clean_sheet_rankings, (s) => String(s.clean_sheets))}
-            accentColor="#22C55E"
+            accentColor="#EA6C56"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -546,7 +546,7 @@ export default function GlobalAnalyticsPage() {
               team: `${row.matches} matches · ${row.goalsFor}-${row.goalsAgainst}`,
               value: `${row.winRate.toFixed(0)}%`,
             }))}
-            accentColor="#3B82F6"
+            accentColor="#7E8CC2"
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>

@@ -31,14 +31,15 @@ import { fetcher } from '@/lib/fetcher';
 const SIDEBAR_WIDTH = 278;
 
 const COLORS = {
-  pitchBlack: '#020617',
-  textIce: '#F8FAFC',
-  textSteel: '#94A3B8',
-  textMuted: '#94A3B8',
-  green: '#22C55E',
-  greenLight: '#4ADE80',
-  blue: '#3B82F6',
-  blueLight: '#60A5FA',
+  pitchBlack: '#12080C',
+  textIce: '#FFF7F6',
+  textSteel: '#C9B9BE',
+  textMuted: '#C9B9BE',
+  coral: '#EA6C56',
+  coralLight: '#FF8A73',
+  frenchBlue: '#334075',
+  frenchBlueLight: '#7E8CC2',
+  nightBordeaux: '#621122',
 };
 
 const NAV_GROUPS = [
@@ -178,7 +179,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       sx={{
         minHeight: '100vh',
         color: COLORS.textIce,
-        background: 'radial-gradient(circle at 84% 0%, rgba(59, 130, 246, 0.1), transparent 28%), #020617',
+        background: `radial-gradient(circle at 84% 0%, rgba(51, 64, 117, 0.28), transparent 30%), radial-gradient(circle at 42% 110%, rgba(98, 17, 34, 0.42), transparent 38%), ${COLORS.pitchBlack}`,
         position: 'relative',
         overflowX: 'hidden',
       }}
@@ -195,8 +196,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
           width: SIDEBAR_WIDTH,
           flexDirection: 'column',
           borderRadius: '16px',
-          border: '1px solid rgba(34, 197, 94, 0.24)',
-          background: '#07111F',
+          border: '1px solid rgba(234, 108, 86, 0.24)',
+          background: '#334075',
           overflow: 'hidden',
           zIndex: 20,
         }}
@@ -210,13 +211,13 @@ export default function AppShell({ children }: { children: ReactNode }) {
               display: 'grid',
               placeItems: 'center',
               color: COLORS.pitchBlack,
-              background: '#4ADE80',
+              background: '#FF8A73',
             }}
           >
             <SportsSoccerIcon sx={{ fontSize: 26 }} />
           </Box>
           <Box>
-            <Typography sx={{ fontWeight: 700, fontSize: '1.38rem', lineHeight: 0.9, color: '#4ADE80' }}>
+            <Typography sx={{ fontWeight: 700, fontSize: '1.38rem', lineHeight: 0.9, color: '#FF8A73' }}>
               FC
             </Typography>
             <Typography sx={{ fontSize: '0.875rem', letterSpacing: '0.14em', fontWeight: 700, color: COLORS.textIce }}>
@@ -225,7 +226,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </Box>
         </Box>
 
-        <Divider sx={{ borderColor: 'rgba(148, 163, 184, 0.09)' }} />
+        <Divider sx={{ borderColor: 'rgba(201, 185, 190, 0.09)' }} />
 
         <Box sx={{ flex: 1, px: 1.25, py: 1.5, overflowY: 'auto' }}>
           {NAV_GROUPS.map((group) => (
@@ -261,15 +262,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
                       borderRadius: '10px',
                       fontSize: '0.9rem',
                       fontWeight: 600,
-                      color: active ? COLORS.textIce : '#B7C4D6',
-                      bgcolor: active ? 'rgba(34, 197, 94, 0.2)' : 'transparent',
-                      border: active ? '1px solid rgba(34, 197, 94, 0.55)' : '1px solid transparent',
+                      color: active ? COLORS.textIce : '#D6C5CA',
+                      bgcolor: active ? 'rgba(234, 108, 86, 0.2)' : 'transparent',
+                      border: active ? '1px solid rgba(234, 108, 86, 0.55)' : '1px solid transparent',
                       boxShadow: 'none',
                       '&:hover': {
-                        bgcolor: active ? 'rgba(34, 197, 94, 0.24)' : 'rgba(148, 163, 184, 0.07)',
+                        bgcolor: active ? 'rgba(234, 108, 86, 0.24)' : 'rgba(201, 185, 190, 0.07)',
                       },
                       '& .MuiButton-startIcon': {
-                        color: active ? '#4ADE80' : '#91A4BC',
+                        color: active ? '#FF8A73' : '#BCA9B0',
                       },
                     }}
                   >
@@ -295,10 +296,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
             gap: 1.5,
             px: { xs: 2, sm: 3, lg: 4 },
             py: { xs: 1.25, sm: 1.75 },
-            background: { xs: 'rgba(2, 6, 23, 0.86)', lg: 'transparent' },
+            background: { xs: 'rgba(98, 17, 34, 0.9)', lg: 'transparent' },
             backdropFilter: { xs: 'blur(22px)', lg: 'none' },
             WebkitBackdropFilter: { xs: 'blur(22px)', lg: 'none' },
-            borderBottom: { xs: '1px solid rgba(148, 163, 184, 0.08)', lg: 'none' },
+            borderBottom: { xs: '1px solid rgba(201, 185, 190, 0.08)', lg: 'none' },
           }}
         >
           <Box
@@ -321,12 +322,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
               font: 'inherit',
             }}
           >
-            <SportsSoccerIcon sx={{ color: '#22C55E', fontSize: 28 }} />
+            <SportsSoccerIcon sx={{ color: '#EA6C56', fontSize: 28 }} />
             <Box sx={{ minWidth: 0 }}>
-              <Typography sx={{ fontWeight: 700, color: '#F8FAFC', lineHeight: 1 }}>
+              <Typography sx={{ fontWeight: 700, color: '#FFF7F6', lineHeight: 1 }}>
                 FC Tracker
               </Typography>
-              <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem', fontWeight: 600 }}>
+              <Typography sx={{ color: '#D7C6CB', fontSize: '0.875rem', fontWeight: 600 }}>
                 Tournament hub
               </Typography>
             </Box>
@@ -338,7 +339,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 aria-label="Search players and tournaments"
                 aria-expanded={searchOpen}
                 onClick={() => setSearchOpen((open) => !open)}
-                sx={{ display: { xs: 'inline-flex', lg: 'none' }, ml: 'auto', color: searchOpen ? '#4ADE80' : '#B6C3D5' }}
+                sx={{ display: { xs: 'inline-flex', lg: 'none' }, ml: 'auto', color: searchOpen ? '#FF8A73' : '#D7C6CB' }}
               >
                 <SearchIcon />
               </IconButton>
@@ -364,12 +365,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   px: 1.5,
                   py: 0.65,
                   borderRadius: '16px',
-                  border: '1px solid rgba(148, 163, 184, 0.18)',
-                  background: '#0F172A',
-                  boxShadow: searchOpen ? '0 0 0 3px rgba(34, 197, 94, 0.1)' : 'inset 0 1px 0 rgba(255, 255, 255, 0.04)',
+                  border: '1px solid rgba(201, 185, 190, 0.18)',
+                  background: '#241019',
+                  boxShadow: searchOpen ? '0 0 0 3px rgba(234, 108, 86, 0.1)' : 'inset 0 1px 0 rgba(255, 255, 255, 0.04)',
                 }}
               >
-                <SearchIcon sx={{ color: '#94A3B8', fontSize: 20 }} />
+                <SearchIcon sx={{ color: '#C9B9BE', fontSize: 20 }} />
                 <InputBase
                   value={query}
                   onChange={(event) => {
@@ -388,12 +389,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   }}
                   sx={{
                     flex: 1,
-                    color: '#F8FAFC',
+                    color: '#FFF7F6',
                     fontSize: '0.9rem',
-                    '& input::placeholder': { color: '#94A3B8', opacity: 1 },
+                    '& input::placeholder': { color: '#C9B9BE', opacity: 1 },
                   }}
                 />
-                {searchLoading && <CircularProgress size={16} thickness={5} sx={{ color: '#22C55E' }} />}
+                {searchLoading && <CircularProgress size={16} thickness={5} sx={{ color: '#EA6C56' }} />}
               </Box>
 
               {searchOpen && (
@@ -407,15 +408,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     zIndex: 40,
                     overflow: 'hidden',
                     borderRadius: '16px',
-                    border: '1px solid rgba(148, 163, 184, 0.14)',
-                    background: '#0F172A',
+                    border: '1px solid rgba(201, 185, 190, 0.14)',
+                    background: '#241019',
                     boxShadow: '0 6px 8px rgba(0, 0, 0, 0.32)',
                   }}
                 >
                   {searchError ? (
                     <Box sx={{ p: 1.5 }}>
-                      <Typography sx={{ color: '#F8FAFC', fontWeight: 700 }}>Search is unavailable</Typography>
-                      <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem', mb: 1 }}>
+                      <Typography sx={{ color: '#FFF7F6', fontWeight: 700 }}>Search is unavailable</Typography>
+                      <Typography sx={{ color: '#D7C6CB', fontSize: '0.875rem', mb: 1 }}>
                         Check the connection or deployment configuration, then retry.
                       </Typography>
                       <Button
@@ -431,14 +432,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     </Box>
                   ) : trimmedQuery.length < 2 ? (
                     <Box sx={{ p: 1.5 }}>
-                      <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem' }}>
+                      <Typography sx={{ color: '#D7C6CB', fontSize: '0.875rem' }}>
                         Type at least two characters to find a player or tournament.
                       </Typography>
                     </Box>
                   ) : searchResults.length === 0 && !searchLoading ? (
                     <Box sx={{ p: 1.5 }}>
-                      <Typography sx={{ color: '#F8FAFC', fontWeight: 700 }}>No results found</Typography>
-                      <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem' }}>
+                      <Typography sx={{ color: '#FFF7F6', fontWeight: 700 }}>No results found</Typography>
+                      <Typography sx={{ color: '#D7C6CB', fontSize: '0.875rem' }}>
                         Try a player name, team, tournament, or format.
                       </Typography>
                     </Box>
@@ -460,17 +461,17 @@ export default function AppShell({ children }: { children: ReactNode }) {
                             px: 1.5,
                             py: 1.1,
                             borderRadius: 0,
-                            color: '#F8FAFC',
+                            color: '#FFF7F6',
                             textAlign: 'left',
-                            background: index === activeResultIndex ? 'rgba(34, 197, 94, 0.08)' : 'transparent',
-                            '&:hover': { background: 'rgba(34, 197, 94, 0.1)' },
+                            background: index === activeResultIndex ? 'rgba(234, 108, 86, 0.08)' : 'transparent',
+                            '&:hover': { background: 'rgba(234, 108, 86, 0.1)' },
                           }}
                         >
                           <Box sx={{ minWidth: 0 }}>
                             <Typography sx={{ fontWeight: 700, fontSize: '0.9rem' }} noWrap>
                               {result.label}
                             </Typography>
-                            <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem' }} noWrap>
+                            <Typography sx={{ color: '#D7C6CB', fontSize: '0.875rem' }} noWrap>
                               {result.meta}
                             </Typography>
                           </Box>
@@ -479,8 +480,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
                             label={result.kind}
                             sx={{
                               flexShrink: 0,
-                              color: result.kind === 'Player' ? '#60A5FA' : '#22C55E',
-                              bgcolor: result.kind === 'Player' ? 'rgba(59, 130, 246, 0.12)' : 'rgba(34, 197, 94, 0.12)',
+                              color: result.kind === 'Player' ? '#7E8CC2' : '#EA6C56',
+                              bgcolor: result.kind === 'Player' ? 'rgba(51, 64, 117, 0.12)' : 'rgba(234, 108, 86, 0.12)',
                               fontWeight: 700,
                             }}
                           />
@@ -519,10 +520,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
           right: 0,
           display: { xs: 'block', lg: 'none' },
           zIndex: 1200,
-          background: 'rgba(2, 6, 23, 0.86)',
+          background: 'rgba(18, 8, 12, 0.86)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
-          borderTop: '1px solid rgba(148, 163, 184, 0.09)',
+          borderTop: '1px solid rgba(201, 185, 190, 0.09)',
           borderRadius: 0,
         }}
         elevation={0}
@@ -541,7 +542,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               minWidth: 'auto',
               gap: 0,
               pt: 1,
-              '&.Mui-selected': { color: '#22C55E' },
+              '&.Mui-selected': { color: '#EA6C56' },
               '& .MuiBottomNavigationAction-label': {
                 fontSize: '0.875rem',
                 fontWeight: 700,

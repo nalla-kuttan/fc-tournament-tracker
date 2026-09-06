@@ -135,8 +135,8 @@ export default function MatchDetailPage() {
                 px: 3,
                 py: 1,
                 borderRadius: 2,
-                bgcolor: 'rgba(59,130,246,0.1)',
-                border: '1px solid rgba(59,130,246,0.2)',
+                bgcolor: 'rgba(51, 64, 117,0.1)',
+                border: '1px solid rgba(51, 64, 117,0.2)',
               }}
             >
               <Typography variant="h3" fontWeight={700} sx={{ fontFamily: 'monospace' }}>

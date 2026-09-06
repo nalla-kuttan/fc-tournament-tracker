@@ -11,8 +11,8 @@ export default function GlassCard({ sx, children, interactive = false, ...props 
   return (
     <Card
       sx={{
-        background: '#0F172A',
-        border: '1px solid rgba(148, 163, 184, 0.12)',
+        background: '#241019',
+        border: '1px solid rgba(201, 185, 190, 0.12)',
         boxShadow: 'none',
         borderRadius: '16px',
         overflow: 'hidden',
@@ -20,11 +20,11 @@ export default function GlassCard({ sx, children, interactive = false, ...props 
         ...(interactive && {
           cursor: 'pointer',
           '&:hover': {
-            borderColor: 'rgba(148, 163, 184, 0.28)',
-            background: '#111C31',
+            borderColor: 'rgba(201, 185, 190, 0.28)',
+            background: '#2D1620',
           },
           '&:active': {
-            background: '#0D1729',
+            background: '#1D0D14',
           },
         }),
         ...sx,

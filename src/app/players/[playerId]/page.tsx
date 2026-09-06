@@ -192,7 +192,7 @@ export default function PlayerProfilePage() {
               </Box>
             )}
             {archetypeHighlight && (
-              <Box sx={{ position: 'absolute', left: 12, bottom: 12, display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75, borderRadius: '12px', bgcolor: 'rgba(2, 6, 23, 0.78)', backdropFilter: 'blur(16px)', border: '1px solid rgba(148, 163, 184, 0.08)' }}>
+              <Box sx={{ position: 'absolute', left: 12, bottom: 12, display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75, borderRadius: '12px', bgcolor: 'rgba(18, 8, 12, 0.78)', backdropFilter: 'blur(16px)', border: '1px solid rgba(201, 185, 190, 0.08)' }}>
                 <ArchetypeIcon archetype={archetypeHighlight.value} size={32} showTooltip={false} />
                 <Typography variant="caption" fontWeight={800} sx={{ color: getArchetypeMeta(archetypeHighlight.value).color }}>
                   {archetypeHighlight.value}
@@ -226,9 +226,9 @@ export default function PlayerProfilePage() {
                     size="small"
                     variant="outlined"
                     sx={{
-                      color: '#93C5FD',
-                      borderColor: 'rgba(96, 165, 250, 0.32)',
-                      bgcolor: 'rgba(59, 130, 246, 0.08)',
+                      color: '#7E8CC2',
+                      borderColor: 'rgba(126, 140, 194, 0.36)',
+                      bgcolor: 'rgba(51, 64, 117, 0.12)',
                       fontWeight: 700,
                     }}
                   />
@@ -239,8 +239,8 @@ export default function PlayerProfilePage() {
                     label={result}
                     size="small"
                     sx={{
-                      bgcolor: result === 'W' ? '#22C55E' : result === 'D' ? '#94A3B8' : '#EF4444',
-                      color: '#020617',
+                      bgcolor: result === 'W' ? '#EA6C56' : result === 'D' ? '#C9B9BE' : '#EF4444',
+                      color: '#12080C',
                       fontWeight: 900,
                       minWidth: 32,
                     }}
@@ -258,10 +258,10 @@ export default function PlayerProfilePage() {
                 }}
               >
                 {[
-                  { label: 'Win Rate', value: `${stats.win_rate.toFixed(0)}%`, color: '#22C55E' },
+                  { label: 'Win Rate', value: `${stats.win_rate.toFixed(0)}%`, color: '#EA6C56' },
                   { label: 'Goals', value: stats.total_goals, color: '#F59E0B' },
-                  { label: 'G/M', value: stats.goals_per_match.toFixed(2), color: '#3B82F6' },
-                  { label: 'MOTM', value: stats.motm_awards, color: '#3B82F6' },
+                  { label: 'G/M', value: stats.goals_per_match.toFixed(2), color: '#7E8CC2' },
+                  { label: 'MOTM', value: stats.motm_awards, color: '#7E8CC2' },
                 ].map((item) => (
                   <Box
                     key={item.label}
@@ -290,7 +290,7 @@ export default function PlayerProfilePage() {
                 startIcon={<DescriptionIcon />}
                 onClick={() => setScoutOpen(true)}
                 disabled={!stats}
-                sx={{ color: '#22C55E', borderColor: 'rgba(34,197,94,0.35)' }}
+                sx={{ color: '#EA6C56', borderColor: 'rgba(234, 108, 86,0.35)' }}
               >
                 AI Scout Report
               </Button>
@@ -371,7 +371,7 @@ export default function PlayerProfilePage() {
               <Grid size={{ xs: 12, md: 4 }}>
                 <GlassCard sx={{ height: '100%' }}>
                   <CardContent sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
-                    <ShowChartIcon sx={{ color: '#4ADE80', fontSize: 36 }} />
+                    <ShowChartIcon sx={{ color: '#FF8A73', fontSize: 36 }} />
                     <Box>
                       <Typography variant="caption" color="text.secondary" textTransform="uppercase">
                         All-Time Rating
@@ -389,13 +389,13 @@ export default function PlayerProfilePage() {
               <Grid size={{ xs: 12, md: 4 }}>
                 <GlassCard sx={{ height: '100%' }}>
                   <CardContent sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
-                    <ShowChartIcon sx={{ color: '#60A5FA', fontSize: 36 }} />
+                    <ShowChartIcon sx={{ color: '#7E8CC2', fontSize: 36 }} />
                     <Box>
                       <Typography variant="caption" color="text.secondary" textTransform="uppercase">
                         Season Rating
                       </Typography>
                       <Typography variant="h5" fontWeight={900}>{seasonRating.rating}</Typography>
-                      <Typography variant="caption" color={seasonRating.movement >= 0 ? '#4ADE80' : '#EF4444'}>
+                      <Typography variant="caption" color={seasonRating.movement >= 0 ? '#FF8A73' : '#EF4444'}>
                         {seasonRating.movement >= 0 ? '+' : ''}{seasonRating.movement} latest movement
                       </Typography>
                     </Box>
@@ -507,11 +507,11 @@ export default function PlayerProfilePage() {
                       </Typography>
                     </Box>
                     <Typography variant="body2">{team.matches} MP</Typography>
-                    <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' }, color: '#22C55E' }}>{team.wins}W</Typography>
+                    <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' }, color: '#EA6C56' }}>{team.wins}W</Typography>
                     <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>{team.draws}D</Typography>
                     <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' }, color: '#EF4444' }}>{team.losses}L</Typography>
                   </Box>
-                  {index < teamHistory.slice(0, 6).length - 1 && <Divider sx={{ borderColor: 'rgba(148, 163, 184, 0.06)' }} />}
+                  {index < teamHistory.slice(0, 6).length - 1 && <Divider sx={{ borderColor: 'rgba(201, 185, 190, 0.06)' }} />}
                 </Box>
               ))}
             </CardContent>
@@ -562,8 +562,8 @@ export default function PlayerProfilePage() {
                       label={entry.result}
                       size="small"
                       sx={{
-                        bgcolor: entry.result === 'W' ? '#22C55E' : entry.result === 'D' ? '#94A3B8' : '#EF4444',
-                        color: '#020617',
+                        bgcolor: entry.result === 'W' ? '#EA6C56' : entry.result === 'D' ? '#C9B9BE' : '#EF4444',
+                        color: '#12080C',
                         fontWeight: 900,
                       }}
                     />
@@ -582,7 +582,7 @@ export default function PlayerProfilePage() {
                       {entry.match.played_at ? new Date(entry.match.played_at).toLocaleDateString() : ''}
                     </Typography>
                   </Box>
-                  {index < matchInsights.slice(0, 10).length - 1 && <Divider sx={{ borderColor: 'rgba(148, 163, 184, 0.06)' }} />}
+                  {index < matchInsights.slice(0, 10).length - 1 && <Divider sx={{ borderColor: 'rgba(201, 185, 190, 0.06)' }} />}
                 </Box>
               ))}
             </CardContent>

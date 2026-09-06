@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
         description: 'Manage and track FIFA/FC tournaments with detailed stats and analytics',
         start_url: '/',
         display: 'standalone',
-        background_color: '#020617',
-        theme_color: '#22C55E',
+        background_color: '#12080C',
+        theme_color: '#EA6C56',
         icons: [
             {
                 src: '/icon192.png',

@@ -18,12 +18,12 @@ import type { Match, MatchStats } from '@/lib/types';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 const PLAYER_COLORS = [
-  '#22C55E',
-  '#3B82F6',
+  '#EA6C56',
+  '#7E8CC2',
   '#F59E0B',
-  '#22C55E',
+  '#EA6C56',
   '#EF4444',
-  '#60A5FA',
+  '#7E8CC2',
 ];
 
 interface PlayerInstance {
@@ -121,7 +121,7 @@ export default function PerformanceTrendChart({ matches, registeredPlayers, play
       legend: {
         position: 'bottom' as const,
         labels: {
-          color: '#F8FAFC',
+          color: '#FFF7F6',
           padding: 16,
           usePointStyle: true,
           pointStyle: 'circle' as const,
@@ -136,17 +136,17 @@ export default function PerformanceTrendChart({ matches, registeredPlayers, play
       y: {
         min: 0,
         max: 10,
-        grid: { color: 'rgba(148, 163, 184, 0.08)' },
-        ticks: { color: '#64748B' },
+        grid: { color: 'rgba(201, 185, 190, 0.08)' },
+        ticks: { color: '#A18A93' },
         title: {
           display: true,
           text: 'Rating',
-          color: '#64748B',
+          color: '#A18A93',
         },
       },
       x: {
-        grid: { color: 'rgba(148, 163, 184, 0.08)' },
-        ticks: { color: '#64748B', maxRotation: 45 },
+        grid: { color: 'rgba(201, 185, 190, 0.08)' },
+        ticks: { color: '#A18A93', maxRotation: 45 },
       },
     },
     interaction: {

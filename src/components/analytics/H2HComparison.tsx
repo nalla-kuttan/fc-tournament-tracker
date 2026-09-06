@@ -62,7 +62,7 @@ function MatchHistoryRow({ match, player1Name }: { match: Match; player1Name: st
           size="small"
           sx={{
             bgcolor: resultColor,
-            color: '#F8FAFC',
+            color: '#FFF7F6',
             fontWeight: 700,
             fontSize: '0.7rem',
             minWidth: 48,
@@ -125,12 +125,12 @@ export default function H2HComparison({ data }: Props) {
                     px: 3,
                     py: 1.5,
                     borderRadius: 2,
-                    bgcolor: 'rgba(59,130,246,0.08)',
+                    bgcolor: 'rgba(51, 64, 117,0.08)',
                   }}
                 >
-                  <BigStat value={data.player1_wins} label="Wins" color="#22C55E" />
-                  <BigStat value={data.draws} label="Draws" color="#64748B" />
-                  <BigStat value={data.player2_wins} label="Wins" color="#3B82F6" />
+                  <BigStat value={data.player1_wins} label="Wins" color="#EA6C56" />
+                  <BigStat value={data.draws} label="Draws" color="#A18A93" />
+                  <BigStat value={data.player2_wins} label="Wins" color="#7E8CC2" />
                 </Box>
 
                 <Box sx={{ textAlign: 'center' }}>
@@ -194,7 +194,7 @@ export default function H2HComparison({ data }: Props) {
               <Typography variant="h6" fontWeight={600} gutterBottom>
                 H2H Prediction
               </Typography>
-              <Typography variant="h4" fontWeight={900} sx={{ color: '#22C55E' }}>
+              <Typography variant="h4" fontWeight={900} sx={{ color: '#EA6C56' }}>
                 {predictedWinner}
               </Typography>
               <Typography variant="body2" color="text.secondary">

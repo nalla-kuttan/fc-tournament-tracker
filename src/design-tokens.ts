@@ -1,0 +1,17 @@
+export const BRAND_COLORS = {
+  coral: '#EA6C56',
+  coralLight: '#FF8A73',
+  coralDark: '#C84F3D',
+  frenchBlue: '#334075',
+  frenchBlueLight: '#7E8CC2',
+  frenchBlueDark: '#222C55',
+  nightBordeaux: '#621122',
+  nightBordeauxLight: '#852A3D',
+  nightBordeauxDark: '#3B0B16',
+  background: '#12080C',
+  surface: '#241019',
+  surfaceRaised: '#2D1620',
+  ink: '#16090D',
+  text: '#FFF7F6',
+  textSecondary: '#C9B9BE',
+} as const;

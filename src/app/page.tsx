@@ -62,19 +62,20 @@ interface TournamentDetails extends Tournament {
 }
 
 const COLORS = {
-  pitchBlack: '#020617',
-  textIce: '#F8FAFC',
-  textSteel: '#B6C3D5',
-  green: '#22C55E',
-  greenLight: '#4ADE80',
-  blue: '#3B82F6',
-  blueLight: '#60A5FA',
+  pitchBlack: '#12080C',
+  textIce: '#FFF7F6',
+  textSteel: '#D7C6CB',
+  coral: '#EA6C56',
+  coralLight: '#FF8A73',
+  frenchBlue: '#334075',
+  frenchBlueLight: '#7E8CC2',
+  nightBordeaux: '#621122',
   amber: '#F59E0B',
 };
 
 const surfaceSx = {
-  background: '#0F172A',
-  border: '1px solid rgba(148, 163, 184, 0.12)',
+  background: '#241019',
+  border: '1px solid rgba(201, 185, 190, 0.12)',
   boxShadow: 'none',
   borderRadius: '16px',
 };
@@ -151,12 +152,18 @@ function KickoffFlow({
         />
       )}
 
-      <GlassCard sx={{ ...surfaceSx, borderColor: 'rgba(34, 197, 94, 0.24)' }}>
+      <GlassCard
+        sx={{
+          ...surfaceSx,
+          background: `linear-gradient(145deg, ${COLORS.nightBordeaux}, #241019 72%)`,
+          borderColor: 'rgba(234, 108, 86, 0.32)',
+        }}
+      >
         <CardContent sx={{ p: { xs: 2.25, sm: 3.5 }, '&:last-child': { pb: { xs: 2.25, sm: 3.5 } } }}>
           <Chip
             icon={<SportsSoccerIcon />}
             label="New match night"
-            sx={{ color: COLORS.greenLight, bgcolor: 'rgba(34, 197, 94, 0.1)', mb: 1.5 }}
+            sx={{ color: COLORS.coralLight, bgcolor: 'rgba(234, 108, 86, 0.1)', mb: 1.5 }}
           />
           <Typography component="h1" sx={{ fontSize: { xs: '1.75rem', sm: '2.35rem' }, lineHeight: 1.08, fontWeight: 700 }}>
             Set up tonight’s tournament
@@ -173,8 +180,8 @@ function KickoffFlow({
               my: 3,
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' },
-              borderTop: '1px solid rgba(148, 163, 184, 0.12)',
-              borderBottom: '1px solid rgba(148, 163, 184, 0.12)',
+              borderTop: '1px solid rgba(201, 185, 190, 0.12)',
+              borderBottom: '1px solid rgba(201, 185, 190, 0.12)',
             }}
           >
             {[
@@ -196,8 +203,8 @@ function KickoffFlow({
                   alignItems: 'center',
                   py: 2,
                   px: { xs: 0, md: 2 },
-                  borderTop: { xs: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.1)', md: 'none' },
-                  borderLeft: { xs: 'none', md: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.1)' },
+                  borderTop: { xs: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.1)', md: 'none' },
+                  borderLeft: { xs: 'none', md: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.1)' },
                 }}
               >
                 <Box
@@ -208,8 +215,8 @@ function KickoffFlow({
                     borderRadius: '10px',
                     display: 'grid',
                     placeItems: 'center',
-                    bgcolor: step.complete ? 'rgba(34, 197, 94, 0.12)' : 'rgba(59, 130, 246, 0.1)',
-                    color: step.complete ? COLORS.greenLight : COLORS.blueLight,
+                    bgcolor: step.complete ? 'rgba(234, 108, 86, 0.12)' : 'rgba(51, 64, 117, 0.1)',
+                    color: step.complete ? COLORS.coralLight : COLORS.frenchBlueLight,
                     fontWeight: 700,
                   }}
                 >
@@ -256,7 +263,16 @@ function MatchNightCommand({
   const secondaryLabel = 'View Standings';
 
   return (
-    <GlassCard sx={{ ...surfaceSx, mb: 1.75, borderColor: nextMatch ? 'rgba(34, 197, 94, 0.32)' : 'rgba(59, 130, 246, 0.24)' }}>
+    <GlassCard
+      sx={{
+        ...surfaceSx,
+        mb: 1.75,
+        background: nextMatch
+          ? 'linear-gradient(135deg, rgba(98, 17, 34, 0.96), #241019 68%)'
+          : 'linear-gradient(135deg, rgba(51, 64, 117, 0.54), #241019 68%)',
+        borderColor: nextMatch ? 'rgba(234, 108, 86, 0.32)' : 'rgba(98, 17, 34, 0.5)',
+      }}
+    >
       <CardContent
         sx={{
           p: { xs: 2.25, md: 3 },
@@ -273,8 +289,8 @@ function MatchNightCommand({
             label={refreshing ? 'Refreshing live data' : dataAvailable ? 'Live data connected' : 'Live data unavailable'}
             sx={{
               mb: 1.5,
-              color: dataAvailable ? COLORS.greenLight : COLORS.amber,
-              bgcolor: dataAvailable ? 'rgba(34, 197, 94, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+              color: dataAvailable ? COLORS.coralLight : COLORS.amber,
+              bgcolor: dataAvailable ? 'rgba(234, 108, 86, 0.1)' : 'rgba(245, 158, 11, 0.1)',
             }}
           />
           <Typography component="h1" sx={{ color: COLORS.textIce, fontSize: { xs: '1.7rem', sm: '2.25rem' }, lineHeight: 1.08, fontWeight: 700 }}>
@@ -302,8 +318,8 @@ function MatchNightCommand({
           sx={{
             py: 2,
             px: { xs: 0, md: 2.5 },
-            borderTop: { xs: '1px solid rgba(148, 163, 184, 0.12)', md: 'none' },
-            borderLeft: { xs: 'none', md: '1px solid rgba(148, 163, 184, 0.12)' },
+            borderTop: { xs: '1px solid rgba(201, 185, 190, 0.12)', md: 'none' },
+            borderLeft: { xs: 'none', md: '1px solid rgba(201, 185, 190, 0.12)' },
           }}
         >
           <Typography sx={{ color: COLORS.textSteel, fontSize: '0.875rem' }}>Active tournament</Typography>
@@ -335,8 +351,8 @@ function SignalStrip({
   unavailable: boolean;
 }) {
   const signals = [
-    { label: 'Registered players', value: players, color: COLORS.blueLight },
-    { label: 'Played matches', value: matches, color: COLORS.greenLight },
+    { label: 'Registered players', value: players, color: COLORS.frenchBlueLight },
+    { label: 'Played matches', value: matches, color: COLORS.coralLight },
     { label: 'Recorded goals', value: goals, color: COLORS.amber },
   ];
 
@@ -350,7 +366,7 @@ function SignalStrip({
             sx={{
               px: { xs: 1.25, sm: 2.25 },
               py: 1.75,
-              borderLeft: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.1)',
+              borderLeft: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.1)',
             }}
           >
             <Typography sx={{ color: COLORS.textSteel, fontSize: '0.875rem' }}>{signal.label}</Typography>
@@ -590,10 +606,10 @@ export default function HomePage() {
                       py: 1,
                       color: 'inherit',
                       textDecoration: 'none',
-                      borderTop: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.08)',
+                      borderTop: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.08)',
                     }}
                   >
-                    <Typography sx={{ color: index === 0 ? COLORS.greenLight : COLORS.textSteel, fontWeight: 700 }}>#{row.rank}</Typography>
+                    <Typography sx={{ color: index === 0 ? COLORS.coralLight : COLORS.textSteel, fontWeight: 700 }}>#{row.rank}</Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
                       <Avatar src={getPlayerImagePath(row.player.name)} sx={{ width: 36, height: 36 }}>{row.player.name.slice(0, 1)}</Avatar>
                       <Box sx={{ minWidth: 0 }}>
@@ -613,7 +629,7 @@ export default function HomePage() {
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                 <SectionHeading title="Hall of Fame" />
                 {champions.slice(0, 4).map((champion, index) => (
-                  <Box key={champion.name} sx={{ display: 'grid', gridTemplateColumns: '36px 1fr auto', alignItems: 'center', gap: 1, py: 1, borderTop: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.08)' }}>
+                  <Box key={champion.name} sx={{ display: 'grid', gridTemplateColumns: '36px 1fr auto', alignItems: 'center', gap: 1, py: 1, borderTop: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.08)' }}>
                     <MilitaryTechIcon aria-hidden="true" sx={{ color: index === 0 ? COLORS.amber : COLORS.textSteel }} />
                     <Box sx={{ minWidth: 0 }}>
                       <Typography sx={{ fontWeight: 700 }} noWrap>{champion.name}</Typography>
@@ -635,7 +651,7 @@ export default function HomePage() {
                     component={Link}
                     href={`/tournaments/${match.tournament_id}`}
                     key={match.id}
-                    sx={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 1, py: 1, color: 'inherit', textDecoration: 'none', borderTop: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.08)' }}
+                    sx={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 1, py: 1, color: 'inherit', textDecoration: 'none', borderTop: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.08)' }}
                   >
                     <Box sx={{ minWidth: 0 }}>
                       <Typography sx={{ fontWeight: 700 }} noWrap>

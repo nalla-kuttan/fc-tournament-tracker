@@ -46,8 +46,8 @@ export default function MatchCard({ match }: MatchCardProps) {
 
   if (match.is_bye) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', px: 2, py: 2, borderBottom: '1px solid rgba(148, 163, 184, 0.08)' }}>
-        <Typography variant="body2" sx={{ color: '#94A3B8' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', px: 2, py: 2, borderBottom: '1px solid rgba(201, 185, 190, 0.08)' }}>
+        <Typography variant="body2" sx={{ color: '#C9B9BE' }}>
           {match.home_player?.name ?? 'TBD'} — BYE
         </Typography>
       </Box>
@@ -69,31 +69,31 @@ export default function MatchCard({ match }: MatchCardProps) {
         py: 2,
         color: 'inherit',
         textDecoration: 'none',
-        background: '#0F172A',
+        background: '#241019',
         borderRadius: '12px',
-        border: '1px solid rgba(148, 163, 184, 0.12)',
+        border: '1px solid rgba(201, 185, 190, 0.12)',
         transition: 'background-color 180ms ease, border-color 180ms ease',
-        '&:hover': { borderColor: 'rgba(148, 163, 184, 0.24)', background: '#111C31' },
-        '&:focus-visible': { outline: '3px solid rgba(74, 222, 128, 0.7)', outlineOffset: 2 },
+        '&:hover': { borderColor: 'rgba(201, 185, 190, 0.24)', background: '#2D1620' },
+        '&:focus-visible': { outline: '3px solid rgba(255, 138, 115, 0.7)', outlineOffset: 2 },
       }}
     >
       <Box sx={{ flex: 1, textAlign: 'right', pr: 1.5, minWidth: 0 }}>
         <Typography variant="body1" fontWeight={600} noWrap>{match.home_player?.name ?? 'TBD'}</Typography>
-        <Typography variant="caption" sx={{ color: '#94A3B8' }} noWrap>{match.home_player?.team ?? ''}</Typography>
+        <Typography variant="caption" sx={{ color: '#C9B9BE' }} noWrap>{match.home_player?.team ?? ''}</Typography>
       </Box>
 
-      <Box sx={{ minWidth: 76, textAlign: 'center', py: 0.75, px: 2, borderRadius: '10px', bgcolor: match.is_played ? 'rgba(34, 197, 94, 0.1)' : 'rgba(148, 163, 184, 0.06)' }}>
-        <Typography variant={match.is_played ? 'h6' : 'body2'} fontWeight={700} sx={{ fontVariantNumeric: 'tabular-nums', color: match.is_played ? '#F8FAFC' : '#94A3B8' }}>
+      <Box sx={{ minWidth: 76, textAlign: 'center', py: 0.75, px: 2, borderRadius: '10px', bgcolor: match.is_played ? 'rgba(234, 108, 86, 0.1)' : 'rgba(201, 185, 190, 0.06)' }}>
+        <Typography variant={match.is_played ? 'h6' : 'body2'} fontWeight={700} sx={{ fontVariantNumeric: 'tabular-nums', color: match.is_played ? '#FFF7F6' : '#C9B9BE' }}>
           {match.is_played ? `${match.home_score} – ${match.away_score}` : 'vs'}
         </Typography>
       </Box>
 
       <Box sx={{ flex: 1, textAlign: 'left', pl: 1.5, minWidth: 0 }}>
         <Typography variant="body1" fontWeight={600} noWrap>{match.away_player?.name ?? 'TBD'}</Typography>
-        <Typography variant="caption" sx={{ color: '#94A3B8' }} noWrap>{match.away_player?.team ?? ''}</Typography>
+        <Typography variant="caption" sx={{ color: '#C9B9BE' }} noWrap>{match.away_player?.team ?? ''}</Typography>
       </Box>
 
-      {match.stage && <Chip label={match.stage} size="small" sx={{ color: '#60A5FA', ml: 1 }} />}
+      {match.stage && <Chip label={match.stage} size="small" sx={{ color: '#7E8CC2', ml: 1 }} />}
       {intelligenceLabel && <Chip label={intelligenceLabel.label} size="small" sx={{ display: { xs: 'none', sm: 'inline-flex' }, color: '#F59E0B', ml: 1 }} />}
     </Box>
   );

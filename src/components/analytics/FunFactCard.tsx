@@ -26,9 +26,9 @@ export default function FunFactCard({ emoji, title, value, subtitle, color, inde
       sx={{
         minWidth: 160,
         maxWidth: 180,
-        background: 'rgba(15, 23, 42, 0.6)',
+        background: 'rgba(36, 16, 25, 0.6)',
         backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(148, 163, 184, 0.08)',
+        border: '1px solid rgba(201, 185, 190, 0.08)',
         borderRadius: '16px',
         p: 2.5,
         display: 'flex',
@@ -43,7 +43,7 @@ export default function FunFactCard({ emoji, title, value, subtitle, color, inde
         '&:hover': {
           transform: 'translateY(-3px)',
           borderColor: `${color}30`,
-          boxShadow: `0 8px 24px rgba(2, 6, 23, 0.3), 0 0 0 1px ${color}15`,
+          boxShadow: `0 6px 8px rgba(18, 8, 12, 0.34)`,
         },
         '&::before': {
           content: '""',
@@ -62,7 +62,7 @@ export default function FunFactCard({ emoji, title, value, subtitle, color, inde
       <Typography
         variant="caption"
         sx={{
-          color: '#475569',
+          color: '#A18A93',
           fontWeight: 700,
           fontSize: '0.6rem',
           textTransform: 'uppercase',
@@ -83,7 +83,7 @@ export default function FunFactCard({ emoji, title, value, subtitle, color, inde
       >
         {value}
       </Typography>
-      <Typography variant="caption" sx={{ color: '#64748B', lineHeight: 1.2, fontSize: '0.75rem' }} noWrap>
+      <Typography variant="caption" sx={{ color: '#A18A93', lineHeight: 1.2, fontSize: '0.75rem' }} noWrap>
         {subtitle}
       </Typography>
     </MotionBox>

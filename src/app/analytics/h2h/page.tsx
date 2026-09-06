@@ -93,7 +93,7 @@ function H2HPageContent() {
             variant="outlined"
             onClick={() => setH2hModalOpen(true)}
             startIcon={<AutoAwesomeIcon />}
-            sx={{ color: '#22C55E', borderColor: 'rgba(34,197,94,0.5)', '&:hover': { borderColor: '#22C55E', bgcolor: 'rgba(34,197,94,0.1)' } }}
+            sx={{ color: '#EA6C56', borderColor: 'rgba(234, 108, 86,0.5)', '&:hover': { borderColor: '#EA6C56', bgcolor: 'rgba(234, 108, 86,0.1)' } }}
           >
             AI Analyst
           </Button>
@@ -157,7 +157,7 @@ function H2HPageContent() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
                         <Avatar
                           src={getPlayerImagePath(rivalry.p1Name)}
-                          sx={{ width: 46, height: 46, border: '1px solid rgba(34, 197, 94, 0.45)' }}
+                          sx={{ width: 46, height: 46, border: '1px solid rgba(234, 108, 86, 0.45)' }}
                         >
                           {rivalry.p1Name.slice(0, 1)}
                         </Avatar>
@@ -166,7 +166,7 @@ function H2HPageContent() {
                           <Typography variant="caption" color="text.secondary">Home</Typography>
                         </Box>
                       </Box>
-                      <Typography sx={{ color: '#94A3B8', fontSize: '0.72rem', fontWeight: 900 }}>VS</Typography>
+                      <Typography sx={{ color: '#C9B9BE', fontSize: '0.72rem', fontWeight: 900 }}>VS</Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1, minWidth: 0 }}>
                         <Box sx={{ minWidth: 0, textAlign: 'right' }}>
                           <Typography fontWeight={900} noWrap>{rivalry.p2Name}</Typography>
@@ -174,7 +174,7 @@ function H2HPageContent() {
                         </Box>
                         <Avatar
                           src={getPlayerImagePath(rivalry.p2Name)}
-                          sx={{ width: 46, height: 46, border: '1px solid rgba(96, 165, 250, 0.45)' }}
+                          sx={{ width: 46, height: 46, border: '1px solid rgba(126, 140, 194, 0.45)' }}
                         >
                           {rivalry.p2Name.slice(0, 1)}
                         </Avatar>
@@ -184,7 +184,7 @@ function H2HPageContent() {
                       <Typography variant="body2" color="text.secondary">
                         {rivalry.p1Wins}-{rivalry.draws}-{rivalry.p2Wins} record · {rivalry.totalGoals} goals
                       </Typography>
-                      <Typography variant="caption" sx={{ color: '#22C55E', fontWeight: 800 }}>
+                      <Typography variant="caption" sx={{ color: '#EA6C56', fontWeight: 800 }}>
                         {rivalry.matches.length}x
                       </Typography>
                     </Box>

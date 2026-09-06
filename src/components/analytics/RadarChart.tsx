@@ -30,18 +30,18 @@ export default function RadarChartComponent({ player1Stats, player2Stats }: Prop
       {
         label: player1Stats.player_name,
         data: [p1.goals, p1.cleanSheets, p1.winRate, p1.avgRating, p1.possession],
-        backgroundColor: 'rgba(10, 132, 255, 0.2)',
-        borderColor: '#22C55E',
+        backgroundColor: 'rgba(51, 64, 117, 0.2)',
+        borderColor: '#EA6C56',
         borderWidth: 2,
-        pointBackgroundColor: '#22C55E',
+        pointBackgroundColor: '#EA6C56',
       },
       {
         label: player2Stats.player_name,
         data: [p2.goals, p2.cleanSheets, p2.winRate, p2.avgRating, p2.possession],
-        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-        borderColor: '#3B82F6',
+        backgroundColor: 'rgba(51, 64, 117, 0.2)',
+        borderColor: '#7E8CC2',
         borderWidth: 2,
-        pointBackgroundColor: '#3B82F6',
+        pointBackgroundColor: '#7E8CC2',
       },
     ],
   };
@@ -51,14 +51,14 @@ export default function RadarChartComponent({ player1Stats, player2Stats }: Prop
     plugins: {
       legend: {
         position: 'top' as const,
-        labels: { color: '#F8FAFC' },
+        labels: { color: '#FFF7F6' },
       },
     },
     scales: {
       r: {
-        angleLines: { color: 'rgba(148, 163, 184, 0.08)' },
-        grid: { color: 'rgba(148, 163, 184, 0.06)' },
-        pointLabels: { color: '#64748B', font: { size: 12 } },
+        angleLines: { color: 'rgba(201, 185, 190, 0.08)' },
+        grid: { color: 'rgba(201, 185, 190, 0.06)' },
+        pointLabels: { color: '#A18A93', font: { size: 12 } },
         ticks: { display: false },
         suggestedMin: 0,
         suggestedMax: 100,

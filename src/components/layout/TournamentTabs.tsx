@@ -40,9 +40,9 @@ export default function TournamentTabs({ tournamentId, format }: Props) {
   return (
     <Box
       sx={{
-        borderBottom: '1px solid rgba(148, 163, 184, 0.08)',
+        borderBottom: '1px solid rgba(201, 185, 190, 0.08)',
         mb: 3,
-        background: 'rgba(15, 23, 42, 0.3)',
+        background: 'rgba(36, 16, 25, 0.3)',
         borderRadius: '12px 12px 0 0',
         mx: -1,
         px: 1,

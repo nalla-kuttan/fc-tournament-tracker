@@ -39,7 +39,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
     awards.push({
       emoji: '⭐',
       title: 'Best Manager',
-      color: '#22C55E',
+      color: '#EA6C56',
       winner: bestRated.player_name,
       team: bestRated.base_team,
       value: `${bestRated.avg_rating.toFixed(1)} avg rating`,
@@ -52,7 +52,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
     awards.push({
       emoji: '🧤',
       title: 'Iron Wall',
-      color: '#22C55E',
+      color: '#EA6C56',
       winner: ironWall.player_name,
       team: ironWall.base_team,
       value: `${ironWall.clean_sheets} clean sheets`,
@@ -65,7 +65,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
     awards.push({
       emoji: '🌟',
       title: 'MOTM Magnet',
-      color: '#3B82F6',
+      color: '#7E8CC2',
       winner: motmKing.player_name,
       team: motmKing.base_team,
       value: `${motmKing.motm_awards} awards`,
@@ -78,7 +78,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
     awards.push({
       emoji: '🔄',
       title: 'Possession Master',
-      color: '#60A5FA',
+      color: '#7E8CC2',
       winner: possKing.player_name,
       team: possKing.base_team,
       value: `${possKing.avg_possession.toFixed(0)}% avg`,
@@ -111,7 +111,7 @@ export default function SeasonAwards({ stats }: { stats: CareerStats[] }) {
       <Typography
         variant="body2"
         sx={{
-          color: '#64748B',
+          color: '#A18A93',
           textTransform: 'uppercase',
           fontSize: '0.8rem',
           fontWeight: 600,
@@ -127,7 +127,7 @@ export default function SeasonAwards({ stats }: { stats: CareerStats[] }) {
           <Grid key={award.title} size={{ xs: 6, sm: 4, md: 4 }}>
             <Box
               sx={{
-                background: 'rgba(15, 23, 42, 0.6)',
+                background: 'rgba(36, 16, 25, 0.6)',
                 borderRadius: '12px',
                 p: 2,
                 display: 'flex',
@@ -162,7 +162,7 @@ export default function SeasonAwards({ stats }: { stats: CareerStats[] }) {
                 <Typography variant="body2" fontWeight={600} noWrap>
                   {award.winner}
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#64748B' }} noWrap>
+                <Typography variant="caption" sx={{ color: '#A18A93' }} noWrap>
                   {award.value}
                 </Typography>
               </Box>

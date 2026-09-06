@@ -43,7 +43,7 @@ export default function AdvancedHighlights({ records }: { records: PerformanceRe
               <Typography variant="caption" color="text.secondary" fontWeight={700}>{title}</Typography>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1, mt: 0.75 }}>
                 <Typography fontWeight={700} noWrap>{entry.playerName}</Typography>
-                <Typography fontWeight={800} sx={{ color: '#4ADE80' }}>{entry.value}{suffix}</Typography>
+                <Typography fontWeight={800} sx={{ color: '#FF8A73' }}>{entry.value}{suffix}</Typography>
               </Box>
               <Typography variant="caption" color="text.secondary" noWrap>{entry.detail}</Typography>
             </CardContent>

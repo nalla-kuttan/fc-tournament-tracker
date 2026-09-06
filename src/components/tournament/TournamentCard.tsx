@@ -13,9 +13,9 @@ import type { Tournament } from '@/lib/types';
 
 const FORMAT_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   league: {
-    icon: <StadiumIcon sx={{ fontSize: 22, color: '#3B82F6' }} />,
-    color: '#3B82F6',
-    bg: 'rgba(59, 130, 246, 0.1)',
+    icon: <StadiumIcon sx={{ fontSize: 22, color: '#7E8CC2' }} />,
+    color: '#7E8CC2',
+    bg: 'rgba(51, 64, 117, 0.1)',
   },
   knockout: {
     icon: <EmojiEventsIcon sx={{ fontSize: 22, color: '#F59E0B' }} />,
@@ -23,9 +23,9 @@ const FORMAT_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: 
     bg: 'rgba(245, 158, 11, 0.1)',
   },
   cup: {
-    icon: <MilitaryTechIcon sx={{ fontSize: 22, color: '#3B82F6' }} />,
-    color: '#3B82F6',
-    bg: 'rgba(59, 130, 246, 0.1)',
+    icon: <MilitaryTechIcon sx={{ fontSize: 22, color: '#7E8CC2' }} />,
+    color: '#7E8CC2',
+    bg: 'rgba(51, 64, 117, 0.1)',
   },
 };
 
@@ -47,7 +47,7 @@ export default function TournamentCard({ tournament, showDivider = true }: { tou
           cursor: 'pointer',
           color: 'inherit',
           textDecoration: 'none',
-          borderBottom: showDivider ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
+          borderBottom: showDivider ? '1px solid rgba(201, 185, 190, 0.06)' : 'none',
           transition: 'background 150ms ease, transform 150ms ease',
           '&:hover': {
             transform: 'translateX(2px)',
@@ -55,7 +55,7 @@ export default function TournamentCard({ tournament, showDivider = true }: { tou
           '&:active': {
             transform: 'scale(0.99)',
           },
-          '&:focus-visible': { outline: '3px solid rgba(74, 222, 128, 0.7)', outlineOffset: -3 },
+          '&:focus-visible': { outline: '3px solid rgba(255, 138, 115, 0.7)', outlineOffset: -3 },
         }}
       >
       {/* Format icon - SVG instead of emoji */}
@@ -82,7 +82,7 @@ export default function TournamentCard({ tournament, showDivider = true }: { tou
         <Typography variant="body1" fontWeight={600} noWrap sx={{ letterSpacing: '0.01em' }}>
           {tournament.name}
         </Typography>
-        <Typography variant="caption" sx={{ color: '#B6C3D5', fontSize: '0.875rem' }}>
+        <Typography variant="caption" sx={{ color: '#D7C6CB', fontSize: '0.875rem' }}>
           {tournament.format.charAt(0).toUpperCase() + tournament.format.slice(1)} &middot; {new Date(tournament.created_at).toLocaleDateString()}
         </Typography>
       </Box>
@@ -104,7 +104,7 @@ export default function TournamentCard({ tournament, showDivider = true }: { tou
           }}
         />
 
-        <ChevronRightIcon aria-hidden="true" sx={{ color: '#94A3B8', fontSize: 20 }} />
+        <ChevronRightIcon aria-hidden="true" sx={{ color: '#C9B9BE', fontSize: 20 }} />
       </Box>
     </Box>
   );

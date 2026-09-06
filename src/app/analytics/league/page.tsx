@@ -192,7 +192,7 @@ export default function LeagueAnalyticsPage() {
                       gap: 1.5,
                       alignItems: 'center',
                       py: 1,
-                      borderBottom: index < Math.min(7, data.player_stats.length - 1) ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
+                      borderBottom: index < Math.min(7, data.player_stats.length - 1) ? '1px solid rgba(201, 185, 190, 0.06)' : 'none',
                     }}
                   >
                     <Typography variant="body2" fontWeight={800} color="text.secondary">
@@ -205,7 +205,7 @@ export default function LeagueAnalyticsPage() {
                     <Typography variant="body2" fontFamily="monospace">
                       {row.currentPoints} pts
                     </Typography>
-                    <Typography variant="body2" fontWeight={800} sx={{ color: '#22C55E', fontFamily: 'monospace' }}>
+                    <Typography variant="body2" fontWeight={800} sx={{ color: '#EA6C56', fontFamily: 'monospace' }}>
                       {row.projectedPoints}
                     </Typography>
                   </Box>
@@ -223,7 +223,7 @@ export default function LeagueAnalyticsPage() {
               <Divider sx={{ mb: 2 }} />
               <Box sx={{ overflowX: 'auto' }}>
                 <Box sx={{ minWidth: 650 }}>
-                  <Box sx={{ display: 'flex', py: 1, borderBottom: '1px solid rgba(148, 163, 184, 0.06)' }}>
+                  <Box sx={{ display: 'flex', py: 1, borderBottom: '1px solid rgba(201, 185, 190, 0.06)' }}>
                     {['Player', 'P', 'W', 'D', 'L', 'GF', 'GA', 'CS', 'Pts', 'Win%', 'G/M', 'xG', 'Rtg', 'Poss%'].map((h) => (
                       <Typography
                         key={h}
@@ -248,7 +248,7 @@ export default function LeagueAnalyticsPage() {
                         display: 'flex',
                         py: 1,
                         borderBottom: '1px solid rgba(255,255,255,0.04)',
-                        '&:hover': { bgcolor: 'rgba(59,130,246,0.04)' },
+                        '&:hover': { bgcolor: 'rgba(51, 64, 117,0.04)' },
                       }}
                     >
                       <Box sx={{ width: 120, flexShrink: 0, px: 0.5 }}>
@@ -292,7 +292,7 @@ export default function LeagueAnalyticsPage() {
                 title="Top Scorers"
                 valueLabel="Goals"
                 entries={toLeaderboard(data.top_scorers, (s) => String(s.goals))}
-                accentColor="#22C55E"
+                accentColor="#EA6C56"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -308,7 +308,7 @@ export default function LeagueAnalyticsPage() {
                 title="Goals Per Match"
                 valueLabel="G/M"
                 entries={toLeaderboard(data.goals_per_match_rankings, (s) => s.goals_per_match.toFixed(2))}
-                accentColor="#22C55E"
+                accentColor="#EA6C56"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -316,7 +316,7 @@ export default function LeagueAnalyticsPage() {
                 title="Avg xG"
                 valueLabel="xG"
                 entries={toLeaderboard(data.xg_rankings, (s) => s.avg_xg.toFixed(2))}
-                accentColor="#3B82F6"
+                accentColor="#7E8CC2"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -324,7 +324,7 @@ export default function LeagueAnalyticsPage() {
                 title="Possession"
                 valueLabel="Avg%"
                 entries={toLeaderboard(data.possession_rankings, (s) => `${s.avg_possession.toFixed(0)}%`)}
-                accentColor="#22C55E"
+                accentColor="#EA6C56"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>

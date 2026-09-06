@@ -277,7 +277,7 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
       </GlassCard>
 
       {/* Goal Scorers */}
-      <Accordion sx={{ bgcolor: 'rgba(148, 163, 184, 0.03)', border: '1px solid rgba(148, 163, 184, 0.06)' }}>
+      <Accordion sx={{ bgcolor: 'rgba(201, 185, 190, 0.03)', border: '1px solid rgba(201, 185, 190, 0.06)' }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography>Goal Scorers ({goals.length})</Typography>
         </AccordionSummary>
@@ -326,7 +326,7 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
       </Accordion>
 
       {/* Advanced Stats */}
-      <Accordion sx={{ bgcolor: 'rgba(148, 163, 184, 0.03)', border: '1px solid rgba(148, 163, 184, 0.06)' }}>
+      <Accordion sx={{ bgcolor: 'rgba(201, 185, 190, 0.03)', border: '1px solid rgba(201, 185, 190, 0.06)' }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography>Advanced Stats</Typography>
         </AccordionSummary>

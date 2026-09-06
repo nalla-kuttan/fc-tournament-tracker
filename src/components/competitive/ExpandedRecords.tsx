@@ -21,7 +21,7 @@ function RecordSection({ id, title, description, boards }: { id: string; title: 
   return (
     <Box component="section" aria-labelledby={id} sx={{ contentVisibility: 'auto', containIntrinsicSize: '640px', mt: 3 }}>
       <Typography id={id} component="h3" sx={{ fontWeight: 700, fontSize: '1.2rem' }}>{title}</Typography>
-      <Typography sx={{ color: '#94A3B8', fontSize: '0.9rem', mt: 0.25, mb: 1.5 }}>{description}</Typography>
+      <Typography sx={{ color: '#C9B9BE', fontSize: '0.9rem', mt: 0.25, mb: 1.5 }}>{description}</Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' }, gap: 2 }}>
         {boards.map((board) => <RecordBoard key={board.title} {...board} />)}
       </Box>
@@ -34,7 +34,7 @@ export default function ExpandedRecords({ records }: { records: ExpandedRecordsD
   return (
     <Box component="section" aria-labelledby="expanded-records-title" sx={{ mt: 3 }}>
       <Typography id="expanded-records-title" component="h2" sx={{ fontWeight: 700, fontSize: '1.4rem' }}>Expanded Record Book</Typography>
-      <Typography sx={{ color: '#B6C3D5', mt: 0.5 }}>Records derived only from scorelines and match statistics captured by the tracker.</Typography>
+      <Typography sx={{ color: '#D7C6CB', mt: 0.5 }}>Records derived only from scorelines and match statistics captured by the tracker.</Typography>
 
       <RecordSection id="runs-records-title" title="Runs & Resilience" description="Career sequences, responses to defeat, dominance, and single-match scoring." boards={[
         { title: 'Longest Unbeaten Run', rows: runs.longestUnbeaten },
