@@ -108,10 +108,10 @@ export default function MusicPlayer() {
           bottom: 0,
           left: 0,
           right: 0,
-          bgcolor: 'rgba(2, 6, 23, 0.92)',
+          bgcolor: 'rgba(18, 8, 12, 0.92)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
-          borderTop: '1px solid rgba(148, 163, 184, 0.06)',
+          borderTop: '1px solid rgba(201, 185, 190, 0.06)',
           px: 2,
           py: 1,
           display: 'flex',
@@ -128,21 +128,21 @@ export default function MusicPlayer() {
               width: 36,
               height: 36,
               borderRadius: '10px',
-              background: 'rgba(34, 197, 94, 0.1)',
-              border: '1px solid rgba(34, 197, 94, 0.15)',
+              background: 'rgba(234, 108, 86, 0.1)',
+              border: '1px solid rgba(234, 108, 86, 0.15)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
             }}
           >
-            <MusicNoteIcon sx={{ color: '#22C55E', fontSize: 18 }} />
+            <MusicNoteIcon sx={{ color: '#EA6C56', fontSize: 18 }} />
           </Box>
           <Box sx={{ overflow: 'hidden' }}>
             <Typography variant="body2" fontWeight={600} noWrap sx={{ fontSize: '0.875rem' }}>
               {currentTrack?.title ?? 'No track'}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.75rem' }} noWrap>
+            <Typography variant="caption" sx={{ color: '#C9B9BE', fontSize: '0.75rem' }} noWrap>
               {currentTrack?.artist ?? ''}
             </Typography>
           </Box>
@@ -155,9 +155,9 @@ export default function MusicPlayer() {
             onClick={prevTrack}
             size="small"
             sx={{
-              color: '#94A3B8',
+              color: '#C9B9BE',
               transition: 'color 150ms ease',
-              '&:hover': { color: '#F8FAFC' },
+              '&:hover': { color: '#FFF7F6' },
             }}
           >
             <SkipPreviousIcon />
@@ -166,14 +166,14 @@ export default function MusicPlayer() {
             aria-label={isPlaying ? 'Pause music' : 'Play music'}
             onClick={isPlaying ? pause : play}
             sx={{
-              color: '#020617',
-              bgcolor: '#22C55E',
+              color: '#12080C',
+              bgcolor: '#EA6C56',
               width: 36,
               height: 36,
               transition: 'all 200ms ease',
               '&:hover': {
-                bgcolor: '#4ADE80',
-                boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)',
+                bgcolor: '#FF8A73',
+                boxShadow: '0 4px 12px rgba(234, 108, 86, 0.3)',
               },
             }}
           >
@@ -184,9 +184,9 @@ export default function MusicPlayer() {
             onClick={nextTrack}
             size="small"
             sx={{
-              color: '#94A3B8',
+              color: '#C9B9BE',
               transition: 'color 150ms ease',
-              '&:hover': { color: '#F8FAFC' },
+              '&:hover': { color: '#FFF7F6' },
             }}
           >
             <SkipNextIcon />
@@ -195,7 +195,7 @@ export default function MusicPlayer() {
 
         {/* Progress */}
         <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="caption" sx={{ color: '#94A3B8', minWidth: 40, fontSize: '0.7rem' }}>
+          <Typography variant="caption" sx={{ color: '#C9B9BE', minWidth: 40, fontSize: '0.7rem' }}>
             {formatTime(progress)}
           </Typography>
           <Slider
@@ -209,15 +209,15 @@ export default function MusicPlayer() {
             }}
             size="small"
             sx={{
-              color: '#22C55E',
+              color: '#EA6C56',
               '& .MuiSlider-track': {
-                background: 'linear-gradient(90deg, #22C55E, #3B82F6)',
+                background: 'linear-gradient(90deg, #EA6C56, #334075)',
               },
               '& .MuiSlider-thumb': {
                 width: 12,
                 height: 12,
                 '&:hover': {
-                  boxShadow: '0 0 0 6px rgba(34, 197, 94, 0.15)',
+                  boxShadow: '0 0 0 6px rgba(234, 108, 86, 0.15)',
                 },
               },
               '& .MuiSlider-rail': {
@@ -225,7 +225,7 @@ export default function MusicPlayer() {
               },
             }}
           />
-          <Typography variant="caption" sx={{ color: '#94A3B8', minWidth: 40, fontSize: '0.7rem' }}>
+          <Typography variant="caption" sx={{ color: '#C9B9BE', minWidth: 40, fontSize: '0.7rem' }}>
             {formatTime(duration)}
           </Typography>
         </Box>
@@ -237,9 +237,9 @@ export default function MusicPlayer() {
             onClick={() => setVolume((v) => (v === 0 ? 0.5 : 0))}
             size="small"
             sx={{
-              color: '#94A3B8',
+              color: '#C9B9BE',
               transition: 'color 150ms ease',
-              '&:hover': { color: '#94A3B8' },
+              '&:hover': { color: '#C9B9BE' },
             }}
           >
             {volume === 0 ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
@@ -252,7 +252,7 @@ export default function MusicPlayer() {
             onChange={(_, v) => setVolume(v as number)}
             size="small"
             sx={{
-              color: '#94A3B8',
+              color: '#C9B9BE',
               '& .MuiSlider-thumb': {
                 width: 10,
                 height: 10,

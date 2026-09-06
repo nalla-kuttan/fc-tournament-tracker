@@ -114,7 +114,7 @@ function computeFunFacts(
         title: 'Goal Fest',
         value: `${maxGoals} goals`,
         subtitle: `${maxGoalsMatch.home_player?.name ?? 'TBD'} ${maxGoalsMatch.home_score}-${maxGoalsMatch.away_score} ${maxGoalsMatch.away_player?.name ?? 'TBD'}`,
-        color: '#22C55E',
+        color: '#EA6C56',
       });
     }
   } catch { /* skip */ }
@@ -184,7 +184,7 @@ function computeFunFacts(
         title: 'CS Streak',
         value: `${bestCSStreak} in a row`,
         subtitle: bestCSPlayer,
-        color: '#22C55E',
+        color: '#EA6C56',
       });
     }
   } catch { /* skip */ }
@@ -237,7 +237,7 @@ function computeFunFacts(
         title: 'MOTM King',
         value: `${maxMotm} awards`,
         subtitle: rp?.name ?? 'Unknown',
-        color: '#3B82F6',
+        color: '#7E8CC2',
       });
     }
   } catch { /* skip */ }
@@ -353,7 +353,7 @@ function computeFunFacts(
         title: 'Master Reader',
         value: `${maxInterceptions} ints`,
         subtitle: `${interceptorName} ${interceptorMatch}`,
-        color: '#3B82F6', // iOS Light Blue
+        color: '#7E8CC2', // iOS Light Blue
       });
     }
   } catch { /* skip */ }
@@ -378,7 +378,7 @@ export default function FunFactsSection({ matches, goals, registeredPlayers, pla
       <Typography
         variant="body2"
         sx={{
-          color: '#64748B',
+          color: '#A18A93',
           textTransform: 'uppercase',
           fontSize: '0.75rem',
           fontWeight: 700,
@@ -405,11 +405,11 @@ export default function FunFactsSection({ matches, goals, registeredPlayers, pla
             height: 6,
           },
           '&::-webkit-scrollbar-track': {
-            background: 'rgba(148, 163, 184, 0.06)',
+            background: 'rgba(201, 185, 190, 0.06)',
             borderRadius: 999,
           },
           '&::-webkit-scrollbar-thumb': {
-            background: 'rgba(34, 197, 94, 0.35)',
+            background: 'rgba(234, 108, 86, 0.35)',
             borderRadius: 999,
           },
         }}

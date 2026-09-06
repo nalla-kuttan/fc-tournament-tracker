@@ -245,7 +245,7 @@ export default function CreateTournamentForm() {
                     gap: 2,
                     p: 1,
                     borderRadius: 1,
-                    bgcolor: selectedPlayerIds.has(player.id) ? 'rgba(34, 197, 94, 0.06)' : 'transparent',
+                    bgcolor: selectedPlayerIds.has(player.id) ? 'rgba(234, 108, 86, 0.06)' : 'transparent',
                   }}
                 >
                   <FormControlLabel

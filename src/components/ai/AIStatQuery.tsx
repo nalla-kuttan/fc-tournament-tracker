@@ -79,8 +79,8 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1.2fr) minmax(320px, 0.8fr)' }, gap: 2 }}>
       <GlassCard
         sx={{
-          background: '#0F172A',
-          borderColor: 'rgba(59, 130, 246, 0.24)',
+          background: '#241019',
+          borderColor: 'rgba(51, 64, 117, 0.24)',
         }}
       >
         <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
@@ -93,9 +93,9 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
                   borderRadius: '12px',
                   display: 'grid',
                   placeItems: 'center',
-                  color: '#60A5FA',
-                  background: 'rgba(59, 130, 246, 0.18)',
-                  border: '1px solid rgba(59, 130, 246, 0.3)',
+                  color: '#7E8CC2',
+                  background: 'rgba(51, 64, 117, 0.18)',
+                  border: '1px solid rgba(51, 64, 117, 0.3)',
                   flexShrink: 0,
                 }}
               >
@@ -105,7 +105,7 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
                 <Typography sx={{ fontSize: { xs: '1.15rem', sm: '1.35rem' }, fontWeight: 950, lineHeight: 1.1 }}>
                   Ask the AI Analyst
                 </Typography>
-                <Typography sx={{ color: '#94A3B8', fontSize: '0.88rem', mt: 0.35 }}>
+                <Typography sx={{ color: '#C9B9BE', fontSize: '0.88rem', mt: 0.35 }}>
                   Ask for stat-backed reads on form, rivals, records, and player roles.
                 </Typography>
               </Box>
@@ -113,7 +113,7 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
             <Chip
               size="small"
               label="Global data"
-              sx={{ color: '#60A5FA', bgcolor: 'rgba(59, 130, 246, 0.12)', borderColor: 'rgba(59, 130, 246, 0.24)', fontWeight: 800 }}
+              sx={{ color: '#7E8CC2', bgcolor: 'rgba(51, 64, 117, 0.12)', borderColor: 'rgba(51, 64, 117, 0.24)', fontWeight: 800 }}
             />
           </Box>
 
@@ -124,13 +124,13 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
                 sx={{
                   p: 1.25,
                   borderRadius: '12px',
-                  bgcolor: '#111C31',
-                  border: '1px solid rgba(148, 163, 184, 0.1)',
+                  bgcolor: '#2D1620',
+                  border: '1px solid rgba(201, 185, 190, 0.1)',
                   minWidth: 0,
                 }}
               >
                 <Typography sx={{ fontWeight: 950, fontSize: '1.2rem', lineHeight: 1 }}>{stat.value}</Typography>
-                <Typography sx={{ color: '#94A3B8', fontSize: '0.72rem', fontWeight: 800, mt: 0.35 }}>{stat.label}</Typography>
+                <Typography sx={{ color: '#C9B9BE', fontSize: '0.72rem', fontWeight: 800, mt: 0.35 }}>{stat.label}</Typography>
               </Box>
             ))}
           </Box>
@@ -150,17 +150,17 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
                 mb: 1.5,
                 '& .MuiOutlinedInput-root': {
                   alignItems: 'flex-start',
-                  bgcolor: '#111C31',
+                  bgcolor: '#2D1620',
                   borderRadius: '12px',
                   fontSize: '0.95rem',
-                  '& fieldset': { borderColor: 'rgba(59, 130, 246, 0.18)' },
-                  '&:hover fieldset': { borderColor: 'rgba(59, 130, 246, 0.34)' },
-                  '&.Mui-focused fieldset': { borderColor: '#3B82F6' },
+                  '& fieldset': { borderColor: 'rgba(51, 64, 117, 0.18)' },
+                  '&:hover fieldset': { borderColor: 'rgba(51, 64, 117, 0.34)' },
+                  '&.Mui-focused fieldset': { borderColor: '#7E8CC2' },
                 },
               }}
             />
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, flexWrap: 'wrap' }}>
-              <Typography sx={{ color: '#94A3B8', fontSize: '0.74rem' }}>
+              <Typography sx={{ color: '#C9B9BE', fontSize: '0.74rem' }}>
                 Uses current career stats only.
               </Typography>
               <Button
@@ -170,10 +170,10 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
                 startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <SendIcon />}
                 sx={{
                   minWidth: 136,
-                  bgcolor: '#3B82F6',
-                  color: '#020617',
-                  boxShadow: '0 4px 14px rgba(59, 130, 246, 0.25)',
-                  '&:hover': { bgcolor: '#60A5FA' },
+                  bgcolor: '#7E8CC2',
+                  color: '#12080C',
+                  boxShadow: '0 4px 14px rgba(51, 64, 117, 0.25)',
+                  '&:hover': { bgcolor: '#7E8CC2' },
                 }}
               >
                 {loading ? 'Thinking' : 'Ask Analyst'}
@@ -197,9 +197,9 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
                     height: 'auto',
                     py: 0.7,
                     '& .MuiChip-label': { whiteSpace: 'normal', lineHeight: 1.25 },
-                    color: '#F8FAFC',
-                    bgcolor: 'rgba(148, 163, 184, 0.08)',
-                    borderColor: 'rgba(148, 163, 184, 0.13)',
+                    color: '#FFF7F6',
+                    bgcolor: 'rgba(201, 185, 190, 0.08)',
+                    borderColor: 'rgba(201, 185, 190, 0.13)',
                     fontWeight: 750,
                   }}
                 />
@@ -212,17 +212,17 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
           sx={{
             minHeight: 260,
             background: answer || error || loading
-              ? 'rgba(15, 23, 42, 0.72)'
-              : 'linear-gradient(135deg, rgba(15, 23, 42, 0.58), rgba(2, 6, 23, 0.72))',
+              ? 'rgba(36, 16, 25, 0.72)'
+              : 'linear-gradient(135deg, rgba(36, 16, 25, 0.58), rgba(18, 8, 12, 0.72))',
           }}
         >
           <CardContent sx={{ p: 2.25, '&:last-child': { pb: 2.25 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-              <SearchIcon sx={{ color: '#60A5FA', fontSize: 20 }} />
+              <SearchIcon sx={{ color: '#7E8CC2', fontSize: 20 }} />
               <Typography sx={{ fontWeight: 900 }}>Analyst Response</Typography>
             </Box>
             {loading ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: '#94A3B8', py: 5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: '#C9B9BE', py: 5 }}>
                 <CircularProgress size={22} />
                 <Typography sx={{ fontWeight: 750 }}>Reading the stat sheet...</Typography>
               </Box>
@@ -233,19 +233,19 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
             ) : answer ? (
               <Box
                 sx={{
-                  color: '#F8FAFC',
-                  '& h1, & h2, & h3': { color: '#60A5FA', mb: 1.5, fontWeight: 900 },
+                  color: '#FFF7F6',
+                  '& h1, & h2, & h3': { color: '#7E8CC2', mb: 1.5, fontWeight: 900 },
                   '& p': { mb: 1.5, lineHeight: 1.65 },
                   '& ul': { pl: 2.5, mb: 1.5 },
                   '& li': { mb: 0.7, lineHeight: 1.55 },
-                  '& strong': { color: '#F8FAFC' },
+                  '& strong': { color: '#FFF7F6' },
                 }}
               >
                 <ReactMarkdown>{answer}</ReactMarkdown>
               </Box>
             ) : (
-              <Box sx={{ color: '#94A3B8', py: 4 }}>
-                <Typography sx={{ fontWeight: 850, color: '#F8FAFC', mb: 0.6 }}>No question asked yet</Typography>
+              <Box sx={{ color: '#C9B9BE', py: 4 }}>
+                <Typography sx={{ fontWeight: 850, color: '#FFF7F6', mb: 0.6 }}>No question asked yet</Typography>
                 <Typography sx={{ lineHeight: 1.55 }}>
                   Pick a suggested question or ask your own. The answer will appear here with direct stat-backed analysis.
                 </Typography>

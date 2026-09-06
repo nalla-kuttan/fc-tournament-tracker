@@ -1,3 +1,15 @@
+:root {
+  --brand-coral: #EA6C56;
+  --brand-coral-light: #FF8A73;
+  --brand-french-blue: #334075;
+  --brand-french-blue-light: #7E8CC2;
+  --brand-night-bordeaux: #621122;
+  --brand-background: #12080C;
+  --brand-surface: #241019;
+  --brand-text: #FFF7F6;
+  --brand-text-secondary: #C9B9BE;
+}
+
 /* ─── Keyframe Animations ─── */
 
 @keyframes fadeInUp {
@@ -29,10 +41,10 @@
 
 @keyframes glowPulse {
   0%, 100% {
-    box-shadow: 0 0 5px rgba(34, 197, 94, 0.2);
+    box-shadow: 0 0 5px rgba(234, 108, 86, 0.2);
   }
   50% {
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.25), 0 0 40px rgba(34, 197, 94, 0.1);
+    box-shadow: 0 0 20px rgba(234, 108, 86, 0.25), 0 0 40px rgba(234, 108, 86, 0.1);
   }
 }
 
@@ -61,10 +73,10 @@
 
 @keyframes borderGlow {
   0%, 100% {
-    border-color: rgba(34, 197, 94, 0.15);
+    border-color: rgba(234, 108, 86, 0.15);
   }
   50% {
-    border-color: rgba(34, 197, 94, 0.35);
+    border-color: rgba(234, 108, 86, 0.35);
   }
 }
 
@@ -89,7 +101,8 @@ html {
 }
 
 body {
-  background: #020617;
+  background: var(--brand-background);
+  color: var(--brand-text);
   font-family: 'Chakra Petch', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-synthesis: none;
 }
@@ -100,7 +113,7 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid rgba(74, 222, 128, 0.78);
+  outline: 3px solid rgba(255, 138, 115, 0.78);
   outline-offset: 3px;
 }
 
@@ -123,15 +136,15 @@ p {
 /* ─── Card Glass Styles ─── */
 
 .glass-card {
-  background: #0f172a;
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: var(--brand-surface);
+  border: 1px solid rgba(201, 185, 190, 0.12);
   border-radius: 16px;
   transition: background-color 180ms ease, border-color 180ms ease;
 }
 
 .glass-card:hover {
-  border-color: rgba(148, 163, 184, 0.12);
-  background: #0f172a;
+  border-color: rgba(201, 185, 190, 0.12);
+  background: var(--brand-surface);
 }
 
 /* ─── List Row Hover ─── */
@@ -142,11 +155,11 @@ p {
 }
 
 .list-row:hover {
-  background: rgba(148, 163, 184, 0.04);
+  background: rgba(201, 185, 190, 0.04);
 }
 
 .list-row:active {
-  background: rgba(148, 163, 184, 0.08);
+  background: rgba(201, 185, 190, 0.08);
 }
 
 /* ─── Stat Card Hover ─── */
@@ -173,7 +186,7 @@ p {
 /* ─── Text Glow Effect ─── */
 
 .text-glow {
-  text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+  text-shadow: 0 0 10px rgba(234, 108, 86, 0.3);
 }
 
 /* ─── Reduced Motion ─── */

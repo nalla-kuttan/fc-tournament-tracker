@@ -1,22 +1,27 @@
 'use client';
 
 import { createTheme } from '@mui/material/styles';
+import { BRAND_COLORS } from '@/design-tokens';
+
+export { BRAND_COLORS } from '@/design-tokens';
 
 const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#22C55E', // Green CTA (esports energy)
-      light: '#4ADE80',
-      dark: '#16A34A',
+      main: BRAND_COLORS.coral,
+      light: BRAND_COLORS.coralLight,
+      dark: BRAND_COLORS.coralDark,
+      contrastText: BRAND_COLORS.ink,
     },
     secondary: {
-      main: '#3B82F6', // Electric blue accent
-      light: '#60A5FA',
-      dark: '#2563EB',
+      main: BRAND_COLORS.frenchBlue,
+      light: BRAND_COLORS.frenchBlueLight,
+      dark: BRAND_COLORS.frenchBlueDark,
+      contrastText: BRAND_COLORS.text,
     },
     success: {
-      main: '#22C55E',
+      main: BRAND_COLORS.coral,
     },
     error: {
       main: '#EF4444',
@@ -25,17 +30,18 @@ const theme = createTheme({
       main: '#F59E0B',
     },
     info: {
-      main: '#3B82F6',
+      main: BRAND_COLORS.frenchBlue,
+      contrastText: BRAND_COLORS.text,
     },
     background: {
-      default: '#020617', // OLED deep navy-black
-      paper: '#0F172A', // Slate-900
+      default: BRAND_COLORS.background,
+      paper: BRAND_COLORS.surface,
     },
     text: {
-      primary: '#F8FAFC', // Slate-50
-      secondary: '#94A3B8', // Slate-400
+      primary: BRAND_COLORS.text,
+      secondary: BRAND_COLORS.textSecondary,
     },
-    divider: 'rgba(148, 163, 184, 0.08)',
+    divider: 'rgba(201, 185, 190, 0.08)',
   },
   typography: {
     fontFamily: '"Chakra Petch", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -78,7 +84,7 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          background: '#020617',
+          background: BRAND_COLORS.background,
           minHeight: '100vh',
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
@@ -88,8 +94,8 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          background: '#0F172A',
-          border: '1px solid rgba(148, 163, 184, 0.12)',
+          background: BRAND_COLORS.surface,
+          border: '1px solid rgba(201, 185, 190, 0.12)',
           boxShadow: 'none',
           borderRadius: 16,
           transition: 'background-color 180ms cubic-bezier(0.16, 1, 0.3, 1), border-color 180ms cubic-bezier(0.16, 1, 0.3, 1)',
@@ -99,9 +105,9 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          background: '#0F172A',
+          background: BRAND_COLORS.surface,
           backgroundImage: 'none',
-          border: '1px solid rgba(148, 163, 184, 0.12)',
+          border: '1px solid rgba(201, 185, 190, 0.12)',
           boxShadow: 'none',
         },
       },
@@ -122,31 +128,31 @@ const theme = createTheme({
           },
         },
         containedPrimary: {
-          background: '#22C55E',
-          color: '#020617',
-          boxShadow: '0 3px 8px rgba(34, 197, 94, 0.22)',
+          background: BRAND_COLORS.coral,
+          color: BRAND_COLORS.ink,
+          boxShadow: '0 3px 8px rgba(234, 108, 86, 0.22)',
           '&:hover': {
-            background: '#4ADE80',
-            boxShadow: '0 4px 8px rgba(34, 197, 94, 0.28)',
+            background: BRAND_COLORS.coralLight,
+            boxShadow: '0 4px 8px rgba(234, 108, 86, 0.28)',
             transform: 'translateY(-1px)',
           },
           '&:disabled': {
-            background: 'rgba(34, 197, 94, 0.3)',
-            color: 'rgba(2, 6, 23, 0.55)',
+            background: 'rgba(234, 108, 86, 0.3)',
+            color: 'rgba(18, 8, 12, 0.55)',
           },
         },
         outlined: {
-          borderColor: 'rgba(148, 163, 184, 0.2)',
-          color: '#F8FAFC',
+          borderColor: 'rgba(201, 185, 190, 0.2)',
+          color: BRAND_COLORS.text,
           '&:hover': {
-            borderColor: '#22C55E',
-            backgroundColor: 'rgba(34, 197, 94, 0.05)',
+            borderColor: BRAND_COLORS.coral,
+            backgroundColor: 'rgba(234, 108, 86, 0.05)',
           },
         },
         text: {
-          color: '#22C55E',
+          color: BRAND_COLORS.coral,
           '&:hover': {
-            backgroundColor: 'rgba(34, 197, 94, 0.08)',
+            backgroundColor: 'rgba(234, 108, 86, 0.08)',
           },
         },
       },
@@ -166,27 +172,27 @@ const theme = createTheme({
           fontWeight: 600,
           fontSize: '0.8125rem',
           letterSpacing: '0.02em',
-          background: 'rgba(148, 163, 184, 0.08)',
-          border: '1px solid rgba(148, 163, 184, 0.12)',
+          background: 'rgba(201, 185, 190, 0.08)',
+          border: '1px solid rgba(201, 185, 190, 0.12)',
         },
         filled: {
-          background: 'rgba(148, 163, 184, 0.1)',
+          background: 'rgba(201, 185, 190, 0.1)',
         },
       },
     },
     MuiTableCell: {
       styleOverrides: {
         root: {
-          borderBottomColor: 'rgba(148, 163, 184, 0.06)',
+          borderBottomColor: 'rgba(201, 185, 190, 0.06)',
           padding: '12px 16px',
         },
         head: {
           fontWeight: 700,
-          color: '#94A3B8',
+          color: '#C9B9BE',
           textTransform: 'uppercase',
           fontSize: '0.6875rem',
           letterSpacing: '0.12em',
-          background: 'rgba(148, 163, 184, 0.03)',
+          background: 'rgba(201, 185, 190, 0.03)',
         },
       },
     },
@@ -198,7 +204,7 @@ const theme = createTheme({
           fontSize: '0.9375rem',
           transition: 'color 200ms cubic-bezier(0.4, 0, 0.2, 1)',
           '&.Mui-selected': {
-            color: '#22C55E',
+            color: '#EA6C56',
           },
         },
       },
@@ -206,7 +212,7 @@ const theme = createTheme({
     MuiTabs: {
       styleOverrides: {
         indicator: {
-          backgroundColor: '#22C55E',
+          backgroundColor: '#EA6C56',
           height: 3,
           borderRadius: '4px 4px 0 0',
         },
@@ -215,7 +221,7 @@ const theme = createTheme({
     MuiDialog: {
       styleOverrides: {
         paper: {
-          background: '#0F172A',
+          background: BRAND_COLORS.nightBordeaux,
           border: 'none',
           boxShadow: '0 20px 48px rgba(0, 0, 0, 0.5)',
           borderRadius: 16,
@@ -226,23 +232,23 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            color: '#F8FAFC',
-            background: '#111C31',
+            color: '#FFF7F6',
+            background: BRAND_COLORS.surfaceRaised,
             borderRadius: 12,
             transition: 'background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease',
             '& fieldset': {
-              borderColor: 'rgba(148, 163, 184, 0.12)',
+              borderColor: 'rgba(201, 185, 190, 0.12)',
             },
             '&:hover fieldset': {
-              borderColor: 'rgba(148, 163, 184, 0.25)',
+              borderColor: 'rgba(201, 185, 190, 0.25)',
             },
             '&.Mui-focused fieldset': {
-              borderColor: '#22C55E',
-              boxShadow: '0 0 0 3px rgba(34, 197, 94, 0.1)',
+              borderColor: BRAND_COLORS.coral,
+              boxShadow: '0 0 0 3px rgba(234, 108, 86, 0.1)',
             },
           },
           '& .MuiOutlinedInput-input::placeholder': {
-            color: '#94A3B8',
+            color: '#C9B9BE',
             opacity: 1,
           },
         },
@@ -251,7 +257,7 @@ const theme = createTheme({
     MuiSelect: {
       styleOverrides: {
         root: {
-          background: 'rgba(15, 23, 42, 0.5)',
+          background: 'rgba(36, 16, 25, 0.5)',
           borderRadius: 12,
         },
       },
@@ -259,8 +265,8 @@ const theme = createTheme({
     MuiAccordion: {
       styleOverrides: {
         root: {
-          background: 'rgba(15, 23, 42, 0.4)',
-          border: '1px solid rgba(148, 163, 184, 0.06)',
+          background: 'rgba(36, 16, 25, 0.4)',
+          border: '1px solid rgba(201, 185, 190, 0.06)',
           '&:before': {
             display: 'none',
           },
@@ -271,11 +277,11 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiSlider-track': {
-            background: 'linear-gradient(90deg, #22C55E, #3B82F6)',
+            background: 'linear-gradient(90deg, #EA6C56, #334075)',
           },
           '& .MuiSlider-thumb': {
-            background: '#22C55E',
-            boxShadow: '0 2px 8px rgba(34, 197, 94, 0.3)',
+            background: '#EA6C56',
+            boxShadow: '0 2px 8px rgba(234, 108, 86, 0.3)',
           },
         },
       },
@@ -283,7 +289,7 @@ const theme = createTheme({
     MuiCircularProgress: {
       styleOverrides: {
         root: {
-          color: '#22C55E',
+          color: '#EA6C56',
         },
       },
     },
@@ -291,16 +297,16 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiStepIcon-root': {
-            color: 'rgba(148, 163, 184, 0.2)',
+            color: 'rgba(201, 185, 190, 0.2)',
             '&.Mui-active': {
-              color: '#22C55E',
+              color: '#EA6C56',
             },
             '&.Mui-completed': {
-              color: '#22C55E',
+              color: '#EA6C56',
             },
           },
           '& .MuiStepConnector-line': {
-            borderColor: 'rgba(148, 163, 184, 0.12)',
+            borderColor: 'rgba(201, 185, 190, 0.12)',
           },
         },
       },
@@ -315,9 +321,9 @@ const theme = createTheme({
     MuiBottomNavigationAction: {
       styleOverrides: {
         root: {
-          color: '#94A3B8',
+          color: '#C9B9BE',
           '&.Mui-selected': {
-            color: '#22C55E',
+            color: '#EA6C56',
           },
         },
       },
@@ -332,15 +338,15 @@ const theme = createTheme({
     MuiToggleButton: {
       styleOverrides: {
         root: {
-          borderColor: 'rgba(148, 163, 184, 0.15)',
-          color: '#94A3B8',
+          borderColor: 'rgba(201, 185, 190, 0.15)',
+          color: '#C9B9BE',
           fontWeight: 600,
           '&.Mui-selected': {
-            background: 'rgba(34, 197, 94, 0.12)',
-            color: '#22C55E',
-            borderColor: '#22C55E',
+            background: 'rgba(234, 108, 86, 0.12)',
+            color: '#EA6C56',
+            borderColor: '#EA6C56',
             '&:hover': {
-              background: 'rgba(34, 197, 94, 0.18)',
+              background: 'rgba(234, 108, 86, 0.18)',
             },
           },
         },

@@ -31,9 +31,9 @@ export default function TournamentLayout({ children }: { children: ReactNode }) 
   if (loading) {
     return (
       <Box>
-        <Skeleton variant="text" width={300} height={40} sx={{ bgcolor: 'rgba(148, 163, 184, 0.05)' }} />
-        <Skeleton variant="rounded" height={48} sx={{ mt: 2, mb: 3, bgcolor: 'rgba(148, 163, 184, 0.05)' }} />
-        <Skeleton variant="rounded" height={400} sx={{ bgcolor: 'rgba(148, 163, 184, 0.05)' }} />
+        <Skeleton variant="text" width={300} height={40} sx={{ bgcolor: 'rgba(201, 185, 190, 0.05)' }} />
+        <Skeleton variant="rounded" height={48} sx={{ mt: 2, mb: 3, bgcolor: 'rgba(201, 185, 190, 0.05)' }} />
+        <Skeleton variant="rounded" height={400} sx={{ bgcolor: 'rgba(201, 185, 190, 0.05)' }} />
       </Box>
     );
   }
@@ -53,7 +53,7 @@ export default function TournamentLayout({ children }: { children: ReactNode }) 
             variant="h4"
             fontWeight={700}
             sx={{
-              background: 'linear-gradient(135deg, #F8FAFC 0%, #94A3B8 100%)',
+              background: 'linear-gradient(135deg, #FFF7F6 0%, #C9B9BE 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',

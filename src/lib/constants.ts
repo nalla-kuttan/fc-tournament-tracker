@@ -168,13 +168,13 @@ export const TOURNAMENT_FORMATS = [
 ] as const;
 
 export const TOURNAMENT_STATUSES = {
-  draft: { label: 'Draft', color: '#64748B' },
-  active: { label: 'Active', color: '#22C55E' },
-  completed: { label: 'Completed', color: '#22C55E' },
+  draft: { label: 'Draft', color: '#A18A93' },
+  active: { label: 'Active', color: '#EA6C56' },
+  completed: { label: 'Completed', color: '#EA6C56' },
 } as const;
 
 export const FORM_COLORS = {
-  W: '#22C55E',
-  D: '#64748B',
+  W: '#EA6C56',
+  D: '#A18A93',
   L: '#EF4444',
 } as const;

@@ -73,7 +73,7 @@ export default function AIMatchReport({ match }: AIMatchReportProps) {
                             color="primary"
                             onClick={generateReport}
                             startIcon={<NewspaperIcon />}
-                            sx={{ color: '#22C55E', borderColor: 'rgba(59, 130, 246, 0.5)' }}
+                            sx={{ color: '#EA6C56', borderColor: 'rgba(51, 64, 117, 0.5)' }}
                         >
                             Generate Report
                         </Button>
@@ -82,7 +82,7 @@ export default function AIMatchReport({ match }: AIMatchReportProps) {
 
                 {loading && (
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 2, gap: 2 }}>
-                        <CircularProgress sx={{ color: '#22C55E' }} />
+                        <CircularProgress sx={{ color: '#EA6C56' }} />
                         <Typography variant="body2" color="text.secondary">
                             Writing the headline...
                         </Typography>
@@ -100,8 +100,8 @@ export default function AIMatchReport({ match }: AIMatchReportProps) {
                         </Box>
                         <Box sx={{
                             fontFamily: '"Georgia", serif', // Newspaper feel
-                            '& h1, & h2, & h3, & strong': { fontWeight: 800, mb: 1, color: '#F8FAFC', display: 'block' },
-                            '& p': { mb: 2, lineHeight: 1.6, color: '#94A3B8' },
+                            '& h1, & h2, & h3, & strong': { fontWeight: 800, mb: 1, color: '#FFF7F6', display: 'block' },
+                            '& p': { mb: 2, lineHeight: 1.6, color: '#C9B9BE' },
                         }}>
                             <ReactMarkdown>{report}</ReactMarkdown>
                         </Box>

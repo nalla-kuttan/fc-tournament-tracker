@@ -34,7 +34,7 @@ export default function PlayerStatsGrid({ stats }: { stats: CareerStats }) {
           <StatCard label="Matches" value={stats.total_matches} />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-          <StatCard label="Wins" value={stats.wins} color="#22C55E" />
+          <StatCard label="Wins" value={stats.wins} color="#EA6C56" />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
           <StatCard label="Draws" value={stats.draws} />
@@ -58,7 +58,7 @@ export default function PlayerStatsGrid({ stats }: { stats: CareerStats }) {
           <StatCard label="Avg xG" value={stats.avg_xg.toFixed(2)} />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-          <StatCard label="Avg Rating" value={stats.avg_rating.toFixed(1)} color="#3B82F6" />
+          <StatCard label="Avg Rating" value={stats.avg_rating.toFixed(1)} color="#7E8CC2" />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
           <StatCard label="Avg Possession" value={`${stats.avg_possession.toFixed(0)}%`} />

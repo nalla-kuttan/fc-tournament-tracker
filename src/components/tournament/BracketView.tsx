@@ -37,15 +37,15 @@ function MatchSlot({
     return (
       <Box
         sx={{
-          border: '1px solid rgba(148, 163, 184, 0.06)',
+          border: '1px solid rgba(201, 185, 190, 0.06)',
           borderRadius: '10px',
           p: 1,
           opacity: 0.4,
           minWidth: 200,
-          background: 'rgba(15, 23, 42, 0.3)',
+          background: 'rgba(36, 16, 25, 0.3)',
         }}
       >
-        <Typography variant="caption" sx={{ color: '#64748B' }}>
+        <Typography variant="caption" sx={{ color: '#A18A93' }}>
           {match.home_player?.name ?? 'TBD'} — BYE
         </Typography>
       </Box>
@@ -56,17 +56,17 @@ function MatchSlot({
     <Box
       onClick={onClick}
       sx={{
-        border: '1px solid rgba(148, 163, 184, 0.08)',
+        border: '1px solid rgba(201, 185, 190, 0.08)',
         borderRadius: '12px',
         minWidth: 210,
         cursor: onClick ? 'pointer' : 'default',
         overflow: 'hidden',
-        background: 'rgba(15, 23, 42, 0.5)',
+        background: 'rgba(36, 16, 25, 0.5)',
         backdropFilter: 'blur(8px)',
         transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': onClick ? {
-          borderColor: 'rgba(34, 197, 94, 0.2)',
-          boxShadow: '0 4px 16px rgba(2, 6, 23, 0.3)',
+          borderColor: 'rgba(234, 108, 86, 0.2)',
+          boxShadow: '0 4px 16px rgba(18, 8, 12, 0.3)',
         } : {},
       }}
     >
@@ -78,9 +78,9 @@ function MatchSlot({
           alignItems: 'center',
           px: 1.5,
           py: 1,
-          bgcolor: homeWin ? 'rgba(34, 197, 94, 0.08)' : 'transparent',
-          borderBottom: '1px solid rgba(148, 163, 184, 0.06)',
-          borderLeft: homeWin ? '3px solid #22C55E' : '3px solid transparent',
+          bgcolor: homeWin ? 'rgba(234, 108, 86, 0.08)' : 'transparent',
+          borderBottom: '1px solid rgba(201, 185, 190, 0.06)',
+          borderLeft: homeWin ? '3px solid #EA6C56' : '3px solid transparent',
         }}
       >
         <Typography
@@ -91,7 +91,7 @@ function MatchSlot({
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             maxWidth: 140,
-            color: homeWin ? '#F8FAFC' : '#94A3B8',
+            color: homeWin ? '#FFF7F6' : '#C9B9BE',
           }}
         >
           {match.home_player?.name ?? 'TBD'}
@@ -102,7 +102,7 @@ function MatchSlot({
           sx={{
             fontFamily: '"Chakra Petch", monospace',
             ml: 1,
-            color: homeWin ? '#22C55E' : '#64748B',
+            color: homeWin ? '#EA6C56' : '#A18A93',
           }}
         >
           {match.is_played ? match.home_score : ''}
@@ -117,8 +117,8 @@ function MatchSlot({
           alignItems: 'center',
           px: 1.5,
           py: 1,
-          bgcolor: awayWin ? 'rgba(34, 197, 94, 0.08)' : 'transparent',
-          borderLeft: awayWin ? '3px solid #22C55E' : '3px solid transparent',
+          bgcolor: awayWin ? 'rgba(234, 108, 86, 0.08)' : 'transparent',
+          borderLeft: awayWin ? '3px solid #EA6C56' : '3px solid transparent',
         }}
       >
         <Typography
@@ -129,7 +129,7 @@ function MatchSlot({
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             maxWidth: 140,
-            color: awayWin ? '#F8FAFC' : '#94A3B8',
+            color: awayWin ? '#FFF7F6' : '#C9B9BE',
           }}
         >
           {match.away_player?.name ?? 'TBD'}
@@ -140,7 +140,7 @@ function MatchSlot({
           sx={{
             fontFamily: '"Chakra Petch", monospace',
             ml: 1,
-            color: awayWin ? '#22C55E' : '#64748B',
+            color: awayWin ? '#EA6C56' : '#A18A93',
           }}
         >
           {match.is_played ? match.away_score : ''}
@@ -169,7 +169,7 @@ export default function BracketView({ matches, onMatchClick }: Props) {
 
   if (rounds.length === 0) {
     return (
-      <Typography sx={{ color: '#64748B' }} textAlign="center">
+      <Typography sx={{ color: '#A18A93' }} textAlign="center">
         No bracket data available
       </Typography>
     );
@@ -206,8 +206,8 @@ export default function BracketView({ matches, onMatchClick }: Props) {
                 mb: 2,
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
-                color: '#22C55E',
-                textShadow: '0 0 8px rgba(34, 197, 94, 0.2)',
+                color: '#EA6C56',
+                textShadow: '0 0 8px rgba(234, 108, 86, 0.2)',
               }}
             >
               {stageLabel}

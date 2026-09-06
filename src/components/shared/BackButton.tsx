@@ -12,7 +12,7 @@ export default function BackButton() {
             startIcon={<ArrowBackIosNewIcon sx={{ fontSize: '0.9rem !important' }} />}
             onClick={() => router.back()}
             sx={{
-                color: '#22C55E',
+                color: '#EA6C56',
                 textTransform: 'none',
                 fontWeight: 500,
                 fontSize: '0.9375rem',
@@ -20,7 +20,7 @@ export default function BackButton() {
                 mb: 1,
                 minWidth: 'auto',
                 '&:hover': {
-                    background: 'rgba(34, 197, 94, 0.08)',
+                    background: 'rgba(234, 108, 86, 0.08)',
                 },
             }}
         >

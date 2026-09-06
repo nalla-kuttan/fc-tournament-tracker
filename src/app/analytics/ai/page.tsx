@@ -37,13 +37,13 @@ export default function AIAnalystPage() {
       <GlassCard
         sx={{
           mb: 2,
-          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.14), rgba(15, 23, 42, 0.72) 55%, rgba(2, 6, 23, 0.58))',
-          border: '1px solid rgba(59, 130, 246, 0.22)',
+          background: 'linear-gradient(135deg, rgba(51, 64, 117, 0.14), rgba(36, 16, 25, 0.72) 55%, rgba(18, 8, 12, 0.58))',
+          border: '1px solid rgba(51, 64, 117, 0.22)',
         }}
       >
         <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-            <AutoAwesomeIcon sx={{ color: '#60A5FA', fontSize: 34 }} />
+            <AutoAwesomeIcon sx={{ color: '#7E8CC2', fontSize: 34 }} />
             <Typography component="h1" variant="h4" fontWeight={900}>
               AI Analyst
             </Typography>
@@ -52,12 +52,12 @@ export default function AIAnalystPage() {
             Ask the analyst booth for stat-backed reads on form, awards, rankings, rivalries, and patterns hiding in the numbers.
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 2 }}>
-            <Chip size="small" label={`${careerStats.length} players indexed`} sx={{ color: '#F8FAFC', bgcolor: 'rgba(2, 6, 23, 0.35)', fontWeight: 850 }} />
+            <Chip size="small" label={`${careerStats.length} players indexed`} sx={{ color: '#FFF7F6', bgcolor: 'rgba(18, 8, 12, 0.35)', fontWeight: 850 }} />
             {topScorer && (
               <Chip size="small" label={`Top scorer: ${topScorer.player_name}`} sx={{ color: '#F59E0B', bgcolor: 'rgba(245, 158, 11, 0.12)', fontWeight: 850 }} />
             )}
             {bestRating && (
-              <Chip size="small" label={`Best rating: ${bestRating.player_name}`} sx={{ color: '#4ADE80', bgcolor: 'rgba(34, 197, 94, 0.12)', fontWeight: 850 }} />
+              <Chip size="small" label={`Best rating: ${bestRating.player_name}`} sx={{ color: '#FF8A73', bgcolor: 'rgba(234, 108, 86, 0.12)', fontWeight: 850 }} />
             )}
           </Box>
         </CardContent>

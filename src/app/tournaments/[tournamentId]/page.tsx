@@ -99,7 +99,7 @@ export default function TournamentDashboard() {
       <GlassCard sx={{ mb: 3 }}>
         <CardContent sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr auto' }, gap: 2, alignItems: 'center', p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
           <Box>
-            <Typography variant="caption" sx={{ color: '#22C55E', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <Typography variant="caption" sx={{ color: '#EA6C56', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Tournament Command
             </Typography>
             <Typography component="h1" variant="h5" fontWeight={800} sx={{ mt: 0.4 }}>
@@ -140,8 +140,8 @@ export default function TournamentDashboard() {
                 width: 64,
                 height: 64,
                 borderRadius: '50%',
-                background: 'rgba(34, 197, 94, 0.1)',
-                border: '1px solid rgba(34, 197, 94, 0.15)',
+                background: 'rgba(234, 108, 86, 0.1)',
+                border: '1px solid rgba(234, 108, 86, 0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -149,12 +149,12 @@ export default function TournamentDashboard() {
                 mb: 2,
               }}
             >
-              <PlayArrowIcon sx={{ fontSize: 32, color: '#22C55E' }} />
+              <PlayArrowIcon sx={{ fontSize: 32, color: '#EA6C56' }} />
             </Box>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
               Ready to start?
             </Typography>
-            <Typography variant="body2" sx={{ color: '#64748B', mb: 3 }}>
+            <Typography variant="body2" sx={{ color: '#A18A93', mb: 3 }}>
               {tournament.players?.length ?? 0} players registered. Generate the schedule to begin.
             </Typography>
             <AdminGate tournamentId={tournamentId}>
@@ -239,7 +239,7 @@ export default function TournamentDashboard() {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: '#64748B',
+                    color: '#A18A93',
                     textTransform: 'uppercase',
                     fontSize: '0.75rem',
                     fontWeight: 700,
@@ -262,7 +262,7 @@ export default function TournamentDashboard() {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: '#64748B',
+                    color: '#A18A93',
                     textTransform: 'uppercase',
                     fontSize: '0.75rem',
                     fontWeight: 700,

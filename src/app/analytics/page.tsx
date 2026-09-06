@@ -41,17 +41,17 @@ export default function AnalyticsPage() {
     {
       title: 'Head-to-Head',
       description: rivalries[0] ? `${rivalries[0].p1Name} vs ${rivalries[0].p2Name} leads ${rivalries[0].matches.length} tracked meetings` : 'Compare two players across all tournaments',
-      icon: <CompareArrowsIcon sx={{ fontSize: 24, color: '#3B82F6' }} />,
-      iconBg: 'rgba(59, 130, 246, 0.1)',
-      iconBorder: 'rgba(59, 130, 246, 0.15)',
+      icon: <CompareArrowsIcon sx={{ fontSize: 24, color: '#7E8CC2' }} />,
+      iconBg: 'rgba(51, 64, 117, 0.1)',
+      iconBorder: 'rgba(51, 64, 117, 0.15)',
       href: '/analytics/h2h',
     },
     {
       title: 'Global Analytics',
       description: summary?.topScorer ? `${summary.topScorer.player_name} leads with ${summary.topScorer.total_goals} goals` : 'All-time career stats and rankings',
-      icon: <PublicIcon sx={{ fontSize: 24, color: '#3B82F6' }} />,
-      iconBg: 'rgba(59, 130, 246, 0.1)',
-      iconBorder: 'rgba(59, 130, 246, 0.15)',
+      icon: <PublicIcon sx={{ fontSize: 24, color: '#7E8CC2' }} />,
+      iconBg: 'rgba(51, 64, 117, 0.1)',
+      iconBorder: 'rgba(51, 64, 117, 0.15)',
       href: '/analytics/global',
     },
     {
@@ -65,9 +65,9 @@ export default function AnalyticsPage() {
     {
       title: 'AI Analyst',
       description: 'Ask natural language questions about player stats, rankings, form, and records',
-      icon: <AutoAwesomeIcon sx={{ fontSize: 24, color: '#3B82F6' }} />,
-      iconBg: 'rgba(59, 130, 246, 0.1)',
-      iconBorder: 'rgba(59, 130, 246, 0.15)',
+      icon: <AutoAwesomeIcon sx={{ fontSize: 24, color: '#7E8CC2' }} />,
+      iconBg: 'rgba(51, 64, 117, 0.1)',
+      iconBorder: 'rgba(51, 64, 117, 0.15)',
       href: '/analytics/ai',
     },
   ];
@@ -75,7 +75,7 @@ export default function AnalyticsPage() {
   return (
     <Box>
       <Box className="animate-section" sx={{ mb: 3, mt: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <BarChartIcon aria-hidden="true" sx={{ fontSize: 34, color: '#4ADE80' }} />
+        <BarChartIcon aria-hidden="true" sx={{ fontSize: 34, color: '#FF8A73' }} />
         <Box>
           <Typography component="h1" variant="h4" sx={{ fontWeight: 700 }}>Insights</Typography>
           <Typography color="text.secondary">Explore records, rivalries, rankings, and match trends.</Typography>
@@ -95,10 +95,10 @@ export default function AnalyticsPage() {
       {summary && (
         <Grid container spacing={1.5} className="animate-section" sx={{ mb: 3 }}>
           {[
-            { label: 'Matches', value: summary.matches, icon: <SportsSoccerIcon />, color: '#22C55E' },
+            { label: 'Matches', value: summary.matches, icon: <SportsSoccerIcon />, color: '#EA6C56' },
             { label: 'Goals', value: summary.goals, icon: <EmojiEventsIcon />, color: '#F59E0B' },
-            { label: 'Players', value: summary.players, icon: <PeopleIcon />, color: '#3B82F6' },
-            { label: 'Best WR', value: summary.bestWinRate ? `${summary.bestWinRate.win_rate.toFixed(0)}%` : '—', icon: <TrendingUpIcon />, color: '#3B82F6' },
+            { label: 'Players', value: summary.players, icon: <PeopleIcon />, color: '#7E8CC2' },
+            { label: 'Best WR', value: summary.bestWinRate ? `${summary.bestWinRate.win_rate.toFixed(0)}%` : '—', icon: <TrendingUpIcon />, color: '#7E8CC2' },
           ].map((stat) => (
             <Grid key={stat.label} size={{ xs: 6, sm: 3 }}>
               <GlassCard>
@@ -123,9 +123,9 @@ export default function AnalyticsPage() {
       <Box
         className="animate-section"
         sx={{
-          background: 'rgba(15, 23, 42, 0.6)',
+          background: 'rgba(36, 16, 25, 0.6)',
           backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(148, 163, 184, 0.08)',
+          border: '1px solid rgba(201, 185, 190, 0.08)',
           borderRadius: '16px',
           overflow: 'hidden',
         }}
@@ -144,9 +144,9 @@ export default function AnalyticsPage() {
               cursor: 'pointer',
               color: 'inherit',
               textDecoration: 'none',
-              borderBottom: index < items.length - 1 ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
+              borderBottom: index < items.length - 1 ? '1px solid rgba(201, 185, 190, 0.06)' : 'none',
               transition: 'background 150ms ease',
-              '&:focus-visible': { outline: '3px solid #4ADE80', outlineOffset: -3 },
+              '&:focus-visible': { outline: '3px solid #FF8A73', outlineOffset: -3 },
             }}
           >
             {/* Icon */}
@@ -172,12 +172,12 @@ export default function AnalyticsPage() {
               <Typography variant="body1" fontWeight={600} sx={{ letterSpacing: '0.01em' }}>
                 {item.title}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#B6C3D5', fontSize: '0.875rem' }}>
+              <Typography variant="caption" sx={{ color: '#D7C6CB', fontSize: '0.875rem' }}>
                 {item.description}
               </Typography>
             </Box>
 
-            <ChevronRightIcon sx={{ color: '#94A3B8', fontSize: 20 }} />
+            <ChevronRightIcon sx={{ color: '#C9B9BE', fontSize: 20 }} />
           </Box>
         ))}
       </Box>

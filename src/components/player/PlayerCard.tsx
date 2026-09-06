@@ -46,12 +46,12 @@ export default function PlayerCard({
         cursor: 'pointer',
         color: 'inherit',
         textDecoration: 'none',
-        borderBottom: showDivider ? '1px solid rgba(148, 163, 184, 0.06)' : 'none',
+        borderBottom: showDivider ? '1px solid rgba(201, 185, 190, 0.06)' : 'none',
         animation: `fadeInUp 0.28s ease ${index * 0.03}s both`,
         transition: 'background 150ms ease, transform 150ms ease',
         '&:hover': { transform: 'translateX(2px)' },
         '&:active': { transform: 'scale(0.99)' },
-        '&:focus-visible': { outline: '3px solid rgba(74, 222, 128, 0.7)', outlineOffset: -3 },
+        '&:focus-visible': { outline: '3px solid rgba(255, 138, 115, 0.7)', outlineOffset: -3 },
       }}
     >
       {/* Avatar */}
@@ -104,9 +104,9 @@ export default function PlayerCard({
               size="small"
               sx={{
                 height: 20,
-                bgcolor: 'rgba(34, 197, 94, 0.1)',
-                color: '#22C55E',
-                border: '1px solid rgba(34, 197, 94, 0.2)',
+                bgcolor: 'rgba(234, 108, 86, 0.1)',
+                color: '#EA6C56',
+                border: '1px solid rgba(234, 108, 86, 0.2)',
                 fontSize: '0.65rem',
                 fontWeight: 700,
               }}
@@ -114,22 +114,22 @@ export default function PlayerCard({
           ))}
         </Box>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.25, alignItems: 'center' }}>
-          <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>
+          <Typography variant="caption" sx={{ color: '#C9B9BE', fontSize: '0.8rem' }}>
             {player.base_team}
           </Typography>
           {stats && stats.total_matches > 0 && (
             <>
-              <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>
+              <Typography variant="caption" sx={{ color: '#C9B9BE', fontSize: '0.8rem' }}>
                 {stats.total_matches} MP
               </Typography>
-              <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>
+              <Typography variant="caption" sx={{ color: '#C9B9BE', fontSize: '0.8rem' }}>
                 {stats.win_rate.toFixed(0)}% WR
               </Typography>
               <Typography variant="caption" sx={{ color: '#F59E0B', fontSize: '0.8rem' }}>
                 {stats.total_goals} G
               </Typography>
               {elo && (
-                <Typography variant="caption" sx={{ color: '#3B82F6', fontSize: '0.8rem' }}>
+                <Typography variant="caption" sx={{ color: '#7E8CC2', fontSize: '0.8rem' }}>
                   {elo} PR
                 </Typography>
               )}
@@ -157,8 +157,8 @@ export default function PlayerCard({
                 placeItems: 'center',
                 fontSize: '0.65rem',
                 fontWeight: 800,
-                color: '#020617',
-                bgcolor: result === 'W' ? '#22C55E' : result === 'D' ? '#94A3B8' : '#EF4444',
+                color: '#12080C',
+                bgcolor: result === 'W' ? '#EA6C56' : result === 'D' ? '#C9B9BE' : '#EF4444',
               }}
             >
               {result}
@@ -167,7 +167,7 @@ export default function PlayerCard({
         </Box>
       )}
 
-      <ChevronRightIcon aria-hidden="true" sx={{ color: '#94A3B8', fontSize: 20 }} />
+      <ChevronRightIcon aria-hidden="true" sx={{ color: '#C9B9BE', fontSize: 20 }} />
     </Box>
   );
 }

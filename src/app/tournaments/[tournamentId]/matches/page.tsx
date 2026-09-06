@@ -59,7 +59,7 @@ export default function MatchesPage() {
             {matches.filter((m) => !m.is_played && !m.is_bye).length} pending · {matches.filter((m) => m.is_played && !m.is_bye).length} recorded
           </Typography>
         </Box>
-        <Chip size="small" label={selectedRound ? `Round ${selectedRound}` : 'All rounds'} sx={{ color: '#22C55E', borderColor: 'rgba(34, 197, 94, 0.24)' }} />
+        <Chip size="small" label={selectedRound ? `Round ${selectedRound}` : 'All rounds'} sx={{ color: '#EA6C56', borderColor: 'rgba(234, 108, 86, 0.24)' }} />
       </Box>
 
       {/* Round filter */}
@@ -68,7 +68,7 @@ export default function MatchesPage() {
         gap: 0.5,
         mb: 3,
         flexWrap: 'wrap',
-        background: 'rgba(15, 23, 42, 0.6)',
+        background: 'rgba(36, 16, 25, 0.6)',
         borderRadius: '10px',
         p: 0.5,
       }}>
@@ -76,13 +76,13 @@ export default function MatchesPage() {
           label="All"
           onClick={() => setSelectedRound(null)}
           sx={{
-            bgcolor: selectedRound === null ? '#64748B' : 'transparent',
-            color: selectedRound === null ? '#F8FAFC' : '#64748B',
+            bgcolor: selectedRound === null ? '#A18A93' : 'transparent',
+            color: selectedRound === null ? '#FFF7F6' : '#A18A93',
             fontWeight: 600,
             fontSize: '0.85rem',
             borderRadius: '10px',
             border: 'none',
-            '&:hover': { bgcolor: selectedRound === null ? '#64748B' : 'rgba(148, 163, 184, 0.04)' },
+            '&:hover': { bgcolor: selectedRound === null ? '#A18A93' : 'rgba(201, 185, 190, 0.04)' },
           }}
         />
         {rounds.map((r) => (
@@ -91,13 +91,13 @@ export default function MatchesPage() {
             label={`Round ${r}`}
             onClick={() => setSelectedRound(r)}
             sx={{
-              bgcolor: selectedRound === r ? '#64748B' : 'transparent',
-              color: selectedRound === r ? '#F8FAFC' : '#64748B',
+              bgcolor: selectedRound === r ? '#A18A93' : 'transparent',
+              color: selectedRound === r ? '#FFF7F6' : '#A18A93',
               fontWeight: 600,
               fontSize: '0.85rem',
               borderRadius: '10px',
               border: 'none',
-              '&:hover': { bgcolor: selectedRound === r ? '#64748B' : 'rgba(148, 163, 184, 0.04)' },
+              '&:hover': { bgcolor: selectedRound === r ? '#A18A93' : 'rgba(201, 185, 190, 0.04)' },
             }}
           />
         ))}
@@ -111,7 +111,7 @@ export default function MatchesPage() {
             <Typography
               variant="body2"
               sx={{
-                color: '#64748B',
+                color: '#A18A93',
                 textTransform: 'uppercase',
                 fontSize: '0.8rem',
                 fontWeight: 600,
@@ -124,7 +124,7 @@ export default function MatchesPage() {
             </Typography>
             <Box
               sx={{
-                background: 'rgba(15, 23, 42, 0.6)',
+                background: 'rgba(36, 16, 25, 0.6)',
                 borderRadius: '12px',
                 overflow: 'hidden',
               }}
@@ -139,7 +139,7 @@ export default function MatchesPage() {
         ))}
 
       {matches.length === 0 && (
-        <Typography sx={{ color: '#64748B', textAlign: 'center', py: 4 }}>
+        <Typography sx={{ color: '#A18A93', textAlign: 'center', py: 4 }}>
           No matches scheduled yet. Generate the schedule from the dashboard.
         </Typography>
       )}

@@ -58,15 +58,15 @@ function CompetitiveSignals({ signals }: { signals: Array<{ label: string; value
             key={signal.label}
             sx={{
               p: 2,
-              borderTop: { xs: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.1)', sm: 'none' },
-              borderLeft: { xs: 'none', sm: index === 0 ? 'none' : '1px solid rgba(148, 163, 184, 0.1)' },
+              borderTop: { xs: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.1)', sm: 'none' },
+              borderLeft: { xs: 'none', sm: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.1)' },
             }}
           >
-            <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem' }}>{signal.label}</Typography>
-            <Typography sx={{ fontSize: '1.35rem', fontWeight: 700, color: '#F8FAFC', lineHeight: 1.2 }} noWrap>
+            <Typography sx={{ color: '#D7C6CB', fontSize: '0.875rem' }}>{signal.label}</Typography>
+            <Typography sx={{ fontSize: '1.35rem', fontWeight: 700, color: '#FFF7F6', lineHeight: 1.2 }} noWrap>
               {signal.value}
             </Typography>
-            <Typography sx={{ color: '#B6C3D5', fontSize: '0.875rem' }}>{signal.detail}</Typography>
+            <Typography sx={{ color: '#D7C6CB', fontSize: '0.875rem' }}>{signal.detail}</Typography>
           </Box>
         ))}
       </Box>
@@ -84,10 +84,10 @@ function RatingTable({ rows }: { rows: CompetitiveRatingRow[] }) {
       {rows.slice(0, 10).map((row) => (
         <GlassCard key={row.player.id}>
           <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5, '&:last-child': { pb: 1.5 } }}>
-            <Typography sx={{ width: 34, color: '#4ADE80', fontWeight: 700 }}>#{row.rank}</Typography>
+            <Typography sx={{ width: 34, color: '#FF8A73', fontWeight: 700 }}>#{row.rank}</Typography>
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Typography sx={{ fontWeight: 700 }} noWrap>{row.player.name}</Typography>
-              <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }} noWrap>
+              <Typography sx={{ color: '#C9B9BE', fontSize: '0.875rem' }} noWrap>
                 {row.player.base_team} · {row.matches} matches · peak {row.peakRating}
               </Typography>
             </Box>
@@ -103,7 +103,7 @@ function RatingTable({ rows }: { rows: CompetitiveRatingRow[] }) {
             </Stack>
             <Box sx={{ textAlign: 'right', minWidth: 78 }}>
               <Typography sx={{ fontWeight: 700, fontSize: '1.2rem' }}>{row.rating}</Typography>
-              <Typography sx={{ color: row.movement >= 0 ? '#4ADE80' : '#EF4444', fontSize: '0.875rem', fontWeight: 700 }}>
+              <Typography sx={{ color: row.movement >= 0 ? '#FF8A73' : '#EF4444', fontSize: '0.875rem', fontWeight: 700 }}>
                 {row.movement >= 0 ? '+' : ''}{row.movement}
               </Typography>
             </Box>
@@ -128,15 +128,15 @@ function RecordBoard({
       <CardContent>
         <Typography sx={{ fontWeight: 700, mb: 1.25 }}>{title}</Typography>
         {rows.length === 0 ? (
-          <Typography sx={{ color: '#94A3B8', fontSize: '0.9rem' }}>No records yet</Typography>
+          <Typography sx={{ color: '#C9B9BE', fontSize: '0.9rem' }}>No records yet</Typography>
         ) : (
           <Stack spacing={1}>
             {rows.slice(0, 5).map((row, index) => (
               <Box key={`${title}-${row.playerName}-${index}`} sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-                <Typography sx={{ width: 26, color: '#4ADE80', fontWeight: 700 }}>#{index + 1}</Typography>
+                <Typography sx={{ width: 26, color: '#FF8A73', fontWeight: 700 }}>#{index + 1}</Typography>
                 <Box sx={{ minWidth: 0, flex: 1 }}>
                   <Typography sx={{ fontWeight: 700 }} noWrap>{row.playerName}</Typography>
-                  <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }} noWrap>{row.detail}</Typography>
+                  <Typography sx={{ color: '#C9B9BE', fontSize: '0.875rem' }} noWrap>{row.detail}</Typography>
                 </Box>
                 <Chip label={`${row.value}${suffix}`} size="small" color={index === 0 ? 'primary' : 'default'} />
               </Box>
@@ -188,7 +188,7 @@ export default function CompetitivePage() {
         <Typography component="h1" sx={{ fontWeight: 700, fontSize: { xs: '1.75rem', sm: '2.35rem' }, lineHeight: 1.1 }}>
           Season Race
         </Typography>
-        <Typography sx={{ color: '#B6C3D5', mt: 0.75 }}>
+        <Typography sx={{ color: '#D7C6CB', mt: 0.75 }}>
           Ratings, records, trophies, and match intelligence across every season.
         </Typography>
       </Box>
@@ -243,10 +243,10 @@ export default function CompetitivePage() {
           <GlassCard sx={{ mb: 2 }}>
             <CardContent sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr auto' }, gap: 2, alignItems: 'center' }}>
               <Box>
-                <Typography sx={{ fontWeight: 700, color: '#F8FAFC' }}>
+                <Typography sx={{ fontWeight: 700, color: '#FFF7F6' }}>
                   Season Lens
                 </Typography>
-                <Typography sx={{ color: '#94A3B8', fontSize: '0.9rem' }}>
+                <Typography sx={{ color: '#C9B9BE', fontSize: '0.9rem' }}>
                   Choose all-time or any current/previous season to update the race, records, trophies, and match intelligence below.
                 </Typography>
               </Box>
@@ -292,7 +292,7 @@ export default function CompetitivePage() {
             {tabLabels.map((label) => <Tab key={label} label={label} />)}
           </Tabs>
 
-          <Typography sx={{ mb: 1.5, fontWeight: 700, color: '#F8FAFC' }}>{activeTabLabel}</Typography>
+          <Typography sx={{ mb: 1.5, fontWeight: 700, color: '#FFF7F6' }}>{activeTabLabel}</Typography>
 
           {tab === 0 && (
             <Grid container spacing={2}>
@@ -373,7 +373,7 @@ export default function CompetitivePage() {
               </Grid>
               {isAllTimeLens && (
                 <Grid size={{ xs: 12 }}>
-                  <Typography sx={{ mt: 1, mb: 0.5, fontWeight: 700, color: '#F8FAFC' }}>
+                  <Typography sx={{ mt: 1, mb: 0.5, fontWeight: 700, color: '#FFF7F6' }}>
                     Best Individual Seasons
                   </Typography>
                 </Grid>
@@ -463,7 +463,7 @@ export default function CompetitivePage() {
                           <Typography sx={{ width: 26, color: '#EF4444', fontWeight: 700 }}>#{index + 1}</Typography>
                           <Box sx={{ minWidth: 0, flex: 1 }}>
                             <Typography sx={{ fontWeight: 700 }} noWrap>{row.playerName} vs {row.opponentName}</Typography>
-                            <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }} noWrap>{row.goalDifference} goal margin</Typography>
+                            <Typography sx={{ color: '#C9B9BE', fontSize: '0.875rem' }} noWrap>{row.goalDifference} goal margin</Typography>
                           </Box>
                           <Chip label={row.scoreline} size="small" />
                         </Box>
@@ -482,7 +482,7 @@ export default function CompetitivePage() {
                           <Typography sx={{ width: 26, color: '#F59E0B', fontWeight: 700 }}>#{index + 1}</Typography>
                           <Box sx={{ minWidth: 0, flex: 1 }}>
                             <Typography sx={{ fontWeight: 700 }} noWrap>{row.label}</Typography>
-                            <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }} noWrap>{row.detail}</Typography>
+                            <Typography sx={{ color: '#C9B9BE', fontSize: '0.875rem' }} noWrap>{row.detail}</Typography>
                           </Box>
                           <Chip label={`${row.scoreline} · ${row.totalGoals}`} size="small" />
                         </Box>
@@ -499,10 +499,10 @@ export default function CompetitivePage() {
                   {selectedSeasonRecords?.biggestUpsets.map((row) => (
                     <GlassCard key={row.matchId}>
                       <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <ShowChartIcon sx={{ color: '#60A5FA' }} />
+                        <ShowChartIcon sx={{ color: '#7E8CC2' }} />
                         <Box sx={{ flex: 1 }}>
                           <Typography sx={{ fontWeight: 700 }}>{row.winnerName} upset {row.loserName}</Typography>
-                          <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }}>{row.detail}</Typography>
+                          <Typography sx={{ color: '#C9B9BE', fontSize: '0.875rem' }}>{row.detail}</Typography>
                         </Box>
                         <Chip label={row.upsetScore} color="primary" />
                       </CardContent>
@@ -524,7 +524,7 @@ export default function CompetitivePage() {
                     <EmojiEventsIcon sx={{ color: '#F59E0B', fontSize: 34 }} />
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography sx={{ fontWeight: 700 }} noWrap>{row.player.name}</Typography>
-                      <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }} noWrap>
+                      <Typography sx={{ color: '#C9B9BE', fontSize: '0.875rem' }} noWrap>
                         Best season: {row.bestSeason ?? 'TBD'}
                       </Typography>
                     </Box>

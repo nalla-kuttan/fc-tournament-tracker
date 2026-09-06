@@ -110,7 +110,7 @@ export default function PlayersPage() {
   return (
     <Box>
       <Box className="animate-section" sx={{ mb: 3, mt: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <PeopleIcon aria-hidden="true" sx={{ fontSize: 34, color: '#4ADE80' }} />
+        <PeopleIcon aria-hidden="true" sx={{ fontSize: 34, color: '#FF8A73' }} />
         <Box>
           <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>Players</Typography>
           <Typography color="text.secondary">Profiles, form, ratings, and tournament history.</Typography>
@@ -122,7 +122,7 @@ export default function PlayersPage() {
         <Typography
           variant="body2"
           sx={{
-            color: '#94A3B8',
+            color: '#C9B9BE',
             textTransform: 'uppercase',
             fontSize: '0.75rem',
             fontWeight: 700,
@@ -137,14 +137,14 @@ export default function PlayersPage() {
           startIcon={<AddIcon />}
           onClick={() => router.push('/players/new')}
           sx={{
-            color: '#22C55E',
+            color: '#EA6C56',
             fontWeight: 600,
             fontSize: '0.875rem',
             textTransform: 'none',
             p: 0,
             minWidth: 'auto',
             '&:hover': {
-              background: 'rgba(34, 197, 94, 0.08)',
+              background: 'rgba(234, 108, 86, 0.08)',
             },
           }}
         >
@@ -179,20 +179,20 @@ export default function PlayersPage() {
         <Box className="animate-section" sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2, px: 0.5 }}>
           <Chip size="small" label={`${players.length} players`} />
           {analytics && <Chip size="small" label={`${analytics.all_matches.length} played matches`} />}
-          {leaderIds.goals && <Chip size="small" label="Live rankings" sx={{ color: '#22C55E', borderColor: 'rgba(34,197,94,0.25)' }} variant="outlined" />}
+          {leaderIds.goals && <Chip size="small" label="Live rankings" sx={{ color: '#EA6C56', borderColor: 'rgba(234, 108, 86,0.25)' }} variant="outlined" />}
         </Box>
       )}
 
       {loading ? (
         <Box sx={{
-          background: 'rgba(15, 23, 42, 0.6)',
+          background: 'rgba(36, 16, 25, 0.6)',
           backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(148, 163, 184, 0.08)',
+          border: '1px solid rgba(201, 185, 190, 0.08)',
           borderRadius: '16px',
           p: 2,
         }}>
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} variant="rounded" height={56} sx={{ borderRadius: 2, mb: i < 4 ? 1 : 0, bgcolor: 'rgba(148, 163, 184, 0.05)' }} />
+            <Skeleton key={i} variant="rounded" height={56} sx={{ borderRadius: 2, mb: i < 4 ? 1 : 0, bgcolor: 'rgba(201, 185, 190, 0.05)' }} />
           ))}
         </Box>
       ) : players.length === 0 ? (
@@ -210,9 +210,9 @@ export default function PlayersPage() {
         <Box
           className="animate-section"
           sx={{
-            background: 'rgba(15, 23, 42, 0.6)',
+            background: 'rgba(36, 16, 25, 0.6)',
             backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(148, 163, 184, 0.08)',
+            border: '1px solid rgba(201, 185, 190, 0.08)',
             borderRadius: '16px',
             overflow: 'hidden',
           }}

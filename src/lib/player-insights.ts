@@ -44,7 +44,7 @@ export function getInitials(name: string) {
 }
 
 export function getAvatarColor(seed: string) {
-  const colors = ['#22C55E', '#3B82F6', '#F59E0B', '#EF4444', '#4ADE80', '#60A5FA'];
+  const colors = ['#EA6C56', '#7E8CC2', '#F59E0B', '#EF4444', '#FF8A73', '#852A3D'];
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
     hash = (hash * 31 + seed.charCodeAt(i)) % colors.length;
