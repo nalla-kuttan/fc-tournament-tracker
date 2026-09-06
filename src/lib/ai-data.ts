@@ -4,6 +4,7 @@ import { aggregateCareerStats, aggregateCareerStatsBatch } from '@/lib/algorithm
 import { calculateStandings } from '@/lib/algorithms/standings';
 import { ApiError } from '@/lib/api-guards';
 import { createServerClient } from '@/lib/supabase/server';
+import { fetchAllRows } from '@/lib/supabase/pagination';
 import type { Match } from '@/lib/types';
 
 export async function getPlayerScoutFacts(playerId: string) {
@@ -115,7 +116,13 @@ export async function getGlobalStatFacts() {
     supabase.from('registered_player').select('id, name, base_team'),
     supabase.from('player').select('id, registered_player_id'),
     supabase.from('match').select('*').eq('is_played', true).eq('is_bye', false),
-    supabase.from('goal').select('player_id'),
+    fetchAllRows<{ player_id: string }>((from, to) => (
+      supabase
+        .from('goal')
+        .select('player_id')
+        .order('id', { ascending: true })
+        .range(from, to)
+    )),
   ]);
   const error = registeredResult.error || instancesResult.error || matchesResult.error || goalsResult.error;
   if (error) throw error;

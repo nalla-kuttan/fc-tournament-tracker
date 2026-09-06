@@ -2,25 +2,17 @@ import { createHash, randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import type { ZodType } from 'zod';
 import { verifyPin } from '@/lib/auth';
+import { ApiError } from '@/lib/api-error';
 import { ConfigurationError } from '@/lib/env';
 import { createAdminClient } from '@/lib/supabase/server';
+
+export { ApiError } from '@/lib/api-error';
 
 const DEFAULT_JSON_LIMIT_BYTES = 64 * 1024;
 const DEFAULT_RATE_LIMIT_WINDOW_SECONDS = 60;
 
 type RateLimitEntry = { count: number; resetAt: number };
 const fallbackRateLimitStore = new Map<string, RateLimitEntry>();
-
-export class ApiError extends Error {
-  constructor(
-    message: string,
-    readonly status = 400,
-    readonly code = 'BAD_REQUEST'
-  ) {
-    super(message);
-    this.name = 'ApiError';
-  }
-}
 
 export function getErrorMessage(error: unknown, fallback = 'Server error') {
   return error instanceof Error ? error.message : fallback;

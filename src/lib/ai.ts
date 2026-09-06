@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { GoogleGenAI } from '@google/genai';
-import { ApiError } from '@/lib/api-guards';
+import { extractCompleteAiText } from '@/lib/ai-response';
 import { getGeminiEnv } from '@/lib/env';
 
 const SYSTEM_INSTRUCTION = `You are an analyst for FC Tournament Tracker.
@@ -23,10 +23,9 @@ export async function generateAiText(task: string, facts: unknown) {
       systemInstruction: SYSTEM_INSTRUCTION,
       maxOutputTokens: 700,
       temperature: 0.55,
+      thinkingConfig: { thinkingBudget: 0 },
     },
   });
 
-  const text = response.text?.trim();
-  if (!text) throw new ApiError('The AI provider returned an empty response.', 502, 'AI_EMPTY_RESPONSE');
-  return text;
+  return extractCompleteAiText(response);
 }
