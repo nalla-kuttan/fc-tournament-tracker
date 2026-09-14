@@ -17,63 +17,29 @@ import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import GroupsIcon from '@mui/icons-material/Groups';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
-import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import SearchIcon from '@mui/icons-material/Search';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
-import TableChartIcon from '@mui/icons-material/TableChart';
 import type { RegisteredPlayer, Tournament } from '@/lib/types';
+import { BRAND_COLORS } from '@/design-tokens';
 import { fetcher } from '@/lib/fetcher';
 
-const SIDEBAR_WIDTH = 278;
+const SIDEBAR_WIDTH = 248;
 
 const COLORS = {
-  pitchBlack: '#12080C',
-  textIce: '#FFF7F6',
-  textSteel: '#C9B9BE',
-  textMuted: '#C9B9BE',
-  coral: '#EA6C56',
-  coralLight: '#FF8A73',
-  frenchBlue: '#334075',
-  frenchBlueLight: '#7E8CC2',
-  nightBordeaux: '#621122',
+  pitchBlack: BRAND_COLORS.background, textIce: BRAND_COLORS.text,
+  textSteel: BRAND_COLORS.textSecondary, textMuted: BRAND_COLORS.textSecondary,
+  coral: BRAND_COLORS.coral, coralLight: BRAND_COLORS.coralLight,
+  frenchBlue: BRAND_COLORS.frenchBlue, frenchBlueLight: BRAND_COLORS.frenchBlueLight,
+  nightBordeaux: BRAND_COLORS.nightBordeaux,
 };
-
-const NAV_GROUPS = [
-  {
-    label: 'Play',
-    items: [
-      { label: 'Home', path: '/', icon: <HomeRoundedIcon /> },
-      { label: 'Players', path: '/players', icon: <GroupsIcon /> },
-    ],
-  },
-  {
-    label: 'Insights',
-    items: [
-      { label: 'Overview', path: '/analytics', icon: <AnalyticsIcon /> },
-      { label: 'Rivalries', path: '/analytics/h2h', icon: <SportsSoccerIcon /> },
-      { label: 'Global Stats', path: '/analytics/global', icon: <LeaderboardIcon /> },
-      { label: 'Leagues', path: '/analytics/league', icon: <TableChartIcon /> },
-      { label: 'AI Analyst', path: '/analytics/ai', icon: <AutoAwesomeIcon /> },
-    ],
-  },
-  {
-    label: 'Legacy',
-    items: [
-      { label: 'Competitive', path: '/competitive', icon: <EmojiEventsIcon /> },
-    ],
-  },
-];
-
 const MOBILE_NAV_ITEMS = [
-  { label: 'Home', path: '/', icon: <HomeRoundedIcon /> },
+  { label: 'Play', path: '/', icon: <HomeRoundedIcon /> },
   { label: 'Players', path: '/players', icon: <GroupsIcon /> },
-  { label: 'Insights', path: '/analytics', icon: <AnalyticsIcon /> },
-  { label: 'Compete', path: '/competitive', icon: <EmojiEventsIcon /> },
+  { label: 'Stats', path: '/analytics', icon: <AnalyticsIcon /> },
 ];
+const NAV_GROUPS = [{ label: 'Your club', items: MOBILE_NAV_ITEMS }];
 
 type SearchResult = {
   id: string;
@@ -85,13 +51,13 @@ type SearchResult = {
 
 function isActive(pathname: string, path: string) {
   if (path === '/') return pathname === '/' || pathname.startsWith('/tournaments');
-  if (path === '/analytics') return pathname === '/analytics';
+  if (path === '/analytics') return pathname.startsWith('/analytics') || pathname.startsWith('/competitive');
   return pathname === path || pathname.startsWith(`${path}/`);
 }
 
 function isMobileActive(pathname: string, path: string) {
   if (path === '/') return pathname === '/' || pathname.startsWith('/tournaments');
-  if (path === '/analytics') return pathname.startsWith('/analytics');
+  if (path === '/analytics') return pathname.startsWith('/analytics') || pathname.startsWith('/competitive');
   return pathname === path || pathname.startsWith(`${path}/`);
 }
 
@@ -112,6 +78,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
     fetcher,
     { onError: () => undefined, revalidateOnFocus: false }
   );
+
+  const { data: clubTournaments = [] } = useSWR<Tournament[]>('/api/tournaments', fetcher, { onError: () => undefined });
+  const currentTournament = clubTournaments.find((t) => pathname.startsWith(`/tournaments/${t.id}`))
+    ?? [...clubTournaments].filter((t) => t.status === 'active').sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
 
   const activeMobileTab = MOBILE_NAV_ITEMS.findIndex((item) => isMobileActive(pathname, item.path));
   const trimmedQuery = query.trim().toLowerCase();
@@ -179,7 +149,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       sx={{
         minHeight: '100vh',
         color: COLORS.textIce,
-        background: `radial-gradient(circle at 84% 0%, rgba(51, 64, 117, 0.28), transparent 30%), radial-gradient(circle at 42% 110%, rgba(98, 17, 34, 0.42), transparent 38%), ${COLORS.pitchBlack}`,
+        background: COLORS.pitchBlack,
         position: 'relative',
         overflowX: 'hidden',
       }}
@@ -196,8 +166,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
           width: SIDEBAR_WIDTH,
           flexDirection: 'column',
           borderRadius: '16px',
-          border: '1px solid rgba(234, 108, 86, 0.24)',
-          background: '#334075',
+          border: '1px solid rgba(201, 185, 190, 0.12)',
+          background: BRAND_COLORS.surface,
           overflow: 'hidden',
           zIndex: 20,
         }}
@@ -210,8 +180,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
               borderRadius: '12px',
               display: 'grid',
               placeItems: 'center',
-              color: COLORS.pitchBlack,
-              background: '#FF8A73',
+              color: COLORS.textIce,
+              background: BRAND_COLORS.frenchBlueDark,
             }}
           >
             <SportsSoccerIcon sx={{ fontSize: 26 }} />
@@ -296,7 +266,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             gap: 1.5,
             px: { xs: 2, sm: 3, lg: 4 },
             py: { xs: 1.25, sm: 1.75 },
-            background: { xs: 'rgba(98, 17, 34, 0.9)', lg: 'transparent' },
+            background: BRAND_COLORS.background,
             backdropFilter: { xs: 'blur(22px)', lg: 'none' },
             WebkitBackdropFilter: { xs: 'blur(22px)', lg: 'none' },
             borderBottom: { xs: '1px solid rgba(201, 185, 190, 0.08)', lg: 'none' },
@@ -327,12 +297,18 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <Typography sx={{ fontWeight: 700, color: '#FFF7F6', lineHeight: 1 }}>
                 FC Tracker
               </Typography>
-              <Typography sx={{ color: '#D7C6CB', fontSize: '0.875rem', fontWeight: 600 }}>
+              <Typography noWrap sx={{ color: '#D7C6CB', fontSize: '0.875rem', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
                 Tournament hub
               </Typography>
             </Box>
           </Box>
 
+          {currentTournament && (
+            <Button component={Link} href={`/tournaments/${currentTournament.id}`} startIcon={<SportsSoccerIcon />}
+              sx={{ maxWidth: { xs: 150, sm: 300 }, flexShrink: 1, color: 'text.primary', bgcolor: BRAND_COLORS.surface, px: 1.5 }}>
+              <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentTournament.name}</Box>
+            </Button>
+          )}
           <ClickAwayListener onClickAway={() => setSearchOpen(false)}>
             <Box sx={{ display: 'contents' }}>
               <IconButton

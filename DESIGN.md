@@ -190,7 +190,7 @@ Depth comes from tonal layering, spacing, restrained borders, and selective shad
 - **Error / Disabled:** Error state uses Result Red plus text or helper copy. Disabled state lowers opacity and should not rely on color alone.
 
 ### Navigation
-- **Style:** Desktop uses a fixed French Blue sidebar with grouped navigation, icon+text items, and active Coral selection. Mobile uses a Night Bordeaux bottom navigation with compact labels and icon-forward destinations.
+- **Style:** Desktop uses a quiet Bordeaux sidebar with Play, Players, and Stats. Mobile uses the same three destinations in bottom navigation. Stats destinations share a horizontal subnavigation; the header keeps the current or most recent active tournament within reach.
 - **Typography:** Nav section labels are small, uppercase, and high-weight; item labels stay title case and readable.
 - **Active State:** Coral text or icon, faint Coral background, and clear border/indicator. Avoid hidden active states that depend only on a subtle color shift.
 
@@ -212,3 +212,7 @@ Analytics modules should pair dense numbers with narrative context. Radar charts
 - **Don't** use decorative esports styling that does not help users understand tournaments, rivalries, form, or match state.
 - **Don't** add gradient text or colored side-stripe borders.
 - **Don't** use static glassmorphism as filler. Glass is allowed only when it improves hierarchy, separation, or active context.
+
+## Stats summary
+
+The Stats summary leads with questions about form, the busiest rivalry, and scoring. Use open rows with clear headings and supporting numbers rather than equal-weight metric cards. All time, last 30 days, and last 90 days apply to every summary on this screen. Undated matches count in all-time totals only; improvement compares a player’s latest five dated matches against their previous five, with 3/1/0 points for wins/draws/losses. Show ties and sample sizes explicitly. AI analysis has a separate, clearly stated scope.

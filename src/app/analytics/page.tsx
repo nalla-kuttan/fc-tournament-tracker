@@ -1,186 +1,111 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import useSWR from 'swr';
-import { fetcher } from '@/lib/fetcher';
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
-import PublicIcon from '@mui/icons-material/Public';
-import LeaderboardIcon from '@mui/icons-material/Leaderboard';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import PeopleIcon from '@mui/icons-material/People';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import CardContent from '@mui/material/CardContent';
-import Grid from '@mui/material/Grid';
-import GlassCard from '@/components/shared/GlassCard';
-import { getAnalyticsSummary, getRivalries, type GoalLite } from '@/lib/analytics-insights';
+import Skeleton from '@mui/material/Skeleton';
+import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { fetcher } from '@/lib/fetcher';
+import { getRivalries } from '@/lib/analytics-insights';
+import { getStatsOverview, type StatsPeriod } from '@/lib/stats-overview';
 import type { CareerStats, Match, RegisteredPlayer } from '@/lib/types';
+
+const AIStatQuery = dynamic(() => import('@/components/ai/AIStatQuery'), { loading: () => <Skeleton variant="rounded" height={160} /> });
 
 interface GlobalData {
   career_stats: CareerStats[];
   all_matches: Match[];
-  all_goals: GoalLite[];
   registered_players: RegisteredPlayer[];
   player_instances: { id: string; registered_player_id: string; name: string; team: string }[];
 }
+const periods = { all: 'All time', '30': 'Last 30 days', '90': 'Last 90 days' };
 
 export default function AnalyticsPage() {
-  const { data, error, mutate } = useSWR<GlobalData>('/api/analytics/global', fetcher, { onError: () => undefined, revalidateOnFocus: false });
-  const summary = data ? getAnalyticsSummary(data.career_stats, data.all_matches, data.all_goals, data.registered_players) : null;
-  const rivalries = data ? getRivalries(data.registered_players, data.player_instances, data.all_matches) : [];
-
-  const items = [
+  const [analystOpen, setAnalystOpen] = useState(false);
+  const [period, setPeriod] = useState<StatsPeriod>('all');
+  const { data, error, isLoading, mutate } = useSWR<GlobalData>('/api/analytics/global', fetcher, { onError: () => undefined, revalidateOnFocus: false });
+  const overview = data ? getStatsOverview(data.all_matches, data.registered_players, data.player_instances, period) : null;
+  const rivalry = data && overview ? getRivalries(data.registered_players, data.player_instances, overview.games)[0] : null;
+  const scorer = overview?.scorers[0];
+  const improving = overview?.improving[0];
+  const tiedForm = (overview?.improving.length ?? 0) > 1;
+  const tiedGoals = (overview?.scorers.length ?? 0) > 1;
+  const stories = [
     {
-      title: 'Head-to-Head',
-      description: rivalries[0] ? `${rivalries[0].p1Name} vs ${rivalries[0].p2Name} leads ${rivalries[0].matches.length} tracked meetings` : 'Compare two players across all tournaments',
-      icon: <CompareArrowsIcon sx={{ fontSize: 24, color: '#7E8CC2' }} />,
-      iconBg: 'rgba(51, 64, 117, 0.1)',
-      iconBorder: 'rgba(51, 64, 117, 0.15)',
-      href: '/analytics/h2h',
+      question: 'Who’s improving?',
+      answer: improving ? `${improving.name}${tiedForm ? ' shares the biggest improvement' : ' is gaining momentum'}` : 'No clear improvement yet',
+      detail: improving ? `${improving.latestPoints} points in the latest five matches, up from ${improving.previousPoints} in the previous five. ${tiedForm ? overview!.improving.map((p) => p.name).join(', ') + ' are tied.' : ''}` : 'A player needs ten dated matches in this period. We compare points from their latest five against the previous five and only highlight a positive change.',
+      evidence: 'Form uses 3 points for a win, 1 for a draw. Ten matches per comparison.',
+      href: improving ? `/players/${improving.id}` : '/analytics/global', action: improving ? 'View player form' : 'View player rankings',
     },
     {
-      title: 'Global Analytics',
-      description: summary?.topScorer ? `${summary.topScorer.player_name} leads with ${summary.topScorer.total_goals} goals` : 'All-time career stats and rankings',
-      icon: <PublicIcon sx={{ fontSize: 24, color: '#7E8CC2' }} />,
-      iconBg: 'rgba(51, 64, 117, 0.1)',
-      iconBorder: 'rgba(51, 64, 117, 0.15)',
-      href: '/analytics/global',
+      question: 'Who leads the busiest rivalry?',
+      answer: rivalry ? rivalry.p1Wins === rivalry.p2Wins ? `${rivalry.p1Name} and ${rivalry.p2Name} are level` : `${rivalry.p1Wins > rivalry.p2Wins ? rivalry.p1Name : rivalry.p2Name} leads ${Math.max(rivalry.p1Wins, rivalry.p2Wins)}–${Math.min(rivalry.p1Wins, rivalry.p2Wins)}` : 'Your next rivalry starts on the pitch',
+      detail: rivalry ? `${rivalry.p1Name} vs ${rivalry.p2Name} · ${rivalry.matches.length} meetings · ${rivalry.draws} draws.` : 'Record a match between two registered players to start their head-to-head story.',
+      evidence: 'Selected by most meetings in this period. Lead is measured in wins.',
+      href: '/analytics/h2h', action: 'Compare players',
     },
     {
-      title: 'League Analytics',
-      description: summary?.latestMatch ? `Latest: ${summary.latestMatch.home_player?.name ?? 'Home'} ${summary.latestMatch.home_score}-${summary.latestMatch.away_score} ${summary.latestMatch.away_player?.name ?? 'Away'}` : 'Tournament-specific stats and rankings',
-      icon: <LeaderboardIcon sx={{ fontSize: 24, color: '#F59E0B' }} />,
-      iconBg: 'rgba(245, 158, 11, 0.1)',
-      iconBorder: 'rgba(245, 158, 11, 0.15)',
-      href: '/analytics/league',
-    },
-    {
-      title: 'AI Analyst',
-      description: 'Ask natural language questions about player stats, rankings, form, and records',
-      icon: <AutoAwesomeIcon sx={{ fontSize: 24, color: '#7E8CC2' }} />,
-      iconBg: 'rgba(51, 64, 117, 0.1)',
-      iconBorder: 'rgba(51, 64, 117, 0.15)',
-      href: '/analytics/ai',
+      question: 'Who’s scoring the most?',
+      answer: scorer ? `${scorer.name}${tiedGoals ? ' shares the scoring lead' : ' leads the scoring'}` : 'No scoring record yet',
+      detail: scorer ? `${scorer.goals} goals in ${scorer.played} matches (${(scorer.goals / scorer.played).toFixed(1)} per match). ${tiedGoals ? overview!.scorers.map((p) => p.name).join(', ') + ' are tied on goals.' : ''}` : 'Completed match scorelines will build the scoring table here.',
+      evidence: 'Goals come from final scores. Total goals determine the lead.',
+      href: scorer ? `/players/${scorer.id}` : '/analytics/global', action: scorer ? 'View player record' : 'View player rankings',
     },
   ];
 
-  return (
-    <Box>
-      <Box className="animate-section" sx={{ mb: 3, mt: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <BarChartIcon aria-hidden="true" sx={{ fontSize: 34, color: '#FF8A73' }} />
-        <Box>
-          <Typography component="h1" variant="h4" sx={{ fontWeight: 700 }}>Insights</Typography>
-          <Typography color="text.secondary">Explore records, rivalries, rankings, and match trends.</Typography>
-        </Box>
-      </Box>
-
-      {error && (
-        <Alert
-          severity="error"
-          action={<Button color="inherit" startIcon={<RefreshIcon />} onClick={() => void mutate()}>Retry</Button>}
-          sx={{ mb: 2 }}
-        >
-          Live summaries are unavailable, but you can still open an insight below.
-        </Alert>
-      )}
-
-      {summary && (
-        <Grid container spacing={1.5} className="animate-section" sx={{ mb: 3 }}>
-          {[
-            { label: 'Matches', value: summary.matches, icon: <SportsSoccerIcon />, color: '#EA6C56' },
-            { label: 'Goals', value: summary.goals, icon: <EmojiEventsIcon />, color: '#F59E0B' },
-            { label: 'Players', value: summary.players, icon: <PeopleIcon />, color: '#7E8CC2' },
-            { label: 'Best WR', value: summary.bestWinRate ? `${summary.bestWinRate.win_rate.toFixed(0)}%` : '—', icon: <TrendingUpIcon />, color: '#7E8CC2' },
-          ].map((stat) => (
-            <Grid key={stat.label} size={{ xs: 6, sm: 3 }}>
-              <GlassCard>
-                <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.75, '&:last-child': { pb: 1.75 } }}>
-                  <Box sx={{ color: stat.color, display: 'flex' }}>{stat.icon}</Box>
-                  <Box>
-                    <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1 }}>
-                      {stat.value}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {stat.label}
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </GlassCard>
-            </Grid>
-          ))}
-        </Grid>
-      )}
-
-      {/* Glass List */}
-      <Box
-        className="animate-section"
-        sx={{
-          background: 'rgba(36, 16, 25, 0.6)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(201, 185, 190, 0.08)',
-          borderRadius: '16px',
-          overflow: 'hidden',
-        }}
-      >
-        {items.map((item, index) => (
-          <Box
-            component={Link}
-            href={item.href}
-            key={item.title}
-            className="list-row"
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              px: 2,
-              py: 2,
-              cursor: 'pointer',
-              color: 'inherit',
-              textDecoration: 'none',
-              borderBottom: index < items.length - 1 ? '1px solid rgba(201, 185, 190, 0.06)' : 'none',
-              transition: 'background 150ms ease',
-              '&:focus-visible': { outline: '3px solid #FF8A73', outlineOffset: -3 },
-            }}
-          >
-            {/* Icon */}
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: '12px',
-                background: item.iconBg,
-                border: `1px solid ${item.iconBorder}`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mr: 2,
-                flexShrink: 0,
-              }}
-            >
-              {item.icon}
-            </Box>
-
-            {/* Text */}
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="body1" fontWeight={600} sx={{ letterSpacing: '0.01em' }}>
-                {item.title}
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#D7C6CB', fontSize: '0.875rem' }}>
-                {item.description}
-              </Typography>
-            </Box>
-
-            <ChevronRightIcon sx={{ color: '#C9B9BE', fontSize: 20 }} />
+  return <Box sx={{ maxWidth: 1120 }}>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2, flexWrap: 'wrap', mb: 3 }}>
+      <Box><Typography component="h1" variant="h4" fontWeight={700}>The story so far</Typography>
+        <Typography color="text.secondary" sx={{ mt: 0.75 }}>Form, rivalries, and the numbers behind them.</Typography></Box>
+      <TextField select label="Time range" value={period} onChange={(e) => setPeriod(e.target.value as StatsPeriod)} size="small" sx={{ minWidth: 170 }}>
+        {Object.entries(periods).map(([value, label]) => <MenuItem key={value} value={value}>{label}</MenuItem>)}
+      </TextField>
+    </Box>
+    {error && <Alert severity="error" action={<Button color="inherit" onClick={() => void mutate()}>Retry</Button>} sx={{ mb: 2 }}>Stats could not be refreshed. {data ? 'Showing the last loaded data.' : 'Try again to load the match record.'}</Alert>}
+    {isLoading && <Box aria-label="Loading stats">{[0, 1, 2].map((i) => <Skeleton key={i} variant="rounded" height={160} sx={{ mb: 2 }} />)}</Box>}
+    {overview && <>
+      <Typography color="text.secondary" sx={{ pb: 2, borderBottom: 1, borderColor: 'divider' }}>{periods[period]} · {overview.games.length} completed matches · {overview.goals} goals · {overview.rows.filter((p) => p.played > 0).length} players</Typography>
+      {overview.undated > 0 && <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{overview.undated} undated matches count only toward all-time totals; form comparisons require recorded dates.</Typography>}
+      {overview.games.length === 0 && <Alert severity="info" sx={{ mt: 2 }}>No completed matches in this period. Choose another time range or record a result from Play.</Alert>}
+      <Box aria-live="polite">
+        {stories.map((story) => <Box component="section" key={story.question} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '220px minmax(0, 1fr)' }, gap: { xs: 1, md: 4 }, py: 3, borderBottom: 1, borderColor: 'divider' }}>
+          <Typography component="h2" variant="body1" fontWeight={600} color="text.secondary">{story.question}</Typography>
+          <Box><Typography component="h3" variant="h5" fontWeight={700}>{story.answer}</Typography>
+            <Typography sx={{ mt: 1, maxWidth: '65ch' }}>{story.detail}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{story.evidence}</Typography>
+            <Button component={Link} href={story.href} endIcon={<ArrowForwardIcon />} sx={{ mt: 1, px: 0, color: 'secondary.light' }}>{story.action}</Button>
           </Box>
-        ))}
+        </Box>)}
+      </Box>
+    </>}
+    <Box sx={{ mt: 3, p: { xs: 2, sm: 3 }, bgcolor: 'background.paper', borderRadius: '12px' }}>
+      <Typography component="h2" variant="h6">Explore the bigger picture</Typography>
+      <Typography color="text.secondary" sx={{ mt: 0.5, mb: 1 }}>Explore a tournament’s story, or ask AI about the all-time record below.</Typography>
+      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <Button component={Link} href="/analytics/league" variant="outlined">Tournament stories</Button>
+        <Button component={Link} href="/analytics/ai" sx={{ color: 'secondary.light' }}>Ask AI about the record</Button>
       </Box>
     </Box>
-  );
+    {data && <Accordion expanded={analystOpen} onChange={(_, expanded) => setAnalystOpen(expanded)} sx={{ mt: 2 }}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="stats-analyst-content" id="stats-analyst-heading">
+        <Typography fontWeight={600}>Ask AI about these players · all-time record</Typography>
+      </AccordionSummary>
+      <AccordionDetails id="stats-analyst-content">
+        <Typography color="text.secondary" sx={{ mb: 2 }}>AI interpretation uses the full record, not the selected time range. Check its claims against the supporting match stats.</Typography>
+        {analystOpen && <AIStatQuery careerStats={data.career_stats} />}
+      </AccordionDetails>
+    </Accordion>}
+  </Box>;
 }

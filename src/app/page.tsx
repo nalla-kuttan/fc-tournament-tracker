@@ -26,6 +26,7 @@ import GlassCard from '@/components/shared/GlassCard';
 import { getPowerRankings } from '@/lib/analytics-insights';
 import { getPlayerImagePath } from '@/lib/player-images';
 import type { CareerStats, Match, Player, RegisteredPlayer, Tournament } from '@/lib/types';
+import { BRAND_COLORS } from '@/design-tokens';
 import { fetcher } from '@/lib/fetcher';
 
 const FunFactsSection = dynamic(() => import('@/components/analytics/FunFactsSection'), {
@@ -62,14 +63,10 @@ interface TournamentDetails extends Tournament {
 }
 
 const COLORS = {
-  pitchBlack: '#12080C',
-  textIce: '#FFF7F6',
-  textSteel: '#D7C6CB',
-  coral: '#EA6C56',
-  coralLight: '#FF8A73',
-  frenchBlue: '#334075',
-  frenchBlueLight: '#7E8CC2',
-  nightBordeaux: '#621122',
+  pitchBlack: BRAND_COLORS.background, textIce: BRAND_COLORS.text,
+  textSteel: BRAND_COLORS.textSecondary, coral: BRAND_COLORS.coral,
+  coralLight: BRAND_COLORS.coralLight, frenchBlue: BRAND_COLORS.frenchBlue,
+  frenchBlueLight: BRAND_COLORS.frenchBlueLight, nightBordeaux: BRAND_COLORS.nightBordeaux,
   amber: '#F59E0B',
 };
 
@@ -289,8 +286,8 @@ function MatchNightCommand({
             label={refreshing ? 'Refreshing live data' : dataAvailable ? 'Live data connected' : 'Live data unavailable'}
             sx={{
               mb: 1.5,
-              color: dataAvailable ? COLORS.coralLight : COLORS.amber,
-              bgcolor: dataAvailable ? 'rgba(234, 108, 86, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+              color: dataAvailable ? COLORS.textSteel : COLORS.amber,
+              bgcolor: dataAvailable ? 'transparent' : 'rgba(245, 158, 11, 0.1)',
             }}
           />
           <Typography component="h1" sx={{ color: COLORS.textIce, fontSize: { xs: '1.7rem', sm: '2.25rem' }, lineHeight: 1.08, fontWeight: 700 }}>

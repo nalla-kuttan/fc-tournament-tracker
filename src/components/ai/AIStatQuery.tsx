@@ -40,7 +40,7 @@ export default function AIStatQuery({ careerStats }: AIStatQueryProps) {
     const motm = careerStats.reduce((sum, player) => sum + player.motm_awards, 0);
     return [
       { label: 'Players', value: careerStats.length },
-      { label: 'Matches', value: matches },
+      { label: 'Player appearances', value: matches },
       { label: 'Goals', value: goals },
       { label: 'MOTM', value: motm },
     ];
