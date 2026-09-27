@@ -32,11 +32,19 @@ import type { RegisteredPlayer, Season } from '@/lib/types';
 
 const STEPS = ['Tournament Info', 'Select Players', 'Set Admin PIN'];
 
-export default function CreateTournamentForm() {
+const NEW_SEASON = 'new';
+
+export interface TournamentPrefill {
+  name?: string;
+  format?: string;
+  fromTournamentId?: string;
+}
+
+export default function CreateTournamentForm({ prefill = {} }: { prefill?: TournamentPrefill }) {
   const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
-  const [name, setName] = useState('');
-  const [format, setFormat] = useState<string>('league');
+  const [name, setName] = useState(prefill.name ?? '');
+  const [format, setFormat] = useState<string>(prefill.format ?? 'league');
   const [pin, setPin] = useState('');
   const [pinConfirm, setPinConfirm] = useState('');
   const [seasons, setSeasons] = useState<Season[]>([]);
@@ -87,15 +95,28 @@ export default function CreateTournamentForm() {
       .then((data) => setRegisteredPlayers(data))
       .catch(() => { });
 
+    // Starting from a previous tournament: pre-select the same players.
+    if (prefill.fromTournamentId) {
+      fetch(`/api/tournaments/${prefill.fromTournamentId}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data: { players?: { registered_player_id: string | null }[] } | null) => {
+          const ids = (data?.players ?? []).map((player) => player.registered_player_id).filter((id): id is string => Boolean(id));
+          if (ids.length > 0) setSelectedPlayerIds((current) => (current.size > 0 ? current : new Set(ids)));
+        })
+        .catch(() => { });
+    }
+
     fetch('/api/seasons')
       .then((r) => r.json())
       .then((data: Season[]) => {
         setSeasons(data);
-        const active = data.find((season) => season.status === 'active') ?? data[0];
-        if (active) setSeasonId(active.id);
+        // Join the running season if there is one; otherwise start a new season
+        // rather than filing this tournament under a finished one.
+        const active = data.find((season) => season.status === 'active');
+        setSeasonId(active ? active.id : NEW_SEASON);
       })
       .catch(() => { });
-  }, []);
+  }, [prefill.fromTournamentId]);
 
   const togglePlayer = (id: string) => {
     setSelectedPlayerIds((prev) => {
@@ -131,7 +152,13 @@ export default function CreateTournamentForm() {
       const res = await fetch('/api/tournaments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, format, pin, season_id: seasonId || null, playerSelections }),
+        body: JSON.stringify({
+          name,
+          format,
+          pin,
+          ...(seasonId === NEW_SEASON ? { new_season_name: name.trim() } : { season_id: seasonId || null }),
+          playerSelections,
+        }),
       });
 
       if (!res.ok) {
@@ -184,8 +211,11 @@ export default function CreateTournamentForm() {
                 fullWidth
                 value={seasonId}
                 onChange={(e) => setSeasonId(e.target.value)}
-                helperText="New tournaments default to the active competitive season."
+                helperText={seasonId === NEW_SEASON
+                  ? 'Starts a new competitive season with the same name as this tournament.'
+                  : 'Joins an existing competitive season.'}
               >
+                <MenuItem value={NEW_SEASON}>New season: {name.trim() || 'named after this tournament'}</MenuItem>
                 {seasons.map((season) => (
                   <MenuItem key={season.id} value={season.id}>
                     {season.name} ({season.status})

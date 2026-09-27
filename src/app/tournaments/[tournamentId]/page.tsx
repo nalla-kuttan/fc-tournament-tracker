@@ -20,6 +20,7 @@ import CardContent from '@mui/material/CardContent';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import AIPunditModal from '@/components/ai/AIPunditModal';
 import { useAdmin } from '@/contexts/AdminContext';
+import { getChampionName } from '@/lib/season-status';
 import type { Match, StandingRow } from '@/lib/types';
 
 export default function TournamentDashboard() {
@@ -87,6 +88,24 @@ export default function TournamentDashboard() {
     .slice(0, 3);
   const playedCount = (tournament.matches ?? []).filter((m) => m.is_played && !m.is_bye).length;
   const pendingCount = (tournament.matches ?? []).filter((m) => !m.is_played && !m.is_bye).length;
+  const isKnockout = tournament.format === 'knockout';
+  const tableLabel = isKnockout ? 'View bracket' : 'View standings';
+  const tablePath = `/tournaments/${tournamentId}/${isKnockout ? 'bracket' : 'standings'}`;
+  const champion = tournament.status === 'completed'
+    ? getChampionName(tournament.format, standings, tournament.matches ?? [])
+    : null;
+  const headline = !hasMatches
+    ? 'Schedule not generated'
+    : tournament.status === 'completed'
+      ? champion ? `${champion} won` : 'Tournament complete'
+      : pendingCount === 0
+        ? 'All fixtures recorded'
+        : `${pendingCount} ${pendingCount === 1 ? 'fixture' : 'fixtures'} left`;
+  const subline = !hasMatches
+    ? 'Generate the schedule to start round one.'
+    : tournament.status !== 'completed' && pendingCount === 0
+      ? 'Mark the tournament complete in Settings to crown the champion.'
+      : `${playedCount} played · ${tournament.players?.length ?? 0} players · ${tournament.format}`;
 
   return (
     <Box>
@@ -103,18 +122,18 @@ export default function TournamentDashboard() {
               Tournament Command
             </Typography>
             <Typography component="h1" variant="h5" fontWeight={800} sx={{ mt: 0.4 }}>
-              {hasMatches ? `${pendingCount} fixtures pending` : 'Schedule not generated'}
+              {headline}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {playedCount} played · {tournament.players?.length ?? 0} registered · {tournament.format} · {tournament.status}
+              {subline}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
             <Button variant="outlined" onClick={() => router.push(`/tournaments/${tournamentId}/matches`)}>
               Open Matches
             </Button>
-            <Button variant="outlined" onClick={() => router.push(`/tournaments/${tournamentId}/standings`)}>
-              View Standings
+            <Button variant="outlined" onClick={() => router.push(tablePath)}>
+              {tableLabel}
             </Button>
             {!hasMatches && (
               <AdminGate tournamentId={tournamentId}>
