@@ -1,7 +1,7 @@
 'use client';
 
 import Box from '@mui/material/Box';
-import FunFactCard from './FunFactCard';
+import Typography from '@mui/material/Typography';
 import type { Match, MatchStats } from '@/lib/types';
 
 interface PlayerInstance {
@@ -88,7 +88,7 @@ function computeFunFacts(
     if (bestStreak >= 2) {
       facts.push({
         emoji: '🔥',
-        title: 'Win Streak',
+        title: 'Longest win streak',
         value: `${bestStreak} in a row`,
         subtitle: bestStreakPlayer,
         color: '#F59E0B',
@@ -110,7 +110,7 @@ function computeFunFacts(
     if (maxGoalsMatch && maxGoals > 0) {
       facts.push({
         emoji: '⚽',
-        title: 'Goal Fest',
+        title: 'Most goals in a match',
         value: `${maxGoals} goals`,
         subtitle: `${maxGoalsMatch.home_player?.name ?? 'TBD'} ${maxGoalsMatch.home_score}-${maxGoalsMatch.away_score} ${maxGoalsMatch.away_player?.name ?? 'TBD'}`,
         color: '#EA6C56',
@@ -142,7 +142,7 @@ function computeFunFacts(
     if (maxRating > 0) {
       facts.push({
         emoji: '⭐',
-        title: 'Best Performance',
+        title: 'Best match rating',
         value: `${maxRating.toFixed(1)} rating`,
         subtitle: `${maxRatingPlayer} ${maxRatingMatch}`,
         color: '#F59E0B',
@@ -180,7 +180,7 @@ function computeFunFacts(
     if (bestCSStreak >= 2) {
       facts.push({
         emoji: '🧤',
-        title: 'CS Streak',
+        title: 'Longest clean-sheet streak',
         value: `${bestCSStreak} in a row`,
         subtitle: bestCSPlayer,
         color: '#EA6C56',
@@ -204,7 +204,7 @@ function computeFunFacts(
       const winnerName = winnerIsHome ? biggestWin.home_player?.name : biggestWin.away_player?.name;
       facts.push({
         emoji: '💥',
-        title: 'Biggest Win',
+        title: 'Biggest win',
         value: `${biggestWin.home_score}-${biggestWin.away_score}`,
         subtitle: `${winnerName ?? 'Unknown'} dominance`,
         color: '#EF4444',
@@ -233,7 +233,7 @@ function computeFunFacts(
       const rp = instanceToRegistered.get(motmPlayerId);
       facts.push({
         emoji: '🏅',
-        title: 'MOTM King',
+        title: 'Most Man of the Match awards',
         value: `${maxMotm} awards`,
         subtitle: rp?.name ?? 'Unknown',
         color: '#7E8CC2',
@@ -277,7 +277,7 @@ function computeFunFacts(
     if (maxOverperformance > 0.5) { // Ensure it's a significant overperformance
       facts.push({
         emoji: '🎯',
-        title: 'Clinical Finisher',
+        title: 'Biggest xG overperformance',
         value: `+${maxOverperformance.toFixed(1)} xG Diff`,
         subtitle: `${overperformerName} ${overperformerMatch}`,
         color: '#F59E0B', // iOS Yellow
@@ -313,7 +313,7 @@ function computeFunFacts(
     if (maxTackles >= 5) {
       facts.push({
         emoji: '🛡️',
-        title: 'Brick Wall',
+        title: 'Most tackles in a match',
         value: `${maxTackles} tackles`,
         subtitle: `${tacklerName} ${tacklerMatch}`,
         color: '#EF4444', // iOS Red/Orange
@@ -349,7 +349,7 @@ function computeFunFacts(
     if (maxInterceptions >= 5) {
       facts.push({
         emoji: '🧠',
-        title: 'Master Reader',
+        title: 'Most interceptions in a match',
         value: `${maxInterceptions} ints`,
         subtitle: `${interceptorName} ${interceptorMatch}`,
         color: '#7E8CC2', // iOS Light Blue
@@ -365,52 +365,40 @@ interface Props {
   goals: GoalData[];
   registeredPlayers: RegisteredPlayer[];
   playerInstances: PlayerInstance[];
+  limit?: number;
 }
 
-export default function FunFactsSection({ matches, goals, registeredPlayers, playerInstances }: Props) {
-  const facts = computeFunFacts(matches, goals, registeredPlayers, playerInstances);
+// A short ranked list of the club's standout records: what the record is,
+// who holds it, and the number, read in one line each.
+export default function FunFactsSection({ matches, goals, registeredPlayers, playerInstances, limit }: Props) {
+  const facts = computeFunFacts(matches, goals, registeredPlayers, playerInstances).slice(0, limit);
 
   if (facts.length === 0) return null;
 
   return (
-    <Box sx={{ mb: 4 }}>
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 1.5,
-          overflowX: 'auto',
-          overflowY: 'hidden',
-          WebkitOverflowScrolling: 'touch',
-          overscrollBehaviorX: 'contain',
-          touchAction: 'pan-x',
-          scrollSnapType: 'x proximity',
-          pb: 1,
-          px: 0.5,
-          '&::-webkit-scrollbar': {
-            height: 6,
-          },
-          '&::-webkit-scrollbar-track': {
-            background: 'rgba(201, 185, 190, 0.06)',
-            borderRadius: 999,
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: 'rgba(234, 108, 86, 0.35)',
-            borderRadius: 999,
-          },
-        }}
-      >
-        {facts.map((fact, idx) => (
-          <FunFactCard
-            key={fact.title}
-            emoji={fact.emoji}
-            title={fact.title}
-            value={fact.value}
-            subtitle={fact.subtitle}
-            color={fact.color}
-            index={idx}
-          />
-        ))}
-      </Box>
+    <Box component="ol" sx={{ listStyle: 'none', m: 0, p: 0 }}>
+      {facts.map((fact, index) => (
+        <Box
+          component="li"
+          key={fact.title}
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr) auto',
+            alignItems: 'baseline',
+            columnGap: 2,
+            py: 1,
+            borderTop: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.08)',
+          }}
+        >
+          <Box sx={{ minWidth: 0 }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>{fact.title}</Typography>
+            <Typography sx={{ fontWeight: 700 }} noWrap>{fact.subtitle}</Typography>
+          </Box>
+          <Typography sx={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', color: 'text.primary' }}>
+            {fact.value}
+          </Typography>
+        </Box>
+      ))}
     </Box>
   );
 }
