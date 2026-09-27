@@ -11,13 +11,23 @@ export async function GET() {
 
     const [registeredResult, playersResult, matchesResult, goalsResult] = await Promise.all([
       supabase.from('registered_player').select('id, name, base_team'),
-      supabase.from('player').select('id, tournament_id, registered_player_id, name, team'),
-      supabase
-        .from('match')
-        .select('*, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team), tournament:tournament_id(id, name, format)')
-        .eq('is_played', true)
-        .eq('is_bye', false)
-        .order('played_at', { ascending: false }),
+      fetchAllRows<{ id: string; tournament_id: string; registered_player_id: string; name: string; team: string }>((from, to) => (
+        supabase
+          .from('player')
+          .select('id, tournament_id, registered_player_id, name, team')
+          .order('id', { ascending: true })
+          .range(from, to)
+      )),
+      fetchAllRows<Match>((from, to) => (
+        supabase
+          .from('match')
+          .select('*, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team), tournament:tournament_id(id, name, format)')
+          .eq('is_played', true)
+          .eq('is_bye', false)
+          .order('played_at', { ascending: false })
+          .order('id', { ascending: true })
+          .range(from, to)
+      )),
       fetchAllRows<{ player_id: string; minute: number | null; match_id: string }>((from, to) => (
         supabase
           .from('goal')
@@ -39,7 +49,7 @@ export async function GET() {
     });
   }
 
-    const matches = (matchesResult.data ?? []) as Match[];
+    const matches = matchesResult.data ?? [];
     const players = playersResult.data ?? [];
     const goals = goalsResult.data ?? [];
 

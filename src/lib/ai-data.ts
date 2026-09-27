@@ -7,6 +7,8 @@ import { createServerClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/pagination';
 import type { Match } from '@/lib/types';
 
+const TOURNAMENT_SUMMARY_MATCH_LIMIT = 100;
+
 export async function getPlayerScoutFacts(playerId: string) {
   const supabase = createServerClient();
   const [{ data: player, error: playerError }, { data: instances, error: instanceError }] = await Promise.all([
@@ -20,19 +22,30 @@ export async function getPlayerScoutFacts(playerId: string) {
     return { player, stats: aggregateCareerStats(player.id, player.name, player.base_team, [], [], []) };
   }
   const [{ data: matches, error: matchError }, { data: goals, error: goalError }] = await Promise.all([
-    supabase
-      .from('match')
-      .select('*')
-      .or(playerIds.map((id) => `home_player_id.eq.${id},away_player_id.eq.${id}`).join(','))
-      .eq('is_played', true)
-      .eq('is_bye', false),
-    supabase.from('goal').select('player_id').in('player_id', playerIds),
+    fetchAllRows<Match>((from, to) => (
+      supabase
+        .from('match')
+        .select('*')
+        .or(playerIds.map((id) => `home_player_id.eq.${id},away_player_id.eq.${id}`).join(','))
+        .eq('is_played', true)
+        .eq('is_bye', false)
+        .order('id', { ascending: true })
+        .range(from, to)
+    )),
+    fetchAllRows<{ player_id: string }>((from, to) => (
+      supabase
+        .from('goal')
+        .select('player_id')
+        .in('player_id', playerIds)
+        .order('id', { ascending: true })
+        .range(from, to)
+    )),
   ]);
   if (matchError) throw matchError;
   if (goalError) throw goalError;
   return {
     player,
-    stats: aggregateCareerStats(player.id, player.name, player.base_team, playerIds, (matches ?? []) as Match[], goals ?? []),
+    stats: aggregateCareerStats(player.id, player.name, player.base_team, playerIds, matches ?? [], goals ?? []),
   };
 }
 
@@ -53,13 +66,17 @@ export async function getH2HFacts(player1Id: string, player2Id: string) {
   const allIds = [...player1Ids, ...player2Ids];
   if (!allIds.length) return { player1, player2, encounters: [] };
 
-  const { data: matches, error } = await supabase
-    .from('match')
-    .select('id, home_player_id, away_player_id, home_score, away_score, played_at, tournament:tournament_id(name)')
-    .or(allIds.map((id) => `home_player_id.eq.${id},away_player_id.eq.${id}`).join(','))
-    .eq('is_played', true)
-    .eq('is_bye', false)
-    .order('played_at', { ascending: false });
+  const { data: matches, error } = await fetchAllRows((from, to) => (
+    supabase
+      .from('match')
+      .select('id, home_player_id, away_player_id, home_score, away_score, played_at, tournament:tournament_id(name)')
+      .or(allIds.map((id) => `home_player_id.eq.${id},away_player_id.eq.${id}`).join(','))
+      .eq('is_played', true)
+      .eq('is_bye', false)
+      .order('played_at', { ascending: false })
+      .order('id', { ascending: true })
+      .range(from, to)
+  ));
   if (error) throw error;
   const player1Set = new Set(player1Ids);
   const player2Set = new Set(player2Ids);
@@ -75,22 +92,26 @@ export async function getTournamentSummaryFacts(tournamentId: string) {
   const [tournamentResult, playersResult, matchesResult] = await Promise.all([
     supabase.from('tournament').select('id, name, format, status').eq('id', tournamentId).single(),
     supabase.from('player').select('id, name, team').eq('tournament_id', tournamentId),
-    supabase
-      .from('match')
-      .select('id, tournament_id, home_player_id, away_player_id, home_score, away_score, round_number, match_number, stage, is_played, is_bye, stats, match_order, played_at, created_at, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team)')
-      .eq('tournament_id', tournamentId)
-      .eq('is_played', true)
-      .order('played_at', { ascending: false })
-      .limit(100),
+    fetchAllRows((from, to) => (
+      supabase
+        .from('match')
+        .select('id, tournament_id, home_player_id, away_player_id, home_score, away_score, round_number, match_number, stage, is_played, is_bye, stats, match_order, played_at, created_at, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team)')
+        .eq('tournament_id', tournamentId)
+        .eq('is_played', true)
+        .order('played_at', { ascending: false })
+        .order('id', { ascending: true })
+        .range(from, to)
+    )),
   ]);
   if (tournamentResult.error || !tournamentResult.data) throw new ApiError('Tournament not found', 404, 'NOT_FOUND');
   if (playersResult.error) throw playersResult.error;
   if (matchesResult.error) throw matchesResult.error;
   const matches = (matchesResult.data ?? []) as unknown as Match[];
+  // Standings need every played match; the prompt only needs the latest ones.
   return {
     tournament: tournamentResult.data,
     standings: calculateStandings(matches, playersResult.data ?? []),
-    matches,
+    matches: matches.slice(0, TOURNAMENT_SUMMARY_MATCH_LIMIT),
   };
 }
 
@@ -114,8 +135,22 @@ export async function getGlobalStatFacts() {
   const supabase = createServerClient();
   const [registeredResult, instancesResult, matchesResult, goalsResult] = await Promise.all([
     supabase.from('registered_player').select('id, name, base_team'),
-    supabase.from('player').select('id, registered_player_id'),
-    supabase.from('match').select('*').eq('is_played', true).eq('is_bye', false),
+    fetchAllRows<{ id: string; registered_player_id: string }>((from, to) => (
+      supabase
+        .from('player')
+        .select('id, registered_player_id')
+        .order('id', { ascending: true })
+        .range(from, to)
+    )),
+    fetchAllRows<Match>((from, to) => (
+      supabase
+        .from('match')
+        .select('*')
+        .eq('is_played', true)
+        .eq('is_bye', false)
+        .order('id', { ascending: true })
+        .range(from, to)
+    )),
     fetchAllRows<{ player_id: string }>((from, to) => (
       supabase
         .from('goal')
@@ -129,7 +164,7 @@ export async function getGlobalStatFacts() {
   return aggregateCareerStatsBatch(
     registeredResult.data ?? [],
     instancesResult.data ?? [],
-    (matchesResult.data ?? []) as Match[],
+    matchesResult.data ?? [],
     goalsResult.data ?? []
   ).filter((stats) => stats.total_matches > 0).slice(0, 100);
 }
