@@ -133,6 +133,19 @@ export function statsFromSheet(
   return Object.fromEntries(Object.entries(stats).filter(([, value]) => value !== undefined)) as MatchStats;
 }
 
+// Stats keys the sheet reads and writes. Anything else already stored on a
+// match (e.g. the in-game clubs, home_team/away_team/motm_team) belongs to the
+// history and must survive an edit.
+const SHEET_STAT_KEYS = new Set([
+  'home_xg', 'away_xg', 'home_possession', 'away_possession', 'home_tackles', 'away_tackles',
+  'home_interceptions', 'away_interceptions', 'home_rating', 'away_rating', 'motm_player_id', 'motm_rating',
+]);
+
+export function mergeStatsForSave(existing: Record<string, unknown> | null | undefined, fromSheet: MatchStats) {
+  const kept = Object.fromEntries(Object.entries(existing ?? {}).filter(([key]) => !SHEET_STAT_KEYS.has(key)));
+  return { ...kept, ...fromSheet };
+}
+
 // Mirrors the sheet so the left column becomes the right one. Used when a
 // photo was read with the teams on the opposite sides.
 export function swapSheetSides(sheet: StatSheet): StatSheet {
