@@ -37,7 +37,7 @@ import {
 } from '@/lib/match-entry';
 import type { ReadStatsResult } from '@/lib/match-stats-reading';
 import type { Match, MatchStats } from '@/lib/types';
-import { setResultFlash } from './SavedResultNotice';
+import { setResultFlash, type SavedResultPayload } from './SavedResultNotice';
 
 interface Player {
   id: string;
@@ -235,6 +235,14 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
   );
   const upcoming = tournament ? nextFixture(tournament.matches, match.id) : undefined;
 
+  const [previousResult] = useState<SavedResultPayload>(() => ({
+    home_score: match.home_score ?? 0,
+    away_score: match.away_score ?? 0,
+    stats: (match.stats ?? {}) as Record<string, unknown>,
+    goals: (match.goals ?? []).map((goal) => ({ player_id: goal.player?.id ?? '', minute: goal.minute ?? null })),
+  }));
+  const previousSummary = `${home?.name ?? 'Home'} ${match.home_score ?? 0}–${match.away_score ?? 0} ${away?.name ?? 'Away'}`;
+
   const errors = validateSheet(sheet);
   const minuteErrors = goals.map((goal) => goalMinuteError(goal.minute));
   const hasErrors = Object.keys(errors).length > 0 || minuteErrors.some(Boolean);
@@ -339,9 +347,15 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
 
       const summary = `${home?.name ?? 'Home'} ${homeScore}–${awayScore} ${away?.name ?? 'Away'}`;
       if (isEditing) {
+        setResultFlash({
+          message: `Saved changes · ${summary}`,
+          undo: { matchId: match.id, tournamentId: match.tournament_id, previous: previousResult, summary: previousSummary },
+        });
         onSuccess?.();
         return;
       }
+      // A new result can't be un-recorded, but it can be reopened and corrected.
+      const fix = { href: `/tournaments/${match.tournament_id}/matches/${match.id}?edit=1` };
 
       // Re-read the fixtures: a knockout result may have created the next tie.
       const latest = await fetch(`/api/tournaments/${match.tournament_id}`, { cache: 'no-store' })
@@ -350,13 +364,13 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
       const next = latest ? nextFixture(latest.matches, match.id) : null;
 
       if (mode === 'next' && next) {
-        setResultFlash(`Saved · ${summary}. Next: ${next.home_player?.name ?? 'Home'} vs ${next.away_player?.name ?? 'Away'}`);
+        setResultFlash({ message: `Saved · ${summary}. Next: ${next.home_player?.name ?? 'Home'} vs ${next.away_player?.name ?? 'Away'}`, fix });
         router.push(`/tournaments/${match.tournament_id}/matches/${next.id}`);
       } else if (!next && latest) {
-        setResultFlash(`Saved · ${summary}. All fixtures recorded.`);
+        setResultFlash({ message: `Saved · ${summary}. All fixtures recorded.`, fix });
         router.push(`/tournaments/${match.tournament_id}/standings`);
       } else {
-        setResultFlash(`Saved · ${summary}`);
+        setResultFlash({ message: `Saved · ${summary}`, fix });
         router.push(`/tournaments/${match.tournament_id}`);
       }
       router.refresh();

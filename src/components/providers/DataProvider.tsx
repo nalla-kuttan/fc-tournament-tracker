@@ -53,7 +53,7 @@ function DataErrorNotice({ message, onClose }: { message: string; onClose: () =>
         variant="filled"
         onClose={onClose}
         action={
-          <Button color="inherit" size="small" onClick={retry} sx={{ minHeight: 40, px: 1.25 }}>
+          <Button color="inherit" size="small" onClick={retry} sx={{ minHeight: 40, px: 1.25, color: 'inherit', fontWeight: 700 }}>
             Retry
           </Button>
         }
