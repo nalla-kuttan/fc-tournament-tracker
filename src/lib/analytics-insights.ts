@@ -1,5 +1,6 @@
 import type { CareerStats, Match, RegisteredPlayer, Tournament } from '@/lib/types';
-import { calculateEloRatings, type PlayerInstanceLite } from '@/lib/player-insights';
+import { buildCompetitiveRatingTimeline, getCompetitiveRatingMap } from '@/lib/competitive-ratings';
+import type { PlayerInstanceLite } from '@/lib/player-insights';
 
 export interface GoalLite {
   player_id: string;
@@ -110,7 +111,7 @@ export function getPowerRankings(
   playerInstances: PlayerInstanceLite[],
   matches: Match[]
 ): PowerRanking[] {
-  const ratings = calculateEloRatings(players, playerInstances, matches);
+  const ratings = getCompetitiveRatingMap(players, playerInstances, matches);
   return players
     .map((player) => ({ player, rating: ratings.get(player.id) ?? 1000, rank: 0 }))
     .sort((a, b) => b.rating - a.rating)
@@ -229,33 +230,35 @@ export function getClutchRankings(
   return [...rows.values()].filter((row) => row.clutchScore > 0).sort((a, b) => b.clutchScore - a.clutchScore);
 }
 
+// An upset is judged by the ratings both players had going into the match:
+// the winner must have been the lower-rated player at the time. (Judging old
+// results by today's ratings would label them with hindsight.)
 export function getUpsets(
   matches: Match[],
   players: Pick<RegisteredPlayer, 'id' | 'name' | 'base_team'>[],
   playerInstances: PlayerInstanceLite[]
 ): UpsetRow[] {
-  const ratings = calculateEloRatings(players, playerInstances, matches);
-  const instanceToRegistered = new Map(playerInstances.map((player) => [player.id, player.registered_player_id]));
+  const timeline = buildCompetitiveRatingTimeline(players, playerInstances, matches, { scope: 'all-time' });
   const playerById = new Map(players.map((player) => [player.id, player]));
 
   return matches
     .filter((match) => match.is_played && !match.is_bye && (match.home_score ?? 0) !== (match.away_score ?? 0))
-    .map((match) => {
+    .flatMap((match) => {
+      const before = timeline.get(match.id);
+      if (!before) return [];
       const homeWon = (match.home_score ?? 0) > (match.away_score ?? 0);
-      const winnerInstanceId = homeWon ? match.home_player_id : match.away_player_id;
-      const loserInstanceId = homeWon ? match.away_player_id : match.home_player_id;
-      const winnerRegisteredId = instanceToRegistered.get(winnerInstanceId ?? '');
-      const loserRegisteredId = instanceToRegistered.get(loserInstanceId ?? '');
-      const winnerRating = winnerRegisteredId ? ratings.get(winnerRegisteredId) ?? 1000 : 1000;
-      const loserRating = loserRegisteredId ? ratings.get(loserRegisteredId) ?? 1000 : 1000;
-      return {
+      const winnerId = homeWon ? before.homeRegisteredPlayerId : before.awayRegisteredPlayerId;
+      const loserId = homeWon ? before.awayRegisteredPlayerId : before.homeRegisteredPlayerId;
+      const winnerRating = homeWon ? before.homeRating : before.awayRating;
+      const loserRating = homeWon ? before.awayRating : before.homeRating;
+      return [{
         match,
-        winnerName: winnerRegisteredId ? playerById.get(winnerRegisteredId)?.name ?? 'Unknown' : 'Unknown',
-        loserName: loserRegisteredId ? playerById.get(loserRegisteredId)?.name ?? 'Unknown' : 'Unknown',
+        winnerName: playerById.get(winnerId)?.name ?? 'Unknown',
+        loserName: playerById.get(loserId)?.name ?? 'Unknown',
         winnerRating,
         loserRating,
         ratingGap: loserRating - winnerRating,
-      };
+      }];
     })
     .filter((row) => row.ratingGap > 0)
     .sort((a, b) => b.ratingGap - a.ratingGap);
@@ -302,7 +305,8 @@ export function getRivalries(
     rivalries.set(key, row);
   }
 
-  return [...rivalries.values()].sort((a, b) => b.matches.length - a.matches.length);
+  const latest = (row: RivalrySummary) => row.matches.reduce((max, match) => (match.played_at ?? '') > max ? match.played_at ?? '' : max, '');
+  return [...rivalries.values()].sort((a, b) => b.matches.length - a.matches.length || latest(b).localeCompare(latest(a)));
 }
 
 export function getLeagueStory<T extends {
@@ -313,7 +317,9 @@ export function getLeagueStory<T extends {
   conceded: number;
   played: number;
 }>(playerStats: T[], biggestWins: { home_player: string; away_player: string; home_score: number; away_score: number }[]): LeagueStory {
-  const champion = [...playerStats].sort((a, b) => b.points - a.points)[0]?.player_name ?? null;
+  // playerStats arrive in league-table order (including tie-breaks); re-sorting
+  // by points alone named the wrong champion whenever the top two were level.
+  const champion = playerStats[0]?.player_name ?? null;
   const bestAttack = [...playerStats].sort((a, b) => b.goals_from_score - a.goals_from_score)[0]?.player_name ?? null;
   const bestDefense = [...playerStats].filter((p) => p.played > 0).sort((a, b) => a.conceded / a.played - b.conceded / b.played)[0]?.player_name ?? null;
   const biggest = biggestWins[0];
@@ -333,11 +339,13 @@ export function getTitleRace<T extends {
   points: number;
   played: number;
   win_rate: number;
+  remaining?: number;
 }>(playerStats: T[], tournament?: Pick<Tournament, 'format'> | null): TitleRaceRow[] {
-  const maxPlayed = Math.max(...playerStats.map((row) => row.played), 0);
   return playerStats
     .map((row) => {
-      const remainingMatches = tournament?.format === 'league' ? Math.max(maxPlayed - row.played, 0) : 0;
+      // Actual unplayed fixtures. The old "leader's games minus mine" guess was
+      // zero whenever everyone had played the same number, so nothing projected.
+      const remainingMatches = tournament?.format === 'league' ? row.remaining ?? 0 : 0;
       return {
         playerName: row.player_name,
         team: row.team,

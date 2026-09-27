@@ -1,5 +1,6 @@
 import type { Match, MatchStats, Player, RegisteredPlayer, Season, Tournament } from './types';
-import { type CompetitiveScope } from './competitive-ratings';
+import { buildCompetitiveRatingTimeline, type CompetitiveScope } from './competitive-ratings';
+import { calculateStandings } from './algorithms/standings';
 import { calculateExpandedRecords, type ExpandedRecords } from './records';
 
 export { buildCompetitiveRatingTimeline, calculateCompetitiveRatings } from './competitive-ratings';
@@ -8,6 +9,11 @@ export type { CompetitiveRatingRow, CompetitiveRatingSnapshot } from './competit
 type TournamentWithSeason = Pick<Tournament, 'id' | 'name' | 'format' | 'status' | 'created_at' | 'season_id'>;
 type PlayerInstance = Pick<Player, 'id' | 'registered_player_id' | 'name' | 'team' | 'tournament_id'>;
 type ScopeOptions = CompetitiveScope;
+
+// Per-match records need a real sample; three matches is the same bar the
+// win-rate record already uses.
+const PER_MATCH_MINIMUM = 3;
+const SEASON_PER_MATCH_MINIMUM = 2;
 
 export interface TournamentSeasonAssignment {
   tournamentId: string;
@@ -161,7 +167,12 @@ export function calculateCompetitiveRecords(
       .filter((match) => match.stage === 'F')
       .sort((a, b) => (b.played_at ?? '').localeCompare(a.played_at ?? ''))[0];
     const hasFinal = Boolean(finalMatch);
-    const winner = finalMatch ? getWinnerAndLoser(finalMatch) : getLeagueChampion(tournamentMatches);
+    // A league title is only decided once the tournament is completed; a
+    // played final decides a knockout even if the status lags behind.
+    if (!hasFinal && tournament.status !== 'completed') continue;
+    const winner = finalMatch
+      ? getWinnerAndLoser(finalMatch)
+      : getLeagueChampion(tournamentMatches, playerInstances.filter((player) => player.tournament_id === tournament.id));
     if (!winner) continue;
 
     const winnerRegisteredId = instanceToRegistered.get(winner.winnerInstanceId ?? '');
@@ -199,7 +210,7 @@ export function calculateCompetitiveRecords(
 
   const longestWinStreaks = calculateStreaks(playerMatchRows, 'win').slice(0, 10);
   const longestCleanSheetStreaks = calculateStreaks(playerMatchRows, 'clean-sheet').slice(0, 10);
-  const biggestUpsets = calculateBiggestUpsets(scopedMatches, instanceToRegistered, playerById).slice(0, 10);
+  const biggestUpsets = calculateBiggestUpsets(scopedMatches, players, playerInstances, playerById, options).slice(0, 10);
   const aggregateRecords = calculateAggregateRecords(playerMatchRows);
   const bestIndividualSeasons = calculateBestIndividualSeasons(playerMatchRows, seasonNames);
   const biggestLosses = playerMatchRows
@@ -314,34 +325,13 @@ function getWinnerAndLoser(match: Match) {
   };
 }
 
-function getLeagueChampion(matches: Match[]) {
-  const rows = new Map<string, { points: number; goalDifference: number; goalsFor: number }>();
-  for (const match of matches) {
-    if (!match.home_player_id || !match.away_player_id) continue;
-    const home = rows.get(match.home_player_id) ?? { points: 0, goalDifference: 0, goalsFor: 0 };
-    const away = rows.get(match.away_player_id) ?? { points: 0, goalDifference: 0, goalsFor: 0 };
-    const homeScore = match.home_score ?? 0;
-    const awayScore = match.away_score ?? 0;
-
-    home.goalDifference += homeScore - awayScore;
-    home.goalsFor += homeScore;
-    away.goalDifference += awayScore - homeScore;
-    away.goalsFor += awayScore;
-    if (homeScore > awayScore) home.points += 3;
-    else if (homeScore < awayScore) away.points += 3;
-    else {
-      home.points += 1;
-      away.points += 1;
-    }
-    rows.set(match.home_player_id, home);
-    rows.set(match.away_player_id, away);
-  }
-
-  const sorted = [...rows.entries()].sort(([, a], [, b]) =>
-    b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor
-  );
-  if (sorted.length === 0) return null;
-  return { winnerInstanceId: sorted[0][0], loserInstanceId: sorted[1]?.[0] ?? null };
+// Champion and runner-up from the real standings, including the head-to-head
+// tie-break, so the Trophy Cabinet agrees with the table and the Hall of Fame.
+function getLeagueChampion(matches: Match[], players: PlayerInstance[]) {
+  const table = calculateStandings(matches, players.map((player) => ({ id: player.id, name: player.name, team: player.team })))
+    .filter((row) => row.played > 0);
+  if (table.length === 0) return null;
+  return { winnerInstanceId: table[0].player_id, loserInstanceId: table[1]?.player_id ?? null };
 }
 
 function getPlayerMatchRows(
@@ -476,8 +466,21 @@ function calculateAggregateRecords(rows: ReturnType<typeof getPlayerMatchRows>) 
       (row) => Math.round((row.wins / row.matches) * 100),
       (row) => `${row.wins}-${row.draws}-${row.losses}`
     ),
-    bestAttacks: toRecord(values, (row) => row.goalsFor, (row) => `${(row.goalsFor / row.matches).toFixed(2)} goals/match`),
-    bestDefenses: toRecord(values, (row) => row.goalsAgainst, (row) => `${(row.goalsAgainst / row.matches).toFixed(2)} conceded/match`)
+    bestAttacks: toRecord(
+      values.filter((row) => row.matches >= PER_MATCH_MINIMUM),
+      (row) => Number((row.goalsFor / row.matches).toFixed(2)),
+      (row) => `${row.goalsFor} goals in ${row.matches} matches`
+    ),
+    // Fewest conceded per match; a clean record (0.00) is the best defence, so
+    // this ranks low-to-high and keeps zero.
+    bestDefenses: values
+      .filter((row) => row.matches >= PER_MATCH_MINIMUM)
+      .map((row) => ({
+        playerId: row.playerId,
+        playerName: row.playerName,
+        value: Number((row.goalsAgainst / row.matches).toFixed(2)),
+        detail: `${row.goalsAgainst} conceded in ${row.matches} matches`,
+      }))
       .sort((a, b) => a.value - b.value || a.playerName.localeCompare(b.playerName))
       .slice(0, 10),
     cleanSheetKings: toRecord(values, (row) => row.cleanSheets, (row) => `${row.matches} matches`),
@@ -579,39 +582,42 @@ function calculateBestIndividualSeasons(
     ),
     bestAttacks: high(
       (row) => Number((row.goalsFor / row.matches).toFixed(2)),
-      (row) => `${row.seasonName} · ${row.goalsFor} goals`
+      (row) => `${row.seasonName} · ${row.goalsFor} goals`,
+      values.filter((row) => row.matches >= SEASON_PER_MATCH_MINIMUM)
     ),
     bestDefenses: low(
       (row) => Number((row.goalsAgainst / row.matches).toFixed(2)),
-      (row) => `${row.seasonName} · ${row.goalsAgainst} conceded`
+      (row) => `${row.seasonName} · ${row.goalsAgainst} conceded`,
+      values.filter((row) => row.matches >= SEASON_PER_MATCH_MINIMUM)
     ),
     cleanSheets: high((row) => row.cleanSheets, (row) => `${row.seasonName} · ${row.matches} matches`),
     clutchWins: high((row) => row.clutchWins, (row) => `${row.seasonName} · one-goal wins`),
   };
 }
 
+// An upset is a win by the player who went into the match with the lower
+// rating; the bigger the pre-match gap, the bigger the upset. (Scoring every
+// win by margin and xG turned 12-goal thrashings by the favourite into "upsets".)
 function calculateBiggestUpsets(
   matches: Match[],
-  instanceToRegistered: Map<string, string>,
-  playerById: Map<string, Pick<RegisteredPlayer, 'id' | 'name' | 'base_team'>>
+  players: Pick<RegisteredPlayer, 'id' | 'name' | 'base_team'>[],
+  playerInstances: PlayerInstance[],
+  playerById: Map<string, Pick<RegisteredPlayer, 'id' | 'name' | 'base_team'>>,
+  options: ScopeOptions
 ): UpsetRecord[] {
+  const timeline = buildCompetitiveRatingTimeline(players, playerInstances, matches, options);
   return matches
     .map((match) => {
       const result = getWinnerAndLoser(match);
-      if (!result?.winnerInstanceId || !result.loserInstanceId) return null;
-      const winnerRegisteredId = instanceToRegistered.get(result.winnerInstanceId);
-      const loserRegisteredId = instanceToRegistered.get(result.loserInstanceId);
-      const winner = winnerRegisteredId ? playerById.get(winnerRegisteredId) : null;
-      const loser = loserRegisteredId ? playerById.get(loserRegisteredId) : null;
-      if (!winner || !loser) return null;
-
+      const before = timeline.get(match.id);
+      if (!result || !before) return null;
       const winnerIsHome = result.winnerInstanceId === match.home_player_id;
-      const stats = match.stats as MatchStats | undefined;
-      const winnerXg = winnerIsHome ? stats?.home_xg : stats?.away_xg;
-      const loserXg = winnerIsHome ? stats?.away_xg : stats?.home_xg;
-      const xgGap = winnerXg != null && loserXg != null ? loserXg - winnerXg : 0;
-      const margin = Math.abs((match.home_score ?? 0) - (match.away_score ?? 0));
-      const upsetScore = Math.round(Math.max(xgGap, 0) * 20 + margin * 5);
+      const winner = playerById.get(winnerIsHome ? before.homeRegisteredPlayerId : before.awayRegisteredPlayerId);
+      const loser = playerById.get(winnerIsHome ? before.awayRegisteredPlayerId : before.homeRegisteredPlayerId);
+      if (!winner || !loser) return null;
+      const winnerRating = winnerIsHome ? before.homeRating : before.awayRating;
+      const loserRating = winnerIsHome ? before.awayRating : before.homeRating;
+      const upsetScore = loserRating - winnerRating;
       if (upsetScore <= 0) return null;
       return {
         winnerId: winner.id,
@@ -619,9 +625,7 @@ function calculateBiggestUpsets(
         loserName: loser.name,
         matchId: match.id,
         upsetScore,
-        detail: winnerXg != null && loserXg != null
-          ? `Won despite ${winnerXg.toFixed(1)} xG vs ${loserXg.toFixed(1)} xG`
-          : `Won by ${margin}`,
+        detail: `${match.home_score}-${match.away_score} · rated ${winnerRating} vs ${loserRating} before the match`,
       };
     })
     .filter((row): row is UpsetRecord => Boolean(row))

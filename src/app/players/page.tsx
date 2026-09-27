@@ -18,7 +18,8 @@ import AddIcon from '@mui/icons-material/Add';
 import PeopleIcon from '@mui/icons-material/People';
 import PlayerCard from '@/components/player/PlayerCard';
 import EmptyState from '@/components/shared/EmptyState';
-import { calculateEloRatings, getRecentForm } from '@/lib/player-insights';
+import { getRecentForm } from '@/lib/player-insights';
+import { getCompetitiveRatingMap } from '@/lib/competitive-ratings';
 import type { CareerStats, Match, RegisteredPlayer } from '@/lib/types';
 
 type SortMode = 'name' | 'winRate' | 'goals' | 'matches' | 'form' | 'elo';
@@ -43,7 +44,7 @@ export default function PlayersPage() {
   );
 
   const eloByPlayerId = useMemo(
-    () => calculateEloRatings(players, analytics?.player_instances ?? [], analytics?.all_matches ?? []),
+    () => getCompetitiveRatingMap(players, analytics?.player_instances ?? [], analytics?.all_matches ?? []),
     [analytics?.all_matches, analytics?.player_instances, players]
   );
 

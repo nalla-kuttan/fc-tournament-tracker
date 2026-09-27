@@ -338,10 +338,10 @@ export default function CompetitivePage() {
                 <RecordBoard title="Most Matches" rows={selectedSeasonRecords?.mostMatches ?? []} />
               </Grid>
               <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-                <RecordBoard title="Best Attack" rows={selectedSeasonRecords?.bestAttacks ?? []} />
+                <RecordBoard title="Best attack (goals per match)" rows={selectedSeasonRecords?.bestAttacks ?? []} suffix=" per match" />
               </Grid>
               <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-                <RecordBoard title="Best Defense" rows={selectedSeasonRecords?.bestDefenses ?? []} />
+                <RecordBoard title="Best defence (fewest conceded per match)" rows={selectedSeasonRecords?.bestDefenses ?? []} suffix=" per match" />
               </Grid>
               <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 <RecordBoard title="Clean Sheet Kings" rows={selectedSeasonRecords?.cleanSheetKings ?? []} />
@@ -394,7 +394,8 @@ export default function CompetitivePage() {
                   </Grid>
                   <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                     <RecordBoard
-                      title="Single-Season Attack"
+                      title="Single-season attack"
+                      suffix=" per match"
                       rows={(selectedSeasonRecords?.bestIndividualSeasons.bestAttacks ?? []).map((row) => ({
                         playerName: row.playerName,
                         value: row.value,
@@ -404,7 +405,8 @@ export default function CompetitivePage() {
                   </Grid>
                   <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                     <RecordBoard
-                      title="Single-Season Defense"
+                      title="Single-season defence"
+                      suffix=" per match"
                       rows={(selectedSeasonRecords?.bestIndividualSeasons.bestDefenses ?? []).map((row) => ({
                         playerName: row.playerName,
                         value: row.value,
@@ -475,7 +477,7 @@ export default function CompetitivePage() {
               <Grid size={{ xs: 12 }}>
                 <Stack spacing={1}>
                   {selectedSeasonRecords?.biggestUpsets.length === 0 && (
-                    <EmptyState icon={<ShowChartIcon fontSize="inherit" />} title="No upset records yet" description="This season has no qualifying upset records." />
+                    <EmptyState icon={<ShowChartIcon fontSize="inherit" />} title="No upset records yet" description="No lower-rated player has beaten a higher-rated one in this view yet." />
                   )}
                   {selectedSeasonRecords?.biggestUpsets.map((row) => (
                     <GlassCard key={row.matchId}>
@@ -485,7 +487,7 @@ export default function CompetitivePage() {
                           <Typography sx={{ fontWeight: 700 }}>{row.winnerName} upset {row.loserName}</Typography>
                           <Typography sx={{ color: '#C9B9BE', fontSize: '0.875rem' }}>{row.detail}</Typography>
                         </Box>
-                        <Chip label={row.upsetScore} color="primary" />
+                        <Chip label={`+${row.upsetScore} rating gap`} color="primary" />
                       </CardContent>
                     </GlassCard>
                   ))}

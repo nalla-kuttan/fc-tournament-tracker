@@ -182,11 +182,17 @@ describe('competitive helpers', () => {
       playerName: 'Ayaan',
       streak: 2,
     });
-    expect(records.biggestUpsets[0].winnerName).toBe('Bilal');
+    // m-1 was 1000 vs 1000 going in, so Bilal's win there is not an upset;
+    // Ayaan beating higher-rated opponents afterwards is.
+    expect(records.biggestUpsets[0].winnerName).toBe('Ayaan');
+    expect(records.biggestUpsets.some((row) => row.matchId === 'm-1')).toBe(false);
     expect(records.topScorers[0]).toMatchObject({ playerName: 'Ayaan', value: 9 });
     expect(records.mostWins[0]).toMatchObject({ playerName: 'Ayaan', value: 2 });
-    expect(records.bestAttacks[0]).toMatchObject({ playerName: 'Ayaan', value: 9 });
-    expect(records.bestDefenses[0]).toMatchObject({ playerName: 'Cyrus', value: 3 });
+    // Per match, with at least three matches: Ayaan 9 goals / 3 matches.
+    expect(records.bestAttacks[0]).toMatchObject({ playerName: 'Ayaan', value: 3 });
+    // Cyrus (one match) no longer qualifies; Ayaan conceded 6 in 3.
+    expect(records.bestDefenses[0]).toMatchObject({ playerName: 'Ayaan', value: 2 });
+    expect(records.bestDefenses.some((row) => row.playerName === 'Cyrus')).toBe(false);
     expect(records.cleanSheetKings[0]).toMatchObject({ playerName: 'Ayaan', value: 1 });
     expect(records.clutchWins[0]).toMatchObject({ playerName: 'Ayaan', value: 1 });
     expect(records.highestScoringMatches[0]).toMatchObject({ scoreline: '1-4', totalGoals: 5 });

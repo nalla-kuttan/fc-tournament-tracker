@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
+import { calculateStandings } from '@/lib/algorithms/standings';
 import type { Match, MatchStats } from '@/lib/types';
 
 export async function GET(
@@ -34,6 +35,14 @@ export async function GET(
     .eq('is_played', true)
     .eq('is_bye', false)
     .order('played_at', { ascending: false });
+
+  // Fixtures still to play, for the title race.
+  const { data: unplayed } = await supabase
+    .from('match')
+    .select('home_player_id, away_player_id')
+    .eq('tournament_id', tournamentId)
+    .eq('is_played', false)
+    .eq('is_bye', false);
 
   // Get goals
   const { data: allGoals } = await supabase
@@ -82,6 +91,7 @@ export async function GET(
 
     const totalGoals = goalList.filter((g) => g.player_id === p.id).length;
     const played = pMatches.length;
+    const remaining = (unplayed ?? []).filter((m) => m.home_player_id === p.id || m.away_player_id === p.id).length;
 
     return {
       player_id: p.id,
@@ -103,8 +113,13 @@ export async function GET(
       avg_rating: ratingCount > 0 ? ratingSum / ratingCount : 0,
       avg_possession: possCount > 0 ? possSum / possCount : 0,
       motm_awards: motmAwards,
+      remaining,
     };
   });
+
+  // Same order as the league table (points, goal difference, goals, then
+  // head-to-head), so "Champion" here matches the standings and Hall of Fame.
+  const tableOrder = new Map(calculateStandings(matches, playerList).map((row, index) => [row.player_id, index]));
 
   // Top scorers in this tournament
   const topScorers = [...playerStats]
@@ -133,7 +148,7 @@ export async function GET(
 
   return NextResponse.json({
     tournament,
-    player_stats: playerStats.sort((a, b) => b.points - a.points),
+    player_stats: playerStats.sort((a, b) => (tableOrder.get(a.player_id) ?? 0) - (tableOrder.get(b.player_id) ?? 0)),
     top_scorers: topScorers,
     biggest_wins: biggestWins,
     xg_rankings: [...playerStats].filter((s) => s.avg_xg > 0).sort((a, b) => b.avg_xg - a.avg_xg),
