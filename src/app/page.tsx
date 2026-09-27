@@ -28,6 +28,14 @@ import { getPlayerImagePath } from '@/lib/player-images';
 import type { CareerStats, Match, Player, RegisteredPlayer, Tournament } from '@/lib/types';
 import { BRAND_COLORS } from '@/design-tokens';
 import { fetcher } from '@/lib/fetcher';
+import { TOURNAMENT_STATUSES } from '@/lib/constants';
+import {
+  getMatchNightState,
+  newTournamentHref,
+  pickFeaturedTournament,
+  type ChampionEntry,
+  type MatchNightState,
+} from '@/lib/season-status';
 
 const FunFactsSection = dynamic(() => import('@/components/analytics/FunFactsSection'), {
   ssr: false,
@@ -241,33 +249,121 @@ function KickoffFlow({
   );
 }
 
+type HeroMatch = Match;
+type HeroAction = { label: string; href: string };
+
+function standingsHref(tournament: Pick<Tournament, 'id' | 'format'>) {
+  return `/tournaments/${tournament.id}/${tournament.format === 'knockout' ? 'bracket' : 'standings'}`;
+}
+
+function championRecord(champion: ChampionEntry) {
+  const { stats } = champion;
+  if (stats.final_score) return `Won the final ${stats.final_score}.`;
+  if (stats.played == null) return '';
+  const gd = (stats.goals_for ?? 0) - (stats.goals_against ?? 0);
+  return `${stats.points} points from ${stats.played} matches · ${stats.wins}W ${stats.draws}D ${stats.losses}L · ${gd > 0 ? '+' : ''}${gd} goal difference.`;
+}
+
+// One headline, one explanation and the next two actions for every state the
+// featured tournament can be in, so the hero never claims a finished season is live.
+function heroContent(state: MatchNightState<HeroMatch>): {
+  title: string;
+  body: string;
+  primary: HeroAction;
+  secondary: HeroAction;
+  contextLabel: string;
+  live: boolean;
+} {
+  const { tournament } = state;
+  const base = `/tournaments/${tournament.id}`;
+  const table = { label: tournament.format === 'knockout' ? 'View bracket' : 'View standings', href: standingsHref(tournament) };
+  switch (state.kind) {
+    case 'next-match':
+      return {
+        title: `${state.match.home_player?.name ?? 'Home'} vs ${state.match.away_player?.name ?? 'Away'}`,
+        body: `Round ${state.match.round_number} is ready. Enter the score and the standings update around it.`,
+        primary: { label: 'Enter next result', href: `${base}/matches/${state.match.id}` },
+        secondary: table,
+        contextLabel: 'Playing now',
+        live: true,
+      };
+    case 'awaiting-fixture':
+      return {
+        title: tournament.name,
+        body: 'The next fixture is waiting on earlier results. Open the tournament to see what’s left.',
+        primary: { label: 'Open tournament', href: base },
+        secondary: table,
+        contextLabel: 'Playing now',
+        live: true,
+      };
+    case 'awaiting-close':
+      return {
+        title: `Every ${tournament.name} fixture is in`,
+        body: 'Check the final table, then mark the tournament complete in Settings to crown the champion.',
+        primary: { label: tournament.format === 'knockout' ? 'View final bracket' : 'View final table', href: standingsHref(tournament) },
+        secondary: { label: 'Open settings', href: `${base}/settings` },
+        contextLabel: 'Ready to close',
+        live: true,
+      };
+    case 'awaiting-schedule':
+      return {
+        title: tournament.name,
+        body: 'Players are in. Generate the schedule to start round one.',
+        primary: { label: 'Generate schedule', href: base },
+        secondary: { label: 'Check players', href: `${base}/players` },
+        contextLabel: 'Setting up',
+        live: false,
+      };
+    case 'complete': {
+      const next = state.nextName || 'the next tournament';
+      return {
+        title: state.champion ? `${state.champion.winner_name} won ${tournament.name}` : `${tournament.name} is complete`,
+        body: state.champion
+          ? `${championRecord(state.champion)} Same group again? Start ${next} with this line-up ready to go.`.trim()
+          : `Start ${next} with the same line-up, or look back at the final table.`,
+        primary: { label: `Start ${next}`, href: newTournamentHref(tournament, state.nextName) },
+        secondary: { label: tournament.format === 'knockout' ? 'View final bracket' : 'View final table', href: standingsHref(tournament) },
+        contextLabel: 'Last tournament',
+        live: false,
+      };
+    }
+    default:
+      return {
+        title: tournament.name,
+        body: 'Loading the latest fixtures…',
+        primary: { label: 'Open tournament', href: base },
+        secondary: table,
+        contextLabel: 'Playing now',
+        live: true,
+      };
+  }
+}
+
 function MatchNightCommand({
-  featuredTournament,
-  nextMatch,
+  state,
   refreshing,
   dataAvailable,
-  onPrimary,
-  onSecondary,
+  onNavigate,
 }: {
-  featuredTournament: Tournament;
-  nextMatch: Match | null;
+  state: MatchNightState<HeroMatch>;
   refreshing: boolean;
   dataAvailable: boolean;
-  onPrimary: () => void;
-  onSecondary: () => void;
+  onNavigate: (href: string) => void;
 }) {
-  const primaryLabel = nextMatch ? 'Enter Next Result' : 'Open Tournament';
-  const secondaryLabel = 'View Standings';
+  const { tournament } = state;
+  const content = heroContent(state);
+  const statusLabel = TOURNAMENT_STATUSES[tournament.status]?.label ?? tournament.status;
+  const highlighted = state.kind === 'next-match';
 
   return (
     <GlassCard
       sx={{
         ...surfaceSx,
         mb: 1.75,
-        background: nextMatch
+        background: highlighted
           ? 'linear-gradient(135deg, rgba(98, 17, 34, 0.96), #241019 68%)'
           : 'linear-gradient(135deg, rgba(51, 64, 117, 0.54), #241019 68%)',
-        borderColor: nextMatch ? 'rgba(234, 108, 86, 0.32)' : 'rgba(98, 17, 34, 0.5)',
+        borderColor: highlighted ? 'rgba(234, 108, 86, 0.32)' : 'rgba(98, 17, 34, 0.5)',
       }}
     >
       <CardContent
@@ -290,28 +386,31 @@ function MatchNightCommand({
               bgcolor: dataAvailable ? 'transparent' : 'rgba(245, 158, 11, 0.1)',
             }}
           />
-          <Typography component="h1" sx={{ color: COLORS.textIce, fontSize: { xs: '1.7rem', sm: '2.25rem' }, lineHeight: 1.08, fontWeight: 700 }}>
-            {nextMatch
-              ? `${nextMatch.home_player?.name ?? 'Home'} vs ${nextMatch.away_player?.name ?? 'Away'}`
-              : featuredTournament.name}
+          <Typography component="h1" sx={{ color: COLORS.textIce, fontSize: { xs: '1.7rem', sm: '2.25rem' }, lineHeight: 1.08, fontWeight: 700, textWrap: 'balance' }}>
+            {state.kind === 'complete' && state.champion && (
+              <EmojiEventsIcon aria-hidden="true" sx={{ color: COLORS.amber, fontSize: '0.9em', mr: 1, verticalAlign: '-0.1em' }} />
+            )}
+            {content.title}
           </Typography>
           <Typography sx={{ color: COLORS.textSteel, mt: 1, maxWidth: 680, lineHeight: 1.6 }}>
-            {nextMatch
-              ? `Round ${nextMatch.round_number} is ready. Enter the score and the standings will update around it.`
-              : 'The tournament is active. Review the table or open tournament control before the next fixture.'}
+            {content.body}
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
-            <Button variant="contained" onClick={onPrimary} startIcon={<SportsSoccerIcon />}>
-              {primaryLabel}
+            <Button
+              variant="contained"
+              onClick={() => onNavigate(content.primary.href)}
+              startIcon={state.kind === 'complete' ? <AddIcon /> : <SportsSoccerIcon />}
+            >
+              {content.primary.label}
             </Button>
-            <Button variant="outlined" onClick={onSecondary}>
-              {secondaryLabel}
+            <Button variant="outlined" onClick={() => onNavigate(content.secondary.href)}>
+              {content.secondary.label}
             </Button>
           </Box>
         </Box>
 
         <Box
-          aria-label="Active tournament context"
+          aria-label={`${content.contextLabel}: ${tournament.name}`}
           sx={{
             py: 2,
             px: { xs: 0, md: 2.5 },
@@ -319,14 +418,14 @@ function MatchNightCommand({
             borderLeft: { xs: 'none', md: '1px solid rgba(201, 185, 190, 0.12)' },
           }}
         >
-          <Typography sx={{ color: COLORS.textSteel, fontSize: '0.875rem' }}>Active tournament</Typography>
+          <Typography sx={{ color: COLORS.textSteel, fontSize: '0.875rem' }}>{content.contextLabel}</Typography>
           <Typography sx={{ color: COLORS.textIce, fontWeight: 700, fontSize: '1.2rem', mt: 0.25 }} noWrap>
-            {featuredTournament.name}
+            {tournament.name}
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.25 }}>
-            <Chip size="small" label={featuredTournament.format} />
-            <Chip size="small" label={featuredTournament.status} color={featuredTournament.status === 'active' ? 'success' : 'default'} />
-            {nextMatch && <Chip size="small" label={`Round ${nextMatch.round_number}`} />}
+            <Chip size="small" label={tournament.format} />
+            <Chip size="small" label={statusLabel} color={content.live ? 'success' : 'default'} />
+            {state.kind === 'next-match' && <Chip size="small" label={`Round ${state.match.round_number}`} />}
           </Box>
         </Box>
       </CardContent>
@@ -410,10 +509,7 @@ export default function HomePage() {
     mutate: retryHallOfFame,
   } = useSWR<HallOfFameEntry[]>(hasTournament ? '/api/analytics/hall-of-fame' : null, fetcher, { ...localErrorHandling, revalidateOnFocus: false });
 
-  const featuredTournament = useMemo(
-    () => tournaments.find((tournament) => tournament.status === 'active') ?? tournaments[0] ?? null,
-    [tournaments]
-  );
+  const featuredTournament = useMemo(() => pickFeaturedTournament(tournaments), [tournaments]);
   const {
     data: tournamentDetails,
     error: tournamentDetailsError,
@@ -421,9 +517,11 @@ export default function HomePage() {
     mutate: retryTournamentDetails,
   } = useSWR<TournamentDetails>(featuredTournament ? `/api/tournaments/${featuredTournament.id}` : null, fetcher, localErrorHandling);
 
-  const nextMatch = useMemo(
-    () => tournamentDetails?.matches.find((match) => !match.is_played && !match.is_bye && match.home_player && match.away_player) ?? null,
-    [tournamentDetails?.matches]
+  const matchNight = useMemo(
+    () => featuredTournament
+      ? getMatchNightState(featuredTournament, tournamentDetails?.matches, hallOfFame as ChampionEntry[])
+      : null,
+    [featuredTournament, tournamentDetails?.matches, hallOfFame]
   );
   const recentMatches = useMemo(
     () => (analytics?.all_matches ?? []).filter((match) => match.is_played && !match.is_bye).slice(0, 4),
@@ -491,12 +589,11 @@ export default function HomePage() {
     );
   }
 
-  if (!featuredTournament) return null;
+  if (!featuredTournament || !matchNight) return null;
 
-  const commandPrimaryPath = nextMatch
-    ? `/tournaments/${nextMatch.tournament_id}/matches/${nextMatch.id}`
+  const firstFixturePath = matchNight.kind === 'next-match'
+    ? `/tournaments/${featuredTournament.id}/matches/${matchNight.match.id}`
     : `/tournaments/${featuredTournament.id}`;
-  const commandSecondaryPath = `/tournaments/${featuredTournament.id}/standings`;
   const dataAvailable = !tournamentsError && !tournamentDetailsError;
   const refreshing = validatingTournaments || validatingTournamentDetails;
 
@@ -522,12 +619,10 @@ export default function HomePage() {
       )}
 
       <MatchNightCommand
-        featuredTournament={featuredTournament}
-        nextMatch={nextMatch}
+        state={matchNight}
         refreshing={refreshing}
         dataAvailable={dataAvailable}
-        onPrimary={() => router.push(commandPrimaryPath)}
-        onSecondary={() => router.push(commandSecondaryPath)}
+        onNavigate={(href) => router.push(href)}
       />
 
       <SignalStrip
@@ -671,7 +766,7 @@ export default function HomePage() {
                 <Typography sx={{ color: COLORS.textSteel, mt: 0.5 }}>
                   Play the next fixture to unlock the power table, rivalries, records, and player form.
                 </Typography>
-                <Button sx={{ mt: 1.5 }} endIcon={<ArrowForwardIcon />} onClick={() => router.push(commandPrimaryPath)}>
+                <Button sx={{ mt: 1.5 }} endIcon={<ArrowForwardIcon />} onClick={() => router.push(firstFixturePath)}>
                   Open next fixture
                 </Button>
               </CardContent>

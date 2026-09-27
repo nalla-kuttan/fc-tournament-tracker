@@ -14,12 +14,14 @@ export const tournamentCreateSchema = z.object({
   format: z.enum(['league', 'knockout', 'cup']),
   pin: pinSchema,
   season_id: uuidSchema.nullish(),
+  // Start a new competitive season with this name instead of joining one.
+  new_season_name: z.string().trim().min(1).max(100).optional(),
   playerSelections: z.array(z.object({
     registered_player_id: uuidSchema,
     name: shortTextSchema.optional(),
     team: shortTextSchema,
   })).max(64).default([]),
-});
+}).refine((value) => !(value.season_id && value.new_season_name), 'Choose an existing season or a new one, not both');
 
 export const pinRequestSchema = z.object({ pin: pinSchema });
 
