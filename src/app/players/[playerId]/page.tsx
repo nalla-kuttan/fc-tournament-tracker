@@ -43,6 +43,7 @@ import {
   getRecentForm,
   getTeamHistory,
 } from '@/lib/player-insights';
+import { userFacingError } from '@/lib/user-error';
 import dynamic from 'next/dynamic';
 import PageSkeleton from '@/components/shared/PageSkeleton';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -128,13 +129,13 @@ export default function PlayerProfilePage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to update player');
+        throw new Error(data.error || 'The player could not be updated. Try again.');
       }
 
       await mutatePlayer();
       setEditOpen(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(userFacingError(err, 'The player', 'updated'));
     } finally {
       setSaving(false);
     }

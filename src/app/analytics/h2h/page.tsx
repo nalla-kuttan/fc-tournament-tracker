@@ -23,6 +23,8 @@ import { fetcher } from '@/lib/fetcher';
 import { getPlayerImagePath } from '@/lib/player-images';
 import type { RegisteredPlayer, H2HData, CareerStats, Match } from '@/lib/types';
 import PageSkeleton from '@/components/shared/PageSkeleton';
+import { userFacingError } from '@/lib/user-error';
+import SectionTitle from '@/components/shared/SectionTitle';
 
 interface GlobalData {
   career_stats: CareerStats[];
@@ -46,19 +48,27 @@ function H2HPageContent() {
   const [comparisonKey, setComparisonKey] = useState<string | null>(null);
   const [h2hModalOpen, setH2hModalOpen] = useState(false);
   const { data: globalData } = useSWR<GlobalData>('/api/analytics/global', fetcher);
-  const { data: h2hData, error, isLoading: loading } = useSWR<H2HData>(
-    comparisonKey ?? requestedComparisonKey,
-    fetcher
-  );
-  const players = globalData?.registered_players ?? EMPTY_PLAYERS;
-  const player1 = players.find((player) => player.id === (player1Id ?? requestedPlayer1Id)) ?? null;
-  const player2 = players.find((player) => player.id === (player2Id ?? requestedPlayer2Id)) ?? null;
   const rivalries = useMemo(
     () => globalData
       ? getRivalries(globalData.registered_players, globalData.player_instances, globalData.all_matches)
       : [],
     [globalData]
   );
+  // With nothing picked yet, open on the most-played rivalry instead of two empty pickers.
+  const busiest = rivalries[0];
+  const showingDefault = player1Id === null && player2Id === null && !requestedComparisonKey && Boolean(busiest);
+  const defaultKey = showingDefault && busiest ? `/api/analytics/h2h?p1=${busiest.p1Id}&p2=${busiest.p2Id}` : null;
+  const { data: h2hData, error, isLoading: loading } = useSWR<H2HData>(
+    comparisonKey ?? requestedComparisonKey ?? defaultKey,
+    fetcher
+  );
+  const players = globalData?.registered_players ?? EMPTY_PLAYERS;
+  const player1 = players.find((player) => player.id === (player1Id ?? (requestedPlayer1Id || (showingDefault ? busiest?.p1Id : '')))) ?? null;
+  const player2 = players.find((player) => player.id === (player2Id ?? (requestedPlayer2Id || (showingDefault ? busiest?.p2Id : '')))) ?? null;
+  const otherRivalries = rivalries.filter((rivalry) => {
+    const pair = [rivalry.p1Id, rivalry.p2Id];
+    return !(player1 && player2 && pair.includes(player1.id) && pair.includes(player2.id));
+  });
 
   const handleCompare = () => {
     if (!player1 || !player2) return;
@@ -101,8 +111,14 @@ function H2HPageContent() {
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          {error instanceof Error ? error.message : 'Something went wrong'}
+          {userFacingError(error, 'This comparison', 'loaded')}
         </Alert>
+      )}
+
+      {showingDefault && busiest && (
+        <Typography aria-live="polite" color="text.secondary" sx={{ mb: 2, maxWidth: '65ch' }}>
+          Showing your most-played rivalry, {busiest.p1Name} vs {busiest.p2Name} ({busiest.matches.length} meetings). Pick any two players to compare others.
+        </Typography>
       )}
 
       {/* Player Selection */}
@@ -111,7 +127,7 @@ function H2HPageContent() {
           <PlayerSelector
             label="Player 1"
             value={player1}
-            onChange={(player) => setPlayer1Id(player?.id ?? '')}
+            onChange={(player) => { setPlayer1Id(player?.id ?? ''); if (player2Id === null) setPlayer2Id(player2?.id ?? ''); }}
             excludeId={player2?.id}
           />
         </Grid>
@@ -122,7 +138,7 @@ function H2HPageContent() {
           <PlayerSelector
             label="Player 2"
             value={player2}
-            onChange={(player) => setPlayer2Id(player?.id ?? '')}
+            onChange={(player) => { setPlayer2Id(player?.id ?? ''); if (player1Id === null) setPlayer1Id(player1?.id ?? ''); }}
             excludeId={player1?.id}
           />
         </Grid>
@@ -138,16 +154,16 @@ function H2HPageContent() {
         {loading ? <CircularProgress size={24} /> : 'Compare'}
       </Button>
 
+      {!globalData && <PageSkeleton rows={2} label="Loading rivalries" />}
+
       {/* Results */}
       {h2hData && <H2HComparison data={h2hData} />}
 
-      {!h2hData && rivalries.length > 0 && (
+      {otherRivalries.length > 0 && (
         <Box sx={{ mt: 4 }}>
-          <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-            Rivalry Discovery
-          </Typography>
+          <SectionTitle title={h2hData ? 'Other rivalries' : 'Busiest rivalries'} />
           <Grid container spacing={2}>
-            {rivalries.slice(0, 6).map((rivalry) => (
+            {otherRivalries.slice(0, 6).map((rivalry) => (
               <Grid key={`${rivalry.p1Id}-${rivalry.p2Id}`} size={{ xs: 12, md: 6 }}>
                 <GlassCard sx={{ height: '100%' }}>
                   <CardActionArea onClick={() => chooseRivalry(rivalry)} aria-label={`Compare ${rivalry.p1Name} and ${rivalry.p2Name}`} sx={{ height: '100%' }}>
@@ -162,14 +178,14 @@ function H2HPageContent() {
                         </Avatar>
                         <Box sx={{ minWidth: 0 }}>
                           <Typography fontWeight={900} noWrap>{rivalry.p1Name}</Typography>
-                          <Typography variant="caption" color="text.secondary">Home</Typography>
+                          <Typography variant="caption" color="text.secondary">{rivalry.p1Wins} {rivalry.p1Wins === 1 ? 'win' : 'wins'}</Typography>
                         </Box>
                       </Box>
                       <Typography sx={{ color: '#C9B9BE', fontSize: '0.72rem', fontWeight: 900 }}>VS</Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1, minWidth: 0 }}>
                         <Box sx={{ minWidth: 0, textAlign: 'right' }}>
                           <Typography fontWeight={900} noWrap>{rivalry.p2Name}</Typography>
-                          <Typography variant="caption" color="text.secondary">Away</Typography>
+                          <Typography variant="caption" color="text.secondary">{rivalry.p2Wins} {rivalry.p2Wins === 1 ? 'win' : 'wins'}</Typography>
                         </Box>
                         <Avatar
                           src={getPlayerImagePath(rivalry.p2Name)}
@@ -181,14 +197,14 @@ function H2HPageContent() {
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, mb: 0.5 }}>
                       <Typography variant="body2" color="text.secondary">
-                        {rivalry.p1Wins}-{rivalry.draws}-{rivalry.p2Wins} record · {rivalry.totalGoals} goals
+                        {rivalry.draws} {rivalry.draws === 1 ? 'draw' : 'draws'} · {rivalry.totalGoals} goals
                       </Typography>
                       <Typography variant="caption" sx={{ color: '#EA6C56', fontWeight: 800 }}>
-                        {rivalry.matches.length}x
+                        {rivalry.matches.length} meetings
                       </Typography>
                     </Box>
                     <Typography variant="caption" color="text.secondary">
-                      Avg margin {(rivalry.closeness / Math.max(rivalry.matches.length, 1)).toFixed(1)}
+                      Average margin {(rivalry.closeness / Math.max(rivalry.matches.length, 1)).toFixed(1)} goals
                     </Typography>
                   </CardContent>
                   </CardActionArea>

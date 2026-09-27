@@ -24,6 +24,7 @@ import { useAdmin } from '@/contexts/AdminContext';
 import { getChampionName } from '@/lib/season-status';
 import type { Match, StandingRow } from '@/lib/types';
 import PageSkeleton from '@/components/shared/PageSkeleton';
+import { userFacingError } from '@/lib/user-error';
 
 export default function TournamentDashboard() {
   const params = useParams();
@@ -59,12 +60,12 @@ export default function TournamentDashboard() {
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to generate schedule');
+        throw new Error(data.error || 'The schedule could not be generated. Try again.');
       }
       mutate(`/api/tournaments/${tournamentId}`);
       mutate(`/api/tournaments/${tournamentId}/standings`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(userFacingError(err, 'The schedule', 'generated'));
     } finally {
       setGenerating(false);
     }

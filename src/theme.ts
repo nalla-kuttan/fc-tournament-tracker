@@ -81,6 +81,17 @@ const theme = createTheme({
   },
   spacing: 8,
   components: {
+    // Letter avatars for players without a photo: MUI's default grey with
+    // dark text was 4.3:1; ice on French Blue Dark is 12.8:1.
+    MuiAvatar: {
+      styleOverrides: {
+        colorDefault: {
+          backgroundColor: BRAND_COLORS.frenchBlueDark,
+          color: BRAND_COLORS.text,
+          fontWeight: 700,
+        },
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: {
         body: {
