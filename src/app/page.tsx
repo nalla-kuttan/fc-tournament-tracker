@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -42,6 +42,9 @@ const FunFactsSection = dynamic(() => import('@/components/analytics/FunFactsSec
   ssr: false,
   loading: () => <Skeleton variant="rounded" height={160} />,
 });
+
+const TOURNAMENT_PREVIEW_COUNT = 3;
+const HOME_RECORD_COUNT = 4;
 
 interface HallOfFameEntry {
   tournament_id: string;
@@ -423,55 +426,9 @@ function MatchNightCommand({
   );
 }
 
-function SignalStrip({
-  players,
-  matches,
-  goals,
-  loading,
-  unavailable,
-}: {
-  players: number;
-  matches: number;
-  goals: number;
-  loading: boolean;
-  unavailable: boolean;
-}) {
-  const signals = [
-    { label: 'Registered players', value: players, color: COLORS.frenchBlueLight },
-    { label: 'Played matches', value: matches, color: COLORS.coralLight },
-    { label: 'Recorded goals', value: goals, color: COLORS.amber },
-  ];
-
-  return (
-    <GlassCard sx={{ ...surfaceSx, mb: 1.75 }}>
-      <Box role="list" aria-label="Competition summary" sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
-        {signals.map((signal, index) => (
-          <Box
-            role="listitem"
-            key={signal.label}
-            sx={{
-              px: { xs: 1.25, sm: 2.25 },
-              py: 1.75,
-              borderLeft: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.1)',
-            }}
-          >
-            <Typography sx={{ color: COLORS.textSteel, fontSize: '0.875rem' }}>{signal.label}</Typography>
-            {loading ? (
-              <Skeleton width={54} height={34} />
-            ) : (
-              <Typography sx={{ color: unavailable ? COLORS.textSteel : signal.color, fontWeight: 700, fontSize: { xs: '1.35rem', sm: '1.65rem' }, lineHeight: 1.15 }}>
-                {unavailable ? '—' : signal.value}
-              </Typography>
-            )}
-          </Box>
-        ))}
-      </Box>
-    </GlassCard>
-  );
-}
-
 export default function HomePage() {
   const router = useRouter();
+  const [showAllTournaments, setShowAllTournaments] = useState(false);
   const {
     data: tournaments = [],
     error: tournamentsError,
@@ -542,6 +499,16 @@ export default function HomePage() {
     ).sort((a, b) => b.titles - a.titles),
     [hallOfFame]
   );
+
+  const winnersByTournament = useMemo(
+    () => new Map(hallOfFame.map((entry) => [entry.tournament_id, entry.winner_name])),
+    [hallOfFame]
+  );
+  const newestTournaments = useMemo(
+    () => [...tournaments].sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? '')),
+    [tournaments]
+  );
+  const visibleTournaments = showAllTournaments ? newestTournaments : newestTournaments.slice(0, TOURNAMENT_PREVIEW_COUNT);
 
   if (loadingTournaments) return <LoadingHome />;
 
@@ -615,49 +582,16 @@ export default function HomePage() {
         onNavigate={(href) => router.push(href)}
       />
 
-      <SignalStrip
-        players={players.length}
-        matches={analytics?.all_matches.length ?? 0}
-        goals={analytics?.all_goals.length ?? 0}
-        loading={loadingPlayers || loadingAnalytics}
-        unavailable={Boolean(playersError || analyticsError)}
-      />
+      {analytics ? (
+        <Typography sx={{ color: COLORS.textSteel, fontSize: '0.875rem', px: 0.5, mb: 1.5 }}>
+          {players.length} players · {analytics.all_matches.length.toLocaleString()} matches · {analytics.all_goals.length.toLocaleString()} goals on record
+        </Typography>
+      ) : loadingAnalytics ? (
+        <Skeleton width={260} height={24} sx={{ mb: 1.5 }} />
+      ) : null}
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', xl: 'minmax(0, 1.2fr) minmax(340px, 0.8fr)' }, gap: 1.5, alignItems: 'start' }}>
-        <Box sx={{ display: 'grid', gap: 1.5, minWidth: 0 }}>
-          <GlassCard sx={surfaceSx}>
-            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-              <Box sx={{ px: 2, pt: 2 }}>
-                <SectionTitle
-                  title="Your tournaments"
-                  action={
-                    <Button size="small" startIcon={<AddIcon />} onClick={() => router.push('/tournaments/new')}>
-                      New tournament
-                    </Button>
-                  }
-                />
-              </Box>
-              {tournaments.slice(0, 4).map((tournament, index) => (
-                <TournamentCard key={tournament.id} tournament={tournament} showDivider={index < Math.min(tournaments.length, 4) - 1} index={index} />
-              ))}
-            </CardContent>
-          </GlassCard>
-
-          {analytics && analytics.all_matches.length > 0 && (
-            <GlassCard sx={surfaceSx}>
-              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <SectionTitle title="Records and milestones" />
-                <FunFactsSection
-                  matches={analytics.all_matches}
-                  goals={analytics.all_goals}
-                  registeredPlayers={analytics.registered_players}
-                  playerInstances={analytics.player_instances}
-                />
-              </CardContent>
-            </GlassCard>
-          )}
-        </Box>
-
+      {/* Where the group stands: current form on one side, legacy on the other. */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' }, gap: 1.5, alignItems: 'start' }}>
         <Box sx={{ display: 'grid', gap: 1.5, minWidth: 0 }}>
           {loadingAnalytics && (
             <GlassCard sx={surfaceSx}>
@@ -706,24 +640,6 @@ export default function HomePage() {
             </GlassCard>
           )}
 
-          {champions.length > 0 && (
-            <GlassCard sx={surfaceSx}>
-              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <SectionTitle title="Hall of Fame" />
-                {champions.slice(0, 4).map((champion, index) => (
-                  <Box key={champion.name} sx={{ display: 'grid', gridTemplateColumns: '36px 1fr auto', alignItems: 'center', gap: 1, py: 1, borderTop: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.08)' }}>
-                    <MilitaryTechIcon aria-hidden="true" sx={{ color: index === 0 ? COLORS.amber : COLORS.textSteel }} />
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography sx={{ fontWeight: 700 }} noWrap>{champion.name}</Typography>
-                      <Typography sx={{ color: COLORS.textSteel, fontSize: '0.875rem' }} noWrap>{champion.latestTitle} · {champion.team}</Typography>
-                    </Box>
-                    <Chip size="small" label={`${champion.titles} title${champion.titles === 1 ? '' : 's'}`} />
-                  </Box>
-                ))}
-              </CardContent>
-            </GlassCard>
-          )}
-
           {recentMatches.length > 0 && (
             <GlassCard sx={surfaceSx}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -731,7 +647,7 @@ export default function HomePage() {
                 {recentMatches.map((match, index) => (
                   <Box
                     component={Link}
-                    href={`/tournaments/${match.tournament_id}`}
+                    href={`/tournaments/${match.tournament_id}/matches/${match.id}`}
                     key={match.id}
                     sx={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 1, py: 1, color: 'inherit', textDecoration: 'none', borderTop: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.08)' }}
                   >
@@ -739,9 +655,10 @@ export default function HomePage() {
                       <Typography sx={{ fontWeight: 700 }} noWrap>
                         {match.home_player?.name} {match.home_score}–{match.away_score} {match.away_player?.name}
                       </Typography>
-                      <Typography sx={{ color: COLORS.textSteel, fontSize: '0.875rem' }} noWrap>{match.tournament?.name ?? 'Tournament'}</Typography>
+                      <Typography sx={{ color: COLORS.textSteel, fontSize: '0.875rem' }} noWrap>
+                        {match.tournament?.name ?? 'Tournament'} · Round {match.round_number}
+                      </Typography>
                     </Box>
-                    <Chip size="small" label={`Round ${match.round_number}`} />
                   </Box>
                 ))}
               </CardContent>
@@ -763,7 +680,77 @@ export default function HomePage() {
             </GlassCard>
           )}
         </Box>
+
+        <Box sx={{ display: 'grid', gap: 1.5, minWidth: 0 }}>
+          {champions.length > 0 && (
+            <GlassCard sx={surfaceSx}>
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <SectionTitle title="Hall of Fame" />
+                {champions.slice(0, 4).map((champion, index) => (
+                  <Box key={champion.name} sx={{ display: 'grid', gridTemplateColumns: '36px 1fr auto', alignItems: 'center', gap: 1, py: 1, borderTop: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.08)' }}>
+                    <MilitaryTechIcon aria-hidden="true" sx={{ color: index === 0 ? COLORS.amber : COLORS.textSteel }} />
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography sx={{ fontWeight: 700 }} noWrap>{champion.name}</Typography>
+                      <Typography sx={{ color: COLORS.textSteel, fontSize: '0.875rem' }} noWrap>Latest: {champion.latestTitle} · {champion.team}</Typography>
+                    </Box>
+                    <Chip size="small" label={`${champion.titles} title${champion.titles === 1 ? '' : 's'}`} />
+                  </Box>
+                ))}
+              </CardContent>
+            </GlassCard>
+          )}
+
+          {analytics && analytics.all_matches.length > 0 && (
+            <GlassCard sx={surfaceSx}>
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <SectionTitle
+                  title="Club records"
+                  action={<Button size="small" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/competitive')}>Record book</Button>}
+                />
+                <FunFactsSection
+                  matches={analytics.all_matches}
+                  goals={analytics.all_goals}
+                  registeredPlayers={analytics.registered_players}
+                  playerInstances={analytics.player_instances}
+                  limit={HOME_RECORD_COUNT}
+                />
+              </CardContent>
+            </GlassCard>
+          )}
+        </Box>
       </Box>
+
+      {/* The archive: every tournament, newest first. */}
+      <GlassCard sx={{ ...surfaceSx, mt: 1.5 }}>
+        <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+          <Box sx={{ px: 2, pt: 2 }}>
+            <SectionTitle
+              title="All tournaments"
+              action={
+                <Button size="small" startIcon={<AddIcon />} onClick={() => router.push('/tournaments/new')}>
+                  New tournament
+                </Button>
+              }
+            />
+          </Box>
+          {visibleTournaments.map((tournament, index) => (
+            <TournamentCard
+              key={tournament.id}
+              tournament={tournament}
+              winner={winnersByTournament.get(tournament.id)}
+              showDivider={index < visibleTournaments.length - 1}
+              index={index}
+            />
+          ))}
+          {tournaments.length > TOURNAMENT_PREVIEW_COUNT && (
+            <Box sx={{ px: 2, py: 1, borderTop: '1px solid rgba(201, 185, 190, 0.06)' }}>
+              <Button size="small" onClick={() => setShowAllTournaments((open) => !open)} aria-expanded={showAllTournaments}>
+                {showAllTournaments ? 'Show fewer' : `Show all ${tournaments.length}`}
+              </Button>
+            </Box>
+          )}
+        </CardContent>
+      </GlassCard>
     </Box>
   );
 }

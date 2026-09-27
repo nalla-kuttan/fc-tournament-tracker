@@ -29,7 +29,7 @@ const FORMAT_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: 
   },
 };
 
-export default function TournamentCard({ tournament, showDivider = true }: { tournament: Tournament; showDivider?: boolean; index?: number }) {
+export default function TournamentCard({ tournament, showDivider = true, winner }: { tournament: Tournament; showDivider?: boolean; index?: number; winner?: string | null }) {
   const statusConfig = TOURNAMENT_STATUSES[tournament.status];
   const formatConfig = FORMAT_CONFIG[tournament.format] || FORMAT_CONFIG.league;
 
@@ -84,12 +84,13 @@ export default function TournamentCard({ tournament, showDivider = true }: { tou
         </Typography>
         <Typography variant="caption" sx={{ color: '#D7C6CB', fontSize: '0.875rem' }}>
           {tournament.format.charAt(0).toUpperCase() + tournament.format.slice(1)} &middot; {new Date(tournament.created_at).toLocaleDateString()}
+          {winner && <> &middot; Won by {winner}</>}
         </Typography>
       </Box>
 
       {/* Status chip */}
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Chip
+        {tournament.status !== 'completed' && <Chip
           label={statusConfig.label}
           size="small"
           sx={{
@@ -102,7 +103,7 @@ export default function TournamentCard({ tournament, showDivider = true }: { tou
             border: `1px solid ${statusConfig.color}25`,
             letterSpacing: '0.02em',
           }}
-        />
+        />}
 
         <ChevronRightIcon aria-hidden="true" sx={{ color: '#C9B9BE', fontSize: 20 }} />
       </Box>
