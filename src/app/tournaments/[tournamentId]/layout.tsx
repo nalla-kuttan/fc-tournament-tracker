@@ -49,16 +49,7 @@ export default function TournamentLayout({ children }: { children: ReactNode }) 
       <Box>
         <BackButton />
         <Box className="animate-section" sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <Typography
-            variant="h4"
-            fontWeight={700}
-            sx={{
-              background: 'linear-gradient(135deg, #FFF7F6 0%, #C9B9BE 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
+          <Typography variant="h4" fontWeight={700} sx={{ color: 'text.primary' }}>
             {tournament.name}
           </Typography>
           <Chip

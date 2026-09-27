@@ -5,7 +5,6 @@ import useSWR from 'swr';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
-import CircularProgress from '@mui/material/CircularProgress';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
@@ -19,6 +18,7 @@ import BackButton from '@/components/shared/BackButton';
 import type { Tournament } from '@/lib/types';
 import { getLeagueStory, getTitleRace } from '@/lib/analytics-insights';
 import { fetcher } from '@/lib/fetcher';
+import PageSkeleton from '@/components/shared/PageSkeleton';
 
 interface PlayerStat {
   player_id: string;
@@ -93,9 +93,7 @@ export default function LeagueAnalyticsPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <PageSkeleton />
     );
   }
 
@@ -140,9 +138,7 @@ export default function LeagueAnalyticsPage() {
       </Box>
 
       {dataLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress />
-        </Box>
+        <PageSkeleton />
       ) : data ? (
         <>
           {/* Tournament Story */}

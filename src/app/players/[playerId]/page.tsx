@@ -44,6 +44,7 @@ import {
   getTeamHistory,
 } from '@/lib/player-insights';
 import dynamic from 'next/dynamic';
+import PageSkeleton from '@/components/shared/PageSkeleton';
 
 const WDLDoughnut = dynamic(() => import('@/components/analytics/WDLDoughnut'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
 const SingleRadarChart = dynamic(() => import('@/components/analytics/SingleRadarChart'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
@@ -125,9 +126,7 @@ export default function PlayerProfilePage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <PageSkeleton />
     );
   }
 

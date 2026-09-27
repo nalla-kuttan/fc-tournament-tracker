@@ -1,3 +1,5 @@
+import { BRAND_COLORS } from '@/design-tokens';
+
 export const TEAMS = [
   // Premier League
   'Arsenal',
@@ -178,3 +180,7 @@ export const FORM_COLORS = {
   D: '#A18A93',
   L: '#EF4444',
 } as const;
+
+// Letters on FORM_COLORS badges. Dark ink keeps every badge above WCAG AA
+// (6.3:1 on W, 6.1:1 on D, 5.2:1 on L); white text only reached 2.9-3.6:1.
+export const FORM_TEXT_COLOR = BRAND_COLORS.ink;

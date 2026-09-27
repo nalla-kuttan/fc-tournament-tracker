@@ -23,6 +23,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import TournamentCard from '@/components/tournament/TournamentCard';
 import GlassCard from '@/components/shared/GlassCard';
+import SectionTitle from '@/components/shared/SectionTitle';
 import { getPowerRankings } from '@/lib/analytics-insights';
 import { getPlayerImagePath } from '@/lib/player-images';
 import type { CareerStats, Match, Player, RegisteredPlayer, Tournament } from '@/lib/types';
@@ -86,17 +87,6 @@ const surfaceSx = {
 };
 
 const localErrorHandling = { onError: () => undefined };
-
-function SectionHeading({ title, action }: { title: string; action?: React.ReactNode }) {
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, mb: 1.5 }}>
-      <Typography component="h2" sx={{ fontSize: '1.05rem', fontWeight: 700, color: COLORS.textIce }}>
-        {title}
-      </Typography>
-      {action}
-    </Box>
-  );
-}
 
 function DataErrorPanel({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
@@ -638,7 +628,7 @@ export default function HomePage() {
           <GlassCard sx={surfaceSx}>
             <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
               <Box sx={{ px: 2, pt: 2 }}>
-                <SectionHeading
+                <SectionTitle
                   title="Your tournaments"
                   action={
                     <Button size="small" startIcon={<AddIcon />} onClick={() => router.push('/tournaments/new')}>
@@ -656,7 +646,7 @@ export default function HomePage() {
           {analytics && analytics.all_matches.length > 0 && (
             <GlassCard sx={surfaceSx}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <SectionHeading title="Records and milestones" />
+                <SectionTitle title="Records and milestones" />
                 <FunFactsSection
                   matches={analytics.all_matches}
                   goals={analytics.all_goals}
@@ -681,7 +671,7 @@ export default function HomePage() {
           {powerRankings.length > 0 && (
             <GlassCard sx={surfaceSx}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <SectionHeading
+                <SectionTitle
                   title="Power table"
                   action={<Button size="small" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/analytics/global')}>Full stats</Button>}
                 />
@@ -719,7 +709,7 @@ export default function HomePage() {
           {champions.length > 0 && (
             <GlassCard sx={surfaceSx}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <SectionHeading title="Hall of Fame" />
+                <SectionTitle title="Hall of Fame" />
                 {champions.slice(0, 4).map((champion, index) => (
                   <Box key={champion.name} sx={{ display: 'grid', gridTemplateColumns: '36px 1fr auto', alignItems: 'center', gap: 1, py: 1, borderTop: index === 0 ? 'none' : '1px solid rgba(201, 185, 190, 0.08)' }}>
                     <MilitaryTechIcon aria-hidden="true" sx={{ color: index === 0 ? COLORS.amber : COLORS.textSteel }} />
@@ -737,7 +727,7 @@ export default function HomePage() {
           {recentMatches.length > 0 && (
             <GlassCard sx={surfaceSx}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <SectionHeading title="Recent results" />
+                <SectionTitle title="Recent results" />
                 {recentMatches.map((match, index) => (
                   <Box
                     component={Link}

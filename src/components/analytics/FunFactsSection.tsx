@@ -1,7 +1,6 @@
 'use client';
 
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import FunFactCard from './FunFactCard';
 import type { Match, MatchStats } from '@/lib/types';
 
@@ -375,20 +374,6 @@ export default function FunFactsSection({ matches, goals, registeredPlayers, pla
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Typography
-        variant="body2"
-        sx={{
-          color: '#A18A93',
-          textTransform: 'uppercase',
-          fontSize: '0.75rem',
-          fontWeight: 700,
-          letterSpacing: '0.1em',
-          px: 1,
-          mb: 1.5,
-        }}
-      >
-        Records &amp; Milestones
-      </Typography>
       <Box
         sx={{
           display: 'flex',

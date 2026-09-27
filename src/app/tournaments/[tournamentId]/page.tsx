@@ -16,12 +16,14 @@ import StandingsTable from '@/components/tournament/StandingsTable';
 import BracketView from '@/components/tournament/BracketView';
 import AdminGate from '@/components/auth/AdminGate';
 import GlassCard from '@/components/shared/GlassCard';
+import SectionTitle from '@/components/shared/SectionTitle';
 import CardContent from '@mui/material/CardContent';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import AIPunditModal from '@/components/ai/AIPunditModal';
 import { useAdmin } from '@/contexts/AdminContext';
 import { getChampionName } from '@/lib/season-status';
 import type { Match, StandingRow } from '@/lib/types';
+import PageSkeleton from '@/components/shared/PageSkeleton';
 
 export default function TournamentDashboard() {
   const params = useParams();
@@ -70,9 +72,7 @@ export default function TournamentDashboard() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <PageSkeleton />
     );
   }
 
@@ -252,19 +252,7 @@ export default function TournamentDashboard() {
           <Grid size={{ xs: 12, md: 4 }}>
             {upcomingMatches.length > 0 && (
               <Box className="animate-section" sx={{ mb: 3 }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#A18A93',
-                    textTransform: 'uppercase',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.1em',
-                    mb: 1.5,
-                  }}
-                >
-                  Upcoming
-                </Typography>
+                <SectionTitle title="Up next" />
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {upcomingMatches.map((m, idx) => (
                     <MatchCard key={m.id} match={m as never} index={idx} />
@@ -275,19 +263,7 @@ export default function TournamentDashboard() {
 
             {recentMatches.length > 0 && (
               <Box className="animate-section">
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#A18A93',
-                    textTransform: 'uppercase',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.1em',
-                    mb: 1.5,
-                  }}
-                >
-                  Recent Results
-                </Typography>
+                <SectionTitle title="Recent results" />
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {recentMatches.map((m, idx) => (
                     <MatchCard key={m.id} match={m as never} index={idx} />

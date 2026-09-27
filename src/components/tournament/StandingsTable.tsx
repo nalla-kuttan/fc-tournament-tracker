@@ -10,7 +10,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FORM_COLORS } from '@/lib/constants';
+import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
 import type { StandingRow } from '@/lib/types';
 
 const MotionTableRow = motion.create(TableRow);
@@ -33,7 +33,7 @@ function FormDot({ result, phoneHidden = false }: { result: 'W' | 'D' | 'L'; pho
         justifyContent: 'center',
         fontSize: 10,
         fontWeight: 700,
-        color: '#FFF7F6',
+        color: FORM_TEXT_COLOR,
         boxShadow: `0 2px 4px ${FORM_COLORS[result]}30`,
         transition: 'transform 150ms ease',
         // After the base display so it wins on phones.

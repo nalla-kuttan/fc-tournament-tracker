@@ -25,6 +25,7 @@ import AdminGate from '@/components/auth/AdminGate';
 import GlassCard from '@/components/shared/GlassCard';
 import { useAdmin } from '@/contexts/AdminContext';
 import type { Tournament } from '@/lib/types';
+import PageSkeleton from '@/components/shared/PageSkeleton';
 
 interface Props {
   tournamentId: string;
@@ -148,9 +149,7 @@ export default function TournamentSettings({ tournamentId }: Props) {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <PageSkeleton />
     );
   }
 

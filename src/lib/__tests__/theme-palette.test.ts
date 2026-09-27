@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BRAND_COLORS } from '@/design-tokens';
+import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
 
 function relativeLuminance(hex: string) {
   const channels = hex
@@ -30,5 +31,9 @@ describe('brand palette', () => {
 
   it('keeps body text readable on the dark bordeaux surface', () => {
     expect(contrastRatio(BRAND_COLORS.text, BRAND_COLORS.surface)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it.each(Object.entries(FORM_COLORS))('keeps the %s form badge letter readable', (_, background) => {
+    expect(contrastRatio(FORM_TEXT_COLOR, background)).toBeGreaterThanOrEqual(4.5);
   });
 });

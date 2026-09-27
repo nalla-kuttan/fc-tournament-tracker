@@ -119,17 +119,8 @@ export default function PlayersPage() {
 
       {/* Section header */}
       <Box className="animate-section" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 1, mb: 1.5 }}>
-        <Typography
-          variant="body2"
-          sx={{
-            color: '#C9B9BE',
-            textTransform: 'uppercase',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            letterSpacing: '0.1em',
-          }}
-        >
-          Registered Players
+        <Typography component="h2" sx={{ fontSize: '1.05rem', fontWeight: 700 }}>
+          Registered players
         </Typography>
         <Button
           variant="text"

@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import GlassCard from '@/components/shared/GlassCard';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import type { Player } from '@/lib/types';
+import PageSkeleton from '@/components/shared/PageSkeleton';
 
 export default function TournamentPlayersPage() {
   const params = useParams();
@@ -29,9 +29,7 @@ export default function TournamentPlayersPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <PageSkeleton />
     );
   }
 

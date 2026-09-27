@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import GlassCard from '@/components/shared/GlassCard';
 import CardContent from '@mui/material/CardContent';
-import { FORM_COLORS } from '@/lib/constants';
+import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
 import type { H2HData, Match } from '@/lib/types';
 
 function computeRivalryIntensity(data: H2HData): number {
@@ -204,7 +204,7 @@ export default function RivalryCard({ data }: { data: H2HData }) {
                     justifyContent: 'center',
                   }}
                 >
-                  <Typography sx={{ color: '#FFF7F6', fontWeight: 700, fontSize: '0.7rem' }}>
+                  <Typography sx={{ color: FORM_TEXT_COLOR, fontWeight: 700, fontSize: '0.7rem' }}>
                     {result}
                   </Typography>
                 </Box>

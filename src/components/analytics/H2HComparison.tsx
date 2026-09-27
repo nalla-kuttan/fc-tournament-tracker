@@ -11,7 +11,7 @@ import RadarChartComponent from './RadarChart';
 import WDLDoughnut from './WDLDoughnut';
 import RivalryCard from './RivalryCard';
 import dayjs from 'dayjs';
-import { FORM_COLORS } from '@/lib/constants';
+import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
 import type { H2HData, Match } from '@/lib/types';
 
 interface Props {
@@ -62,7 +62,7 @@ function MatchHistoryRow({ match, player1Name }: { match: Match; player1Name: st
           size="small"
           sx={{
             bgcolor: resultColor,
-            color: '#FFF7F6',
+            color: FORM_TEXT_COLOR,
             fontWeight: 700,
             fontSize: '0.7rem',
             minWidth: 48,

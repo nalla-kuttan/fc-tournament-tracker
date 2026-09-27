@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
 import StandingsTable from '@/components/tournament/StandingsTable';
 import type { StandingRow } from '@/lib/types';
+import PageSkeleton from '@/components/shared/PageSkeleton';
 
 export default function StandingsPage() {
   const params = useParams();
@@ -26,9 +26,7 @@ export default function StandingsPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <PageSkeleton />
     );
   }
 

@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
 import BracketView from '@/components/tournament/BracketView';
+import PageSkeleton from '@/components/shared/PageSkeleton';
 
 export default function BracketPage() {
   const params = useParams();
@@ -26,9 +26,7 @@ export default function BracketPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <PageSkeleton />
     );
   }
 
