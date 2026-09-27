@@ -26,6 +26,7 @@ import {
   EMPTY_SHEET,
   goalMinuteError,
   goalsForScore,
+  mergeStatsForSave,
   nextFixture,
   sheetFromStats,
   statsFromSheet,
@@ -334,7 +335,7 @@ export default function MatchResultForm({ match, isEditing = false, onSuccess }:
         body: JSON.stringify({
           home_score: homeScore,
           away_score: awayScore,
-          stats: statsFromSheet(sheet, players),
+          stats: mergeStatsForSave(match.stats as Record<string, unknown> | undefined, statsFromSheet(sheet, players)),
           goals: goals.map((goal) => ({ player_id: goal.player_id, minute: goal.minute.trim() === '' ? null : Number(goal.minute) })),
           advance_bracket: !isEditing,
           pin,

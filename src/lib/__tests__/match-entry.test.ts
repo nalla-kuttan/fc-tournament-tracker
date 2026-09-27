@@ -3,6 +3,7 @@ import {
   EMPTY_SHEET,
   goalMinuteError,
   goalsForScore,
+  mergeStatsForSave,
   nextFixture,
   sheetFromStats,
   statsFromSheet,
@@ -101,5 +102,20 @@ describe('next fixture', () => {
 
   it('returns null when every fixture is recorded', () => {
     expect(nextFixture([fixture('only')], 'only')).toBeNull();
+  });
+});
+
+describe('saving an edit', () => {
+  it('keeps stored stats the sheet does not manage, such as the in-game clubs', () => {
+    const existing = { home_team: 'Arsenal', away_team: 'France', motm_team: 'France', home_xg: 2, away_rating: 7.5 };
+    const fromSheet = statsFromSheet({ ...EMPTY_SHEET, homeXg: '2.4' }, players);
+
+    expect(mergeStatsForSave(existing, fromSheet)).toEqual({
+      home_team: 'Arsenal', away_team: 'France', motm_team: 'France', home_xg: 2.4,
+    });
+  });
+
+  it('clears a managed stat that was blanked on the sheet', () => {
+    expect(mergeStatsForSave({ away_rating: 7.5 }, {})).toEqual({});
   });
 });
