@@ -39,18 +39,26 @@ export default function MatchDetailPage() {
   const [match, setMatch] = useState<MatchDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     fetch(`/api/matches/${matchId}`)
       .then((r) => r.json())
       .then((data) => {
+        if (cancelled) return;
         setMatch(data);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
-  }, [matchId]);
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [matchId, reloadKey]);
 
-  if (loading) {
+  if (loading || (match && match.id !== matchId)) {
     return (
       <PageSkeleton />
     );
@@ -71,7 +79,7 @@ export default function MatchDetailPage() {
           {match.home_player?.name} vs {match.away_player?.name}
         </Typography>
         <AdminGate tournamentId={tournamentId}>
-          <MatchResultForm match={match as never} />
+          <MatchResultForm key={match.id} match={match as never} />
         </AdminGate>
       </Box>
     );
@@ -93,7 +101,7 @@ export default function MatchDetailPage() {
           </Button>
         </Box>
         <AdminGate tournamentId={tournamentId}>
-          <MatchResultForm match={match as never} isEditing={true} onSuccess={() => setIsEditing(false)} />
+          <MatchResultForm key={`${match.id}-edit`} match={match as never} isEditing={true} onSuccess={() => { setIsEditing(false); setReloadKey((key) => key + 1); }} />
         </AdminGate>
       </Box>
     );

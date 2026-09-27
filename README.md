@@ -33,6 +33,7 @@ Gemini integrations add a pundit layer on top of the raw numbers:
 - Head-to-head rivalry analysis.
 - Post-match reports.
 - Natural-language stat questions.
+- Reading a result from a photo of the post-match stats screen. It fills in the result form for the organizer to check; nothing is saved until they confirm.
 
 ### App Experience
 
