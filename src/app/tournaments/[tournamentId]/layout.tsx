@@ -9,6 +9,7 @@ import Skeleton from '@mui/material/Skeleton';
 import TournamentTabs from '@/components/layout/TournamentTabs';
 import RealtimeProvider from '@/components/shared/RealtimeProvider';
 import BackButton from '@/components/shared/BackButton';
+import SavedResultNotice from '@/components/tournament/SavedResultNotice';
 import { TOURNAMENT_STATUSES } from '@/lib/constants';
 import type { Tournament } from '@/lib/types';
 
@@ -69,6 +70,7 @@ export default function TournamentLayout({ children }: { children: ReactNode }) 
 
         {children}
       </Box>
+      <SavedResultNotice />
     </RealtimeProvider>
   );
 }

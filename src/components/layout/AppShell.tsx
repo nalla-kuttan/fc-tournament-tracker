@@ -151,7 +151,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
         color: COLORS.textIce,
         background: COLORS.pitchBlack,
         position: 'relative',
-        overflowX: 'hidden',
+        // `clip`, not `hidden`: hidden turns this box into a scroll container,
+        // which silently disables position: sticky for everything inside it.
+        overflowX: 'clip',
       }}
     >
       <Box

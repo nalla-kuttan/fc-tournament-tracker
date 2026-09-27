@@ -80,6 +80,20 @@ export const aiH2HSchema = z.object({ player1Id: uuidSchema, player2Id: uuidSche
 );
 export const aiTournamentSchema = z.object({ tournamentId: uuidSchema });
 export const aiMatchSchema = z.object({ matchId: uuidSchema });
+// Base64 of an image the browser has already downscaled; ~3 MB of base64 is
+// far more than a 1600px JPEG needs.
+export const MAX_STATS_IMAGE_BASE64_LENGTH = 3_000_000;
+export const aiReadMatchStatsSchema = z.object({
+  matchId: uuidSchema,
+  pin: pinSchema,
+  image: z.object({
+    mimeType: z.enum(['image/jpeg', 'image/png', 'image/webp'], 'Use a JPEG, PNG, or WebP photo'),
+    data: z.string()
+      .min(100, 'The photo is empty')
+      .max(MAX_STATS_IMAGE_BASE64_LENGTH, 'The photo is too large')
+      .regex(/^[A-Za-z0-9+/]+={0,2}$/, 'The photo could not be read'),
+  }),
+});
 export const aiStatQuerySchema = z.object({
   query: z.string().trim().min(3, 'Ask a more specific question').max(300, 'Question is too long'),
 });
