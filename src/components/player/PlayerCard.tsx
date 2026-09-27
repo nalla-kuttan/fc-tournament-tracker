@@ -10,6 +10,7 @@ import type { CareerStats, RegisteredPlayer } from '@/lib/types';
 import { getAvatarColor, getInitials, getPlayerArchetype, getPlayerTags } from '@/lib/player-insights';
 import { getPlayerImagePath } from '@/lib/player-images';
 import ArchetypeIcon from '@/components/player/ArchetypeIcon';
+import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
 
 export default function PlayerCard({
   player,
@@ -178,8 +179,8 @@ export default function PlayerCard({
                 placeItems: 'center',
                 fontSize: '0.65rem',
                 fontWeight: 800,
-                color: '#12080C',
-                bgcolor: result === 'W' ? '#EA6C56' : result === 'D' ? '#C9B9BE' : '#EF4444',
+                color: FORM_TEXT_COLOR,
+                bgcolor: FORM_COLORS[result as 'W' | 'D' | 'L'],
               }}
             >
               {result}

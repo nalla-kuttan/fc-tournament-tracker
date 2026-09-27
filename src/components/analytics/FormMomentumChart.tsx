@@ -121,7 +121,7 @@ export default function FormMomentumChart({ matches, playerIds, title }: Props) 
   return (
     <Box>
       {title && (
-        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+        <Typography component="h3" variant="subtitle2" color="text.secondary" gutterBottom>
           {title}
         </Typography>
       )}
