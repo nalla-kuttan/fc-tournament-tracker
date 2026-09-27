@@ -118,10 +118,7 @@ export default function TournamentDashboard() {
       <GlassCard sx={{ mb: 3 }}>
         <CardContent sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr auto' }, gap: 2, alignItems: 'center', p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
           <Box>
-            <Typography variant="caption" sx={{ color: '#EA6C56', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              Tournament Command
-            </Typography>
-            <Typography component="h1" variant="h5" fontWeight={800} sx={{ mt: 0.4 }}>
+            <Typography component="h1" variant="h5" fontWeight={800}>
               {headline}
             </Typography>
             <Typography variant="body2" color="text.secondary">
