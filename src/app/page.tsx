@@ -705,7 +705,7 @@ export default function HomePage() {
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                 <SectionTitle
                   title="Club records"
-                  action={<Button size="small" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/competitive')}>Record book</Button>}
+                  action={<Button size="small" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/competitive?tab=records')}>Record book</Button>}
                 />
                 <FunFactsSection
                   matches={analytics.all_matches}

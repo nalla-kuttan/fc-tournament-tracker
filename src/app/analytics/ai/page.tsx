@@ -6,7 +6,6 @@ import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import BackButton from '@/components/shared/BackButton';
 import GlassCard from '@/components/shared/GlassCard';
 import AIStatQuery from '@/components/ai/AIStatQuery';
 import { fetcher } from '@/lib/fetcher';
@@ -31,7 +30,6 @@ export default function AIAnalystPage() {
 
   return (
     <Box>
-      <BackButton />
       <GlassCard
         sx={{
           mb: 2,
@@ -43,11 +41,11 @@ export default function AIAnalystPage() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
             <AutoAwesomeIcon sx={{ color: '#7E8CC2', fontSize: 34 }} />
             <Typography component="h1" variant="h4" fontWeight={900}>
-              AI Analyst
+              Ask AI
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 760 }}>
-            Ask the analyst booth for stat-backed reads on form, awards, rankings, rivalries, and patterns hiding in the numbers.
+            Ask about form, awards, rankings or rivalries. Answers use only your recorded stats; check the numbers they cite.
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 2 }}>
             <Chip size="small" label={`${careerStats.length} players indexed`} sx={{ color: '#FFF7F6', bgcolor: 'rgba(18, 8, 12, 0.35)', fontWeight: 850 }} />

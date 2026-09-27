@@ -190,7 +190,7 @@ Depth comes from tonal layering, spacing, restrained borders, and selective shad
 - **Error / Disabled:** Error state uses Result Red plus text or helper copy. Disabled state lowers opacity and should not rely on color alone.
 
 ### Navigation
-- **Style:** Desktop uses a quiet Bordeaux sidebar with Play, Players, and Stats. Mobile uses the same three destinations in bottom navigation. Stats destinations share a horizontal subnavigation; the header keeps the current or most recent active tournament within reach.
+- **Style:** Desktop uses a quiet Bordeaux sidebar with Play, Players, and Stats. Mobile uses the same three destinations in bottom navigation. Stats destinations share a subnavigation whose labels match each page title: one row on tablet and desktop, a 3x2 grid on phones so no destination is hidden. The header keeps the current or most recent active tournament within reach.
 - **Typography:** Nav section labels are small, uppercase, and high-weight; item labels stay title case and readable.
 - **Active State:** Coral text or icon, faint Coral background, and clear border/indicator. Avoid hidden active states that depend only on a subtle color shift.
 

@@ -47,7 +47,14 @@ interface RecordsResponse {
   records: CompetitiveRecords;
 }
 
-const tabLabels = ['Season', 'Ratings', 'Records', 'Trophy Cabinet'];
+const tabLabels = ['Season', 'Ratings', 'Records', 'Trophies'];
+const TAB_PARAM: Record<string, number> = { season: 0, ratings: 1, records: 2, trophies: 3 };
+
+// Lets links such as the home page's "Record book" open a specific tab.
+function initialTab() {
+  if (typeof window === 'undefined') return 0;
+  return TAB_PARAM[new URLSearchParams(window.location.search).get('tab') ?? ''] ?? 0;
+}
 const ALL_TIME_VALUE = 'all-time';
 
 function CompetitiveSignals({ signals }: { signals: Array<{ label: string; value: string | number; detail: string }> }) {
@@ -117,7 +124,7 @@ function RatingTable({ rows }: { rows: CompetitiveRatingRow[] }) {
 }
 
 export default function CompetitivePage() {
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState(initialTab);
   const [selectedSeasonId, setSelectedSeasonId] = useState('');
   const { data, error, isLoading, mutate } = useSWR<CompetitiveOverview>('/api/competitive/overview', fetcher, { onError: () => undefined });
   const defaultSeason = data?.activeSeason ?? data?.seasons[0] ?? null;
@@ -154,10 +161,10 @@ export default function CompetitivePage() {
     <Box>
       <Box sx={{ mb: 3, maxWidth: 760 }}>
         <Typography component="h1" sx={{ fontWeight: 700, fontSize: { xs: '1.75rem', sm: '2.35rem' }, lineHeight: 1.1 }}>
-          Season Race
+          Competition history
         </Typography>
         <Typography sx={{ color: '#D7C6CB', mt: 0.75 }}>
-          Ratings, records, trophies, and match intelligence across every season.
+          Ratings, records and trophies across every season.
         </Typography>
       </Box>
 
@@ -212,15 +219,15 @@ export default function CompetitivePage() {
             <CardContent sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr auto' }, gap: 2, alignItems: 'center' }}>
               <Box>
                 <Typography sx={{ fontWeight: 700, color: '#FFF7F6' }}>
-                  Season Lens
+                  Season
                 </Typography>
                 <Typography sx={{ color: '#C9B9BE', fontSize: '0.9rem' }}>
-                  Choose all-time or any current/previous season to update the race, records, trophies, and match intelligence below.
+                  Show all-time, or pick one season. Everything below follows this choice.
                 </Typography>
               </Box>
               <TextField
                 select
-                label="Lens"
+                label="Season"
                 value={effectiveSeasonId}
                 onChange={(event) => setSelectedSeasonId(event.target.value)}
                 sx={{ minWidth: { xs: '100%', md: 280 } }}
@@ -249,14 +256,20 @@ export default function CompetitivePage() {
                 detail: topSeason ? `${topSeason.rating} rating` : 'Play a match to rank players',
               },
               {
-                label: 'Match storylines',
+                label: 'Standout matches',
                 value: intelligenceCount,
-                detail: 'Recent competitive signals',
+                detail: 'Upsets, one-goal wins, goal rushes and more',
               },
             ]}
           />
 
-          <Tabs value={tab} onChange={(_, next) => setTab(next)} sx={{ mb: 2 }}>
+          <Tabs
+            value={tab}
+            onChange={(_, next) => setTab(next)}
+            aria-label="Competition history sections"
+            variant="fullWidth"
+            sx={{ mb: 2, maxWidth: 560, '& .MuiTab-root': { minWidth: 0, px: 1 } }}
+          >
             {tabLabels.map((label) => <Tab key={label} label={label} />)}
           </Tabs>
 

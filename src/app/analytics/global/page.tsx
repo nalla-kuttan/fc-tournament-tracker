@@ -27,7 +27,6 @@ import StatLeaderboard from '@/components/analytics/StatLeaderboard';
 import BiggestWinsTable from '@/components/analytics/BiggestWinsTable';
 import SeasonAwards from '@/components/analytics/SeasonAwards';
 import AdvancedHighlights from '@/components/analytics/AdvancedHighlights';
-import BackButton from '@/components/shared/BackButton';
 import type { CareerStats, Match } from '@/lib/types';
 import { hasTimedGoals } from '@/lib/analytics-visibility';
 import { calculatePerformanceRecords } from '@/lib/records';
@@ -174,27 +173,27 @@ export default function GlobalAnalyticsPage() {
     const topScorer = filteredStats.slice().sort((a, b) => b.total_goals - a.total_goals)[0];
     return [
       {
-        label: 'Control Room Read',
+        label: 'Top of the power table',
         value: powerLeader?.player.name ?? '-',
         detail: powerLeader ? `${powerLeader.rating} power rating` : 'No power ranking yet',
         color: '#7E8CC2',
       },
       {
-        label: 'Hot Form',
+        label: 'Best recent form',
         value: formLeader?.player.name ?? '-',
         detail: formLeader?.form.length ? `Last five: ${formLeader.form.join('')}` : 'No recent run yet',
         color: '#EA6C56',
       },
       {
-        label: 'Goal Threat',
+        label: 'Top scorer',
         value: topScorer?.player_name ?? '-',
         detail: topScorer ? `${topScorer.total_goals} career goals` : 'No goals recorded',
         color: '#F59E0B',
       },
       {
-        label: 'Latest Result',
+        label: 'Latest result',
         value: latestMatch ? `${latestMatch.home_score}-${latestMatch.away_score}` : '-',
-        detail: latestMatch ? `${latestMatch.home_player?.name ?? 'Home'} vs ${latestMatch.away_player?.name ?? 'Away'}` : 'No played match in this lens',
+        detail: latestMatch ? `${latestMatch.home_player?.name ?? 'Home'} vs ${latestMatch.away_player?.name ?? 'Away'}` : 'No matches with these filters',
         color: '#C9B9BE',
       },
     ];
@@ -215,9 +214,8 @@ export default function GlobalAnalyticsPage() {
   if (error && !data) {
     return (
       <Box>
-        <BackButton />
         <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
-          Global Analytics
+          Player rankings
         </Typography>
         <Alert
           severity="error"
@@ -233,9 +231,8 @@ export default function GlobalAnalyticsPage() {
   if (!data || !data.career_stats || data.career_stats.length === 0) {
     return (
       <Box>
-        <BackButton />
         <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
-          Global Analytics
+          Player rankings
         </Typography>
         <EmptyState
           icon={<SportsSoccerIcon fontSize="inherit" />}
@@ -253,12 +250,11 @@ export default function GlobalAnalyticsPage() {
 
   return (
     <Box>
-      <BackButton />
       <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
-        Global Analytics
+        Player rankings
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-        All-time career stats and rankings across every tournament
+        Every player’s career record across all tournaments.
       </Typography>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 150px 150px 150px' }, gap: 1.5, mb: 3 }}>
@@ -281,17 +277,17 @@ export default function GlobalAnalyticsPage() {
           <InputLabel>Range</InputLabel>
           <Select value={dateRange} label="Range" onChange={(event) => setDateRange(event.target.value)}>
             <MenuItem value="all">All time</MenuItem>
-            <MenuItem value="30">Last 30d</MenuItem>
-            <MenuItem value="90">Last 90d</MenuItem>
+            <MenuItem value="30">Last 30 days</MenuItem>
+            <MenuItem value="90">Last 90 days</MenuItem>
           </Select>
         </FormControl>
         <FormControl size="small">
-          <InputLabel>Min MP</InputLabel>
-          <Select value={String(minMatches)} label="Min MP" onChange={(event) => setMinMatches(Number(event.target.value))}>
-            <MenuItem value="0">0</MenuItem>
-            <MenuItem value="3">3</MenuItem>
-            <MenuItem value="5">5</MenuItem>
-            <MenuItem value="10">10</MenuItem>
+          <InputLabel>Minimum matches</InputLabel>
+          <Select value={String(minMatches)} label="Minimum matches" onChange={(event) => setMinMatches(Number(event.target.value))}>
+            <MenuItem value="0">Any</MenuItem>
+            <MenuItem value="3">3+</MenuItem>
+            <MenuItem value="5">5+</MenuItem>
+            <MenuItem value="10">10+</MenuItem>
           </Select>
         </FormControl>
       </Box>
@@ -310,7 +306,7 @@ export default function GlobalAnalyticsPage() {
                 What matters now
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Current read for this analytics lens before the deep tables.
+                The leaders for the filters above, before the full tables.
               </Typography>
             </Box>
             <Chip size="small" label={format === 'all' ? 'All formats' : format} sx={{ color: '#EA6C56', borderColor: 'rgba(234, 108, 86, 0.24)' }} />
@@ -327,7 +323,7 @@ export default function GlobalAnalyticsPage() {
                     border: '1px solid rgba(201, 185, 190, 0.1)',
                   }}
                 >
-                  <Typography variant="caption" sx={{ color: '#C9B9BE', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  <Typography variant="caption" sx={{ color: '#C9B9BE', fontWeight: 600, fontSize: '0.8125rem' }}>
                     {card.label}
                   </Typography>
                   <Typography variant="h6" fontWeight={700} noWrap sx={{ mt: 0.5, color: card.color }}>

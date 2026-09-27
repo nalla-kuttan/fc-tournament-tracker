@@ -25,7 +25,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
   if (topScorer && topScorer.total_goals > 0) {
     awards.push({
       emoji: '⚽',
-      title: 'Golden Boot',
+      title: 'Most goals',
       color: '#F59E0B',
       winner: topScorer.player_name,
       team: topScorer.base_team,
@@ -39,7 +39,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
   if (bestRated) {
     awards.push({
       emoji: '⭐',
-      title: 'Best Manager',
+      title: 'Best average rating',
       color: '#EA6C56',
       winner: bestRated.player_name,
       team: bestRated.base_team,
@@ -52,7 +52,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
   if (ironWall && ironWall.clean_sheets > 0) {
     awards.push({
       emoji: '🧤',
-      title: 'Iron Wall',
+      title: 'Most clean sheets',
       color: '#EA6C56',
       winner: ironWall.player_name,
       team: ironWall.base_team,
@@ -65,7 +65,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
   if (motmKing) {
     awards.push({
       emoji: '🌟',
-      title: 'MOTM Magnet',
+      title: 'Most Man of the Match awards',
       color: '#7E8CC2',
       winner: motmKing.player_name,
       team: motmKing.base_team,
@@ -78,7 +78,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
   if (possKing) {
     awards.push({
       emoji: '🔄',
-      title: 'Possession Master',
+      title: 'Highest average possession',
       color: '#7E8CC2',
       winner: possKing.player_name,
       team: possKing.base_team,
@@ -91,7 +91,7 @@ function computeAwards(stats: CareerStats[]): Award[] {
   if (goalMachine && goalMachine.goals_per_match > 0) {
     awards.push({
       emoji: '💥',
-      title: 'Goal Machine',
+      title: 'Most goals per match',
       color: '#EF4444',
       winner: goalMachine.player_name,
       team: goalMachine.base_team,
@@ -143,7 +143,7 @@ export default function SeasonAwards({ stats }: { stats: CareerStats[] }) {
               <Box sx={{ minWidth: 0 }}>
                 <Typography
                   variant="caption"
-                  sx={{ color: award.color, fontWeight: 700, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}
+                  sx={{ display: 'block', color: award.color, fontWeight: 600, fontSize: '0.8125rem', lineHeight: 1.3 }}
                 >
                   {award.title}
                 </Typography>
