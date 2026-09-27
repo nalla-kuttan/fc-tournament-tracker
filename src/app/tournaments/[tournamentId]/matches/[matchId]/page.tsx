@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
@@ -15,6 +15,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import AIMatchReport from '@/components/ai/AIMatchReport';
 import type { MatchStats } from '@/lib/types';
 import PageSkeleton from '@/components/shared/PageSkeleton';
+import { MATCH_RESTORED_EVENT } from '@/components/tournament/SavedResultNotice';
 
 interface MatchDetail {
   id: string;
@@ -38,7 +39,21 @@ export default function MatchDetailPage() {
   const tournamentId = params.tournamentId as string;
   const [match, setMatch] = useState<MatchDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
+  // "Fix it" after a save links here with ?edit=1 to reopen the result.
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const editRequested = searchParams.get('edit') === '1';
+  const [isEditing, setIsEditing] = useState(editRequested);
+  // The page is reused when only the query changes, so react to ?edit=1 arriving.
+  const [lastEditRequested, setLastEditRequested] = useState(editRequested);
+  if (editRequested !== lastEditRequested) {
+    setLastEditRequested(editRequested);
+    if (editRequested) setIsEditing(true);
+  }
+  const stopEditing = () => {
+    setIsEditing(false);
+    if (editRequested) router.replace(`/tournaments/${tournamentId}/matches/${matchId}`, { scroll: false });
+  };
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
@@ -57,6 +72,15 @@ export default function MatchDetailPage() {
       cancelled = true;
     };
   }, [matchId, reloadKey]);
+
+  // Reload after "Undo" restores the previous result from the confirmation.
+  useEffect(() => {
+    const onRestored = (event: Event) => {
+      if ((event as CustomEvent<{ matchId: string }>).detail?.matchId === matchId) setReloadKey((key) => key + 1);
+    };
+    window.addEventListener(MATCH_RESTORED_EVENT, onRestored);
+    return () => window.removeEventListener(MATCH_RESTORED_EVENT, onRestored);
+  }, [matchId]);
 
   if (loading || (match && match.id !== matchId)) {
     return (
@@ -96,12 +120,12 @@ export default function MatchDetailPage() {
           <Typography variant="h5" fontWeight={700}>
             Edit Match: Round {match.round_number} {match.stage && `- ${match.stage}`}
           </Typography>
-          <Button onClick={() => setIsEditing(false)} variant="outlined">
+          <Button onClick={stopEditing} variant="outlined">
             Cancel
           </Button>
         </Box>
         <AdminGate tournamentId={tournamentId}>
-          <MatchResultForm key={`${match.id}-edit`} match={match as never} isEditing={true} onSuccess={() => { setIsEditing(false); setReloadKey((key) => key + 1); }} />
+          <MatchResultForm key={`${match.id}-edit`} match={match as never} isEditing={true} onSuccess={() => { stopEditing(); setReloadKey((key) => key + 1); }} />
         </AdminGate>
       </Box>
     );
@@ -127,7 +151,7 @@ export default function MatchDetailPage() {
       {/* Score */}
       <GlassCard sx={{ mb: 3 }}>
         <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, py: 2 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)', alignItems: 'center', gap: { xs: 1.5, sm: 4 }, py: 2 }}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h6" fontWeight={600}>
                 {match.home_player?.name}
@@ -138,15 +162,15 @@ export default function MatchDetailPage() {
             </Box>
             <Box
               sx={{
-                px: 3,
+                px: { xs: 1.5, sm: 3 },
                 py: 1,
                 borderRadius: 2,
                 bgcolor: 'rgba(51, 64, 117,0.1)',
                 border: '1px solid rgba(51, 64, 117,0.2)',
               }}
             >
-              <Typography variant="h3" fontWeight={700} sx={{ fontFamily: 'monospace' }}>
-                {match.home_score} - {match.away_score}
+              <Typography variant="h3" fontWeight={700} sx={{ fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', fontSize: { xs: '2.25rem', sm: '3rem' } }}>
+                {match.home_score} – {match.away_score}
               </Typography>
             </Box>
             <Box sx={{ textAlign: 'center' }}>

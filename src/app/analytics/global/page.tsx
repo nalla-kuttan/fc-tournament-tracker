@@ -18,6 +18,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Chip from '@mui/material/Chip';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
+import TuneIcon from '@mui/icons-material/Tune';
 import Skeleton from '@mui/material/Skeleton';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
@@ -109,6 +110,8 @@ export default function GlobalAnalyticsPage() {
   const [minMatches, setMinMatches] = useState(0);
   const [format, setFormat] = useState('all');
   const [dateRange, setDateRange] = useState('all');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeFilterCount = [format !== 'all', dateRange !== 'all', minMatches > 0].filter(Boolean).length;
   const [nowMs] = useState(() => Date.now());
   const { data, error, isLoading: loading, mutate } = useSWR<GlobalData>('/api/analytics/global', fetcher, { onError: () => undefined });
 
@@ -257,13 +260,36 @@ export default function GlobalAnalyticsPage() {
         Every player’s career record across all tournaments.
       </Typography>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 150px 150px 150px' }, gap: 1.5, mb: 3 }}>
+      {/* Phones: search stays visible, the three filters fold behind one button. */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr auto', md: '1fr 150px 150px 150px' }, gap: 1.5, mb: 3 }}>
         <TextField
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search players or teams"
           size="small"
+          inputProps={{ 'aria-label': 'Search players or teams' }}
+          sx={{ '& .MuiInputBase-root': { minHeight: 48 } }}
         />
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<TuneIcon />}
+          onClick={() => setFiltersOpen((open) => !open)}
+          aria-expanded={filtersOpen}
+          aria-controls="rankings-filters"
+          sx={{ display: { xs: 'inline-flex', md: 'none' }, whiteSpace: 'nowrap', minHeight: 48 }}
+        >
+          {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
+        </Button>
+        <Box
+          id="rankings-filters"
+          sx={{
+            gridColumn: { xs: '1 / -1', md: 'auto / span 3' },
+            display: { xs: filtersOpen ? 'grid' : 'none', md: 'grid' },
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)', md: 'repeat(3, 150px)' },
+            gap: 1.5,
+          }}
+        >
         <FormControl size="small">
           <InputLabel>Format</InputLabel>
           <Select value={format} label="Format" onChange={(event) => setFormat(event.target.value)}>
@@ -290,6 +316,7 @@ export default function GlobalAnalyticsPage() {
             <MenuItem value="10">10+</MenuItem>
           </Select>
         </FormControl>
+        </Box>
       </Box>
 
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
