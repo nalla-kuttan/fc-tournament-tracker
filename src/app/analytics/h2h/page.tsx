@@ -16,7 +16,6 @@ import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import PlayerSelector from '@/components/analytics/PlayerSelector';
 import H2HComparison from '@/components/analytics/H2HComparison';
-import BackButton from '@/components/shared/BackButton';
 import AIH2HModal from '@/components/ai/AIH2HModal';
 import GlassCard from '@/components/shared/GlassCard';
 import { getRivalries, type GoalLite, type RivalrySummary } from '@/lib/analytics-insights';
@@ -78,15 +77,14 @@ function H2HPageContent() {
 
   return (
     <Box>
-      <BackButton />
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
         <Box>
           <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
-            Head-to-Head
+            Rivalries
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Compare career stats and direct encounters between two players
+            Pick two players to compare their meetings and careers.
           </Typography>
         </Box>
         {h2hData && player1 && player2 && (

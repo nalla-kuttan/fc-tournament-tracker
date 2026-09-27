@@ -14,7 +14,6 @@ import Divider from '@mui/material/Divider';
 import GlassCard from '@/components/shared/GlassCard';
 import StatLeaderboard from '@/components/analytics/StatLeaderboard';
 import BiggestWinsTable from '@/components/analytics/BiggestWinsTable';
-import BackButton from '@/components/shared/BackButton';
 import type { Tournament } from '@/lib/types';
 import { getLeagueStory, getTitleRace } from '@/lib/analytics-insights';
 import { fetcher } from '@/lib/fetcher';
@@ -100,9 +99,8 @@ export default function LeagueAnalyticsPage() {
   if (tournaments.length === 0) {
     return (
       <Box>
-        <BackButton />
         <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
-          League Analytics
+          Tournament stats
         </Typography>
         <Typography color="text.secondary">No active or completed tournaments found.</Typography>
       </Box>
@@ -111,14 +109,13 @@ export default function LeagueAnalyticsPage() {
 
   return (
     <Box>
-      <BackButton />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4, flexWrap: 'wrap' }}>
         <Box>
           <Typography component="h1" variant="h4" fontWeight={700}>
-            League Analytics
+            Tournament stats
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Tournament-specific stats and rankings
+            Standings, form and stats for one tournament.
           </Typography>
         </Box>
         <FormControl size="small" sx={{ minWidth: 240 }}>

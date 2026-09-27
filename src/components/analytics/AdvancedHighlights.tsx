@@ -32,7 +32,7 @@ export default function AdvancedHighlights({ records }: { records: PerformanceRe
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1.5, mb: 1.5, flexDirection: { xs: 'column', sm: 'row' } }}>
         <Box>
           <Typography id="advanced-highlights-title" component="h2" variant="h6" fontWeight={700}>Advanced Highlights</Typography>
-          <Typography variant="body2" color="text.secondary">Qualified leaders for the current analytics lens.</Typography>
+          <Typography variant="body2" color="text.secondary">Leaders among players who meet the filters above.</Typography>
         </Box>
         <Button component={Link} href="/competitive" endIcon={<ArrowForwardIcon />} size="small">Complete record book</Button>
       </Box>
