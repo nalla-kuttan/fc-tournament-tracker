@@ -45,10 +45,24 @@ import {
 } from '@/lib/player-insights';
 import dynamic from 'next/dynamic';
 import PageSkeleton from '@/components/shared/PageSkeleton';
+import SectionTitle from '@/components/shared/SectionTitle';
+import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
+import Link from 'next/link';
 
-const WDLDoughnut = dynamic(() => import('@/components/analytics/WDLDoughnut'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
 const SingleRadarChart = dynamic(() => import('@/components/analytics/SingleRadarChart'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
 const FormMomentumChart = dynamic(() => import('@/components/analytics/FormMomentumChart'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
+
+// Long lists show a short preview first so the profile stays scannable on a phone.
+const PREVIEW = { matches: 5, teams: 3, tournaments: 8 } as const;
+const RECENT_MATCH_LIMIT = 10;
+
+function ShowAllButton({ open, total, onClick }: { open: boolean; total: number; onClick: () => void }) {
+  return (
+    <Button size="small" onClick={onClick} aria-expanded={open} sx={{ mt: 1 }}>
+      {open ? 'Show fewer' : `Show all ${total}`}
+    </Button>
+  );
+}
 
 interface CompetitiveOverviewLite {
   allTimeRatings: CompetitiveRatingRow[];
@@ -61,6 +75,8 @@ export default function PlayerProfilePage() {
   const router = useRouter();
   const playerId = params.playerId as string;
   const [scoutOpen, setScoutOpen] = useState(false);
+  const [expanded, setExpanded] = useState<Record<'matches' | 'teams' | 'tournaments', boolean>>({ matches: false, teams: false, tournaments: false });
+  const toggle = (section: 'matches' | 'teams' | 'tournaments') => setExpanded((current) => ({ ...current, [section]: !current[section] }));
   const [editOpen, setEditOpen] = useState(false);
   const [editName, setEditName] = useState('');
   const [editTeam, setEditTeam] = useState('');
@@ -238,8 +254,8 @@ export default function PlayerProfilePage() {
                     label={result}
                     size="small"
                     sx={{
-                      bgcolor: result === 'W' ? '#EA6C56' : result === 'D' ? '#C9B9BE' : '#EF4444',
-                      color: '#12080C',
+                      bgcolor: FORM_COLORS[result as 'W' | 'D' | 'L'],
+                      color: FORM_TEXT_COLOR,
                       fontWeight: 900,
                       minWidth: 32,
                     }}
@@ -259,8 +275,8 @@ export default function PlayerProfilePage() {
                 {[
                   { label: 'Win Rate', value: `${stats.win_rate.toFixed(0)}%`, color: '#EA6C56' },
                   { label: 'Goals', value: stats.total_goals, color: '#F59E0B' },
-                  { label: 'G/M', value: stats.goals_per_match.toFixed(2), color: '#7E8CC2' },
-                  { label: 'MOTM', value: stats.motm_awards, color: '#7E8CC2' },
+                  { label: 'Goals per match', value: stats.goals_per_match.toFixed(2), color: '#7E8CC2' },
+                  { label: 'Man of the Match', value: stats.motm_awards, color: '#7E8CC2' },
                 ].map((item) => (
                   <Box
                     key={item.label}
@@ -271,7 +287,7 @@ export default function PlayerProfilePage() {
                       border: `1px solid ${item.color}22`,
                     }}
                   >
-                    <Typography variant="h6" fontWeight={900} sx={{ color: item.color, lineHeight: 1 }}>
+                    <Typography component="p" variant="h6" fontWeight={900} sx={{ color: item.color, lineHeight: 1 }}>
                       {item.value}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -293,19 +309,6 @@ export default function PlayerProfilePage() {
               >
                 AI Scout Report
               </Button>
-              {rivals.length > 0 && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<CompareArrowsIcon />}
-                  onClick={() => {
-                    const firstRival = rivals[0];
-                    if (firstRival) router.push(`/analytics/h2h?p1=${playerId}&p2=${firstRival.id}`);
-                  }}
-                >
-                  Compare
-                </Button>
-              )}
             </Box>
           </Box>
         </CardContent>
@@ -314,9 +317,7 @@ export default function PlayerProfilePage() {
       {/* Career Stats */}
       {stats && (
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            Career Stats
-          </Typography>
+          <SectionTitle title="Career stats" />
           <PlayerStatsGrid stats={stats} />
         </Box>
       )}
@@ -324,9 +325,7 @@ export default function PlayerProfilePage() {
       {/* Career Highlights */}
       {highlights.length > 0 && (
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            Career Highlights
-          </Typography>
+          <SectionTitle title="Career highlights" />
           <Grid container spacing={2}>
             {highlights.map((highlight) => (
               <Grid key={highlight.label} size={{ xs: 6, md: 4 }}>
@@ -336,10 +335,11 @@ export default function PlayerProfilePage() {
                       <ArchetypeIcon archetype={highlight.value} size={42} showTooltip={false} />
                     )}
                     <Box sx={{ minWidth: 0 }}>
-                      <Typography variant="caption" color="text.secondary" textTransform="uppercase" letterSpacing="0.05em">
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.8125rem' }}>
                         {highlight.label}
                       </Typography>
                       <Typography
+                        component="p"
                         variant="h6"
                         fontWeight={800}
                         sx={{ mt: 0.5, color: highlight.label === 'Archetype' ? getArchetypeMeta(highlight.value).color : undefined }}
@@ -362,12 +362,10 @@ export default function PlayerProfilePage() {
       {/* Competitive Legacy */}
       {(allTimeRating || seasonRating || trophyRow) && (
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            Competitive Legacy
-          </Typography>
+          <SectionTitle title="Competitive legacy" />
           <Grid container spacing={2}>
             {allTimeRating && (
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <GlassCard sx={{ height: '100%' }}>
                   <CardContent sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
                     <ShowChartIcon sx={{ color: '#FF8A73', fontSize: 36 }} />
@@ -375,7 +373,7 @@ export default function PlayerProfilePage() {
                       <Typography variant="caption" color="text.secondary" textTransform="uppercase">
                         All-Time Rating
                       </Typography>
-                      <Typography variant="h5" fontWeight={900}>{allTimeRating.rating}</Typography>
+                      <Typography component="p" variant="h5" fontWeight={900}>{allTimeRating.rating}</Typography>
                       <Typography variant="caption" color="text.secondary">
                         Rank #{allTimeRating.rank} · peak {allTimeRating.peakRating}
                       </Typography>
@@ -385,7 +383,7 @@ export default function PlayerProfilePage() {
               </Grid>
             )}
             {seasonRating && (
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <GlassCard sx={{ height: '100%' }}>
                   <CardContent sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
                     <ShowChartIcon sx={{ color: '#7E8CC2', fontSize: 36 }} />
@@ -393,7 +391,7 @@ export default function PlayerProfilePage() {
                       <Typography variant="caption" color="text.secondary" textTransform="uppercase">
                         Season Rating
                       </Typography>
-                      <Typography variant="h5" fontWeight={900}>{seasonRating.rating}</Typography>
+                      <Typography component="p" variant="h5" fontWeight={900}>{seasonRating.rating}</Typography>
                       <Typography variant="caption" color={seasonRating.movement >= 0 ? '#FF8A73' : '#EF4444'}>
                         {seasonRating.movement >= 0 ? '+' : ''}{seasonRating.movement} latest movement
                       </Typography>
@@ -403,7 +401,7 @@ export default function PlayerProfilePage() {
               </Grid>
             )}
             {trophyRow && (
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <GlassCard sx={{ height: '100%' }}>
                   <CardContent sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
                     <EmojiEventsIcon sx={{ color: '#F59E0B', fontSize: 36 }} />
@@ -411,7 +409,7 @@ export default function PlayerProfilePage() {
                       <Typography variant="caption" color="text.secondary" textTransform="uppercase">
                         Trophy Cabinet
                       </Typography>
-                      <Typography variant="h5" fontWeight={900}>{trophyRow.titles} titles</Typography>
+                      <Typography component="p" variant="h5" fontWeight={900}>{trophyRow.titles} titles</Typography>
                       <Typography variant="caption" color="text.secondary">
                         {trophyRow.finals} finals · {trophyRow.runnerUps} runner-up
                       </Typography>
@@ -427,25 +425,15 @@ export default function PlayerProfilePage() {
       {/* Performance Overview Charts */}
       {stats && (
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            Performance Overview
-          </Typography>
+          <SectionTitle title="Performance" />
           <Grid container spacing={3}>
-            {/* WDL Doughnut */}
-            <Grid size={{ xs: 12, md: 4 }}>
-              <GlassCard sx={{ height: '100%' }}>
-                <CardContent>
-                  <WDLDoughnut stats={stats} title="Win/Draw/Loss" />
-                </CardContent>
-              </GlassCard>
-            </Grid>
 
             {/* Attribute Radar */}
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <GlassCard sx={{ height: '100%' }}>
                 <CardContent>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Attribute Overview
+                  <Typography component="h3" variant="subtitle2" color="text.secondary" gutterBottom>
+                    Attributes
                   </Typography>
                   <SingleRadarChart stats={stats} />
                 </CardContent>
@@ -453,7 +441,7 @@ export default function PlayerProfilePage() {
             </Grid>
 
             {/* Form Momentum */}
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <GlassCard sx={{ height: '100%' }}>
                 <CardContent>
                   <FormMomentumChart
@@ -471,32 +459,32 @@ export default function PlayerProfilePage() {
       {/* Tournament History */}
       {player.participations && player.participations.length > 0 && (
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            Tournament History
-          </Typography>
+          <SectionTitle title="Tournaments" />
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {player.participations.map((p, idx) => (
+            {(expanded.tournaments ? player.participations : player.participations.slice(0, PREVIEW.tournaments)).map((p, idx) => (
               <Chip
-                key={idx}
+                key={p.tournament?.id ?? idx}
                 label={p.tournament?.name ?? 'Unknown'}
-                clickable
+                clickable={Boolean(p.tournament?.id)}
+                {...(p.tournament?.id ? { component: Link, href: `/tournaments/${p.tournament.id}` } : {})}
                 color={p.tournament?.status === 'active' ? 'primary' : 'default'}
                 variant="outlined"
               />
             ))}
           </Box>
+          {player.participations.length > PREVIEW.tournaments && (
+            <ShowAllButton open={expanded.tournaments} total={player.participations.length} onClick={() => toggle('tournaments')} />
+          )}
         </Box>
       )}
 
       {/* Team History */}
       {teamHistory.length > 0 && (
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            Team History
-          </Typography>
+          <SectionTitle title="Teams" />
           <GlassCard>
             <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-              {teamHistory.slice(0, 6).map((team, index) => (
+              {teamHistory.slice(0, expanded.teams ? teamHistory.length : PREVIEW.teams).map((team, index) => (
                 <Box key={team.team}>
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr auto', sm: '1fr repeat(4, auto)' }, gap: 1.5, alignItems: 'center', px: 2, py: 1.5 }}>
                     <Box sx={{ minWidth: 0 }}>
@@ -505,25 +493,26 @@ export default function PlayerProfilePage() {
                         {team.goalsFor}-{team.goalsAgainst} goals
                       </Typography>
                     </Box>
-                    <Typography variant="body2">{team.matches} MP</Typography>
+                    <Typography variant="body2">{team.matches} played</Typography>
                     <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' }, color: '#EA6C56' }}>{team.wins}W</Typography>
                     <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>{team.draws}D</Typography>
                     <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' }, color: '#EF4444' }}>{team.losses}L</Typography>
                   </Box>
-                  {index < teamHistory.slice(0, 6).length - 1 && <Divider sx={{ borderColor: 'rgba(201, 185, 190, 0.06)' }} />}
+                  {index < Math.min(teamHistory.length, expanded.teams ? teamHistory.length : PREVIEW.teams) - 1 && <Divider sx={{ borderColor: 'rgba(201, 185, 190, 0.06)' }} />}
                 </Box>
               ))}
             </CardContent>
           </GlassCard>
+          {teamHistory.length > PREVIEW.teams && (
+            <ShowAllButton open={expanded.teams} total={teamHistory.length} onClick={() => toggle('teams')} />
+          )}
         </Box>
       )}
 
       {/* Rival Picker */}
       {rivals.length > 0 && (
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            Rivalry Shortcut
-          </Typography>
+          <SectionTitle title="Compare with a rival" />
           <GlassCard>
             <CardContent sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr auto' }, gap: 1.5 }}>
               <Autocomplete
@@ -549,20 +538,18 @@ export default function PlayerProfilePage() {
       {/* Match History */}
       {matchInsights.length > 0 && (
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            Recent Matches
-          </Typography>
+          <SectionTitle title="Recent matches" />
           <GlassCard>
             <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-              {matchInsights.slice(0, 10).map((entry, index) => (
+              {matchInsights.slice(0, expanded.matches ? RECENT_MATCH_LIMIT : PREVIEW.matches).map((entry, index) => (
                 <Box key={entry.match.id}>
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'auto 1fr auto', sm: 'auto 1fr auto auto' }, gap: 1.5, alignItems: 'center', px: 2, py: 1.5 }}>
                     <Chip
                       label={entry.result}
                       size="small"
                       sx={{
-                        bgcolor: entry.result === 'W' ? '#EA6C56' : entry.result === 'D' ? '#C9B9BE' : '#EF4444',
-                        color: '#12080C',
+                        bgcolor: FORM_COLORS[entry.result as 'W' | 'D' | 'L'],
+                        color: FORM_TEXT_COLOR,
                         fontWeight: 900,
                       }}
                     />
@@ -581,11 +568,14 @@ export default function PlayerProfilePage() {
                       {entry.match.played_at ? new Date(entry.match.played_at).toLocaleDateString() : ''}
                     </Typography>
                   </Box>
-                  {index < matchInsights.slice(0, 10).length - 1 && <Divider sx={{ borderColor: 'rgba(201, 185, 190, 0.06)' }} />}
+                  {index < Math.min(matchInsights.length, expanded.matches ? RECENT_MATCH_LIMIT : PREVIEW.matches) - 1 && <Divider sx={{ borderColor: 'rgba(201, 185, 190, 0.06)' }} />}
                 </Box>
               ))}
             </CardContent>
           </GlassCard>
+          {Math.min(matchInsights.length, RECENT_MATCH_LIMIT) > PREVIEW.matches && (
+            <ShowAllButton open={expanded.matches} total={Math.min(matchInsights.length, RECENT_MATCH_LIMIT)} onClick={() => toggle('matches')} />
+          )}
         </Box>
       )}
 
