@@ -29,6 +29,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import { TEAMS } from '@/lib/constants';
 import type { RegisteredPlayer, Season } from '@/lib/types';
+import { userFacingError } from '@/lib/user-error';
 
 const STEPS = ['Tournament Info', 'Select Players', 'Set Admin PIN'];
 
@@ -163,13 +164,13 @@ export default function CreateTournamentForm({ prefill = {} }: { prefill?: Tourn
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to create tournament');
+        throw new Error(data.error || 'The tournament could not be created. Try again.');
       }
 
       const tournament = await res.json();
       router.push(`/tournaments/${tournament.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(userFacingError(err, 'The tournament', 'created'));
     } finally {
       setLoading(false);
     }

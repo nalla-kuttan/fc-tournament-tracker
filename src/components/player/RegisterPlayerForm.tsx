@@ -14,6 +14,7 @@ import Typography from '@mui/material/Typography';
 import GlassCard from '@/components/shared/GlassCard';
 import CardContent from '@mui/material/CardContent';
 import { TEAMS } from '@/lib/constants';
+import { userFacingError } from '@/lib/user-error';
 
 export default function RegisterPlayerForm() {
   const router = useRouter();
@@ -40,13 +41,13 @@ export default function RegisterPlayerForm() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to register player');
+        throw new Error(data.error || 'The player could not be registered. Try again.');
       }
 
       router.push('/players');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(userFacingError(err, 'The player', 'registered'));
     } finally {
       setLoading(false);
     }
