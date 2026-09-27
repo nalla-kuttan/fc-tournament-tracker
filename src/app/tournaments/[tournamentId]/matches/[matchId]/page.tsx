@@ -6,7 +6,6 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import AdminGate from '@/components/auth/AdminGate';
 import MatchResultForm from '@/components/tournament/MatchResultForm';
@@ -15,6 +14,7 @@ import CardContent from '@mui/material/CardContent';
 import EditIcon from '@mui/icons-material/Edit';
 import AIMatchReport from '@/components/ai/AIMatchReport';
 import type { MatchStats } from '@/lib/types';
+import PageSkeleton from '@/components/shared/PageSkeleton';
 
 interface MatchDetail {
   id: string;
@@ -52,9 +52,7 @@ export default function MatchDetailPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <PageSkeleton />
     );
   }
 

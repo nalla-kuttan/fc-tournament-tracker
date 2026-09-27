@@ -5,9 +5,10 @@ import { useParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
-import CircularProgress from '@mui/material/CircularProgress';
 import MatchCard from '@/components/tournament/MatchCard';
 import type { Match } from '@/lib/types';
+import SectionTitle from '@/components/shared/SectionTitle';
+import PageSkeleton from '@/components/shared/PageSkeleton';
 
 export default function MatchesPage() {
   const params = useParams();
@@ -28,9 +29,7 @@ export default function MatchesPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <PageSkeleton />
     );
   }
 
@@ -108,20 +107,7 @@ export default function MatchesPage() {
         .sort(([a], [b]) => Number(a) - Number(b))
         .map(([round, roundMatches]) => (
           <Box key={round} sx={{ mb: 3 }}>
-            <Typography
-              variant="body2"
-              sx={{
-                color: '#A18A93',
-                textTransform: 'uppercase',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                letterSpacing: '0.5px',
-                px: 2,
-                mb: 1,
-              }}
-            >
-              Round {round}
-            </Typography>
+            <SectionTitle component="h3" title={`Round ${round}`} sx={{ px: 0.5, mb: 1 }} />
             <Box
               sx={{
                 background: 'rgba(36, 16, 25, 0.6)',

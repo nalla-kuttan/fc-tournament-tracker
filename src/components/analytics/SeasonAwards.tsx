@@ -4,6 +4,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import type { CareerStats } from '@/lib/types';
+import SectionTitle from '@/components/shared/SectionTitle';
 
 interface Award {
   emoji: string;
@@ -108,20 +109,7 @@ export default function SeasonAwards({ stats }: { stats: CareerStats[] }) {
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Typography
-        variant="body2"
-        sx={{
-          color: '#A18A93',
-          textTransform: 'uppercase',
-          fontSize: '0.8rem',
-          fontWeight: 600,
-          letterSpacing: '0.5px',
-          px: 2,
-          mb: 1.5,
-        }}
-      >
-        Season Awards
-      </Typography>
+      <SectionTitle title="Season awards" />
       <Grid container spacing={1.5}>
         {awards.map((award) => (
           <Grid key={award.title} size={{ xs: 6, sm: 4, md: 4 }}>

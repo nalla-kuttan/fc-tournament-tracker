@@ -23,6 +23,7 @@ import { getRivalries, type GoalLite, type RivalrySummary } from '@/lib/analytic
 import { fetcher } from '@/lib/fetcher';
 import { getPlayerImagePath } from '@/lib/player-images';
 import type { RegisteredPlayer, H2HData, CareerStats, Match } from '@/lib/types';
+import PageSkeleton from '@/components/shared/PageSkeleton';
 
 interface GlobalData {
   career_stats: CareerStats[];
@@ -216,7 +217,7 @@ function H2HPageContent() {
 
 export default function H2HPage() {
   return (
-    <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>}>
+    <Suspense fallback={<PageSkeleton />}>
       <H2HPageContent />
     </Suspense>
   );

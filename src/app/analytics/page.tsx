@@ -77,14 +77,14 @@ export default function AnalyticsPage() {
     {isLoading && <Box aria-label="Loading stats">{[0, 1, 2].map((i) => <Skeleton key={i} variant="rounded" height={160} sx={{ mb: 2 }} />)}</Box>}
     {overview && <>
       <Typography color="text.secondary" sx={{ pb: 2, borderBottom: 1, borderColor: 'divider' }}>{periods[period]} · {overview.games.length} completed matches · {overview.goals} goals · {overview.rows.filter((p) => p.played > 0).length} players</Typography>
-      {overview.undated > 0 && <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{overview.undated} undated matches count only toward all-time totals; form comparisons require recorded dates.</Typography>}
+      {overview.undated > 0 && <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: '65ch' }}>{overview.undated} undated matches count only toward all-time totals; form comparisons require recorded dates.</Typography>}
       {overview.games.length === 0 && <Alert severity="info" sx={{ mt: 2 }}>No completed matches in this period. Choose another time range or record a result from Play.</Alert>}
       <Box aria-live="polite">
         {stories.map((story) => <Box component="section" key={story.question} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '220px minmax(0, 1fr)' }, gap: { xs: 1, md: 4 }, py: 3, borderBottom: 1, borderColor: 'divider' }}>
           <Typography component="h2" variant="body1" fontWeight={600} color="text.secondary">{story.question}</Typography>
           <Box><Typography component="h3" variant="h5" fontWeight={700}>{story.answer}</Typography>
             <Typography sx={{ mt: 1, maxWidth: '65ch' }}>{story.detail}</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{story.evidence}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: '65ch' }}>{story.evidence}</Typography>
             <Button component={Link} href={story.href} endIcon={<ArrowForwardIcon />} sx={{ mt: 1, px: 0, color: 'secondary.light' }}>{story.action}</Button>
           </Box>
         </Box>)}
@@ -103,7 +103,7 @@ export default function AnalyticsPage() {
         <Typography fontWeight={600}>Ask AI about these players · all-time record</Typography>
       </AccordionSummary>
       <AccordionDetails id="stats-analyst-content">
-        <Typography color="text.secondary" sx={{ mb: 2 }}>AI interpretation uses the full record, not the selected time range. Check its claims against the supporting match stats.</Typography>
+        <Typography color="text.secondary" sx={{ mb: 2, maxWidth: '65ch' }}>AI interpretation uses the full record, not the selected time range. Check its claims against the supporting match stats.</Typography>
         {analystOpen && <AIStatQuery careerStats={data.career_stats} />}
       </AccordionDetails>
     </Accordion>}

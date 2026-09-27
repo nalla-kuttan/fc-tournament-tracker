@@ -4,7 +4,6 @@ import useSWR from 'swr';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
 import CardContent from '@mui/material/CardContent';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import BackButton from '@/components/shared/BackButton';
@@ -12,6 +11,7 @@ import GlassCard from '@/components/shared/GlassCard';
 import AIStatQuery from '@/components/ai/AIStatQuery';
 import { fetcher } from '@/lib/fetcher';
 import type { CareerStats } from '@/lib/types';
+import PageSkeleton from '@/components/shared/PageSkeleton';
 
 interface GlobalData {
   career_stats: CareerStats[];
@@ -25,9 +25,7 @@ export default function AIAnalystPage() {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <PageSkeleton />
     );
   }
 
