@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
+import { fetchAllRows } from '@/lib/supabase/pagination';
 import { aggregateCareerStats } from '@/lib/algorithms/stats';
 import type { Match } from '@/lib/types';
 import { ApiError, handleApiError } from '@/lib/api-guards';
@@ -31,31 +32,42 @@ export async function GET(request: Request) {
     }
 
   // Get all player instances for both
-  const [{ data: p1Instances }, { data: p2Instances }] = await Promise.all([
+  const [p1InstancesResult, p2InstancesResult] = await Promise.all([
     supabase.from('player').select('id').eq('registered_player_id', p1Id),
     supabase.from('player').select('id').eq('registered_player_id', p2Id),
   ]);
+  if (p1InstancesResult.error) throw p1InstancesResult.error;
+  if (p2InstancesResult.error) throw p2InstancesResult.error;
 
-  const p1Ids = (p1Instances ?? []).map((p) => p.id);
-  const p2Ids = (p2Instances ?? []).map((p) => p.id);
+  const p1Ids = (p1InstancesResult.data ?? []).map((p) => p.id);
+  const p2Ids = (p2InstancesResult.data ?? []).map((p) => p.id);
   const allIds = [...p1Ids, ...p2Ids];
 
-  // Get all matches involving either player
-  const matchResult = allIds.length > 0
-    ? await supabase
-      .from('match')
-      .select('*, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team), tournament:tournament_id(id, name)')
-      .or(allIds.map((id) => `home_player_id.eq.${id},away_player_id.eq.${id}`).join(','))
-    : { data: [], error: null };
+  // Get all matches and goals involving either player
+  const [matchResult, goalResult] = allIds.length > 0
+    ? await Promise.all([
+      fetchAllRows<Match>((from, to) => (
+        supabase
+          .from('match')
+          .select('*, home_player:home_player_id(id, name, team), away_player:away_player_id(id, name, team), tournament:tournament_id(id, name)')
+          .or(allIds.map((id) => `home_player_id.eq.${id},away_player_id.eq.${id}`).join(','))
+          .order('id', { ascending: true })
+          .range(from, to)
+      )),
+      fetchAllRows<{ player_id: string }>((from, to) => (
+        supabase
+          .from('goal')
+          .select('player_id')
+          .in('player_id', allIds)
+          .order('id', { ascending: true })
+          .range(from, to)
+      )),
+    ])
+    : [{ data: [], error: null }, { data: [], error: null }];
   if (matchResult.error) throw matchResult.error;
-
-  const matches = (matchResult.data ?? []) as Match[];
-
-  // Get all goals
-  const goalResult = allIds.length > 0
-    ? await supabase.from('goal').select('player_id').in('player_id', allIds)
-    : { data: [], error: null };
   if (goalResult.error) throw goalResult.error;
+
+  const matches = matchResult.data ?? [];
 
   // Find head-to-head matches (both players were opponents)
   const p1Set = new Set(p1Ids);

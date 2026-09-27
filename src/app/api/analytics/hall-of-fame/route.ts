@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { calculateStandings } from '@/lib/algorithms/standings';
 import { handleApiError } from '@/lib/api-guards';
 import { createServerClient } from '@/lib/supabase/server';
+import { fetchAllRows } from '@/lib/supabase/pagination';
 import type { Match } from '@/lib/types';
 
 export async function GET() {
@@ -17,15 +18,23 @@ export async function GET() {
 
     const tournamentIds = tournaments.map((tournament) => tournament.id);
     const [playersResult, matchesResult] = await Promise.all([
-      supabase
-        .from('player')
-        .select('id, name, team, registered_player_id, tournament_id')
-        .in('tournament_id', tournamentIds),
-      supabase
-        .from('match')
-        .select('*, home_player:home_player_id(id, name, team, registered_player_id), away_player:away_player_id(id, name, team, registered_player_id)')
-        .in('tournament_id', tournamentIds)
-        .order('played_at'),
+      fetchAllRows<{ id: string; name: string; team: string; registered_player_id: string; tournament_id: string }>((from, to) => (
+        supabase
+          .from('player')
+          .select('id, name, team, registered_player_id, tournament_id')
+          .in('tournament_id', tournamentIds)
+          .order('id', { ascending: true })
+          .range(from, to)
+      )),
+      fetchAllRows<Match>((from, to) => (
+        supabase
+          .from('match')
+          .select('*, home_player:home_player_id(id, name, team, registered_player_id), away_player:away_player_id(id, name, team, registered_player_id)')
+          .in('tournament_id', tournamentIds)
+          .order('played_at')
+          .order('id', { ascending: true })
+          .range(from, to)
+      )),
     ]);
     if (playersResult.error) throw playersResult.error;
     if (matchesResult.error) throw matchesResult.error;
@@ -37,7 +46,7 @@ export async function GET() {
       playersByTournament.set(player.tournament_id, group);
     }
     const matchesByTournament = new Map<string, Match[]>();
-    for (const match of (matchesResult.data ?? []) as Match[]) {
+    for (const match of matchesResult.data ?? []) {
       const group = matchesByTournament.get(match.tournament_id) ?? [];
       group.push(match);
       matchesByTournament.set(match.tournament_id, group);
