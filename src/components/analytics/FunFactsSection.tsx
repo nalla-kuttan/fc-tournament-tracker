@@ -31,7 +31,7 @@ interface FunFact {
   color: string;
 }
 
-function computeFunFacts(
+export function computeFunFacts(
   matches: Match[],
   goals: GoalData[],
   registeredPlayers: RegisteredPlayer[],
@@ -110,7 +110,7 @@ function computeFunFacts(
     if (maxGoalsMatch && maxGoals > 0) {
       facts.push({
         emoji: '⚽',
-        title: 'Most goals in a match',
+        title: 'Highest-scoring match',
         value: `${maxGoals} goals`,
         subtitle: `${maxGoalsMatch.home_player?.name ?? 'TBD'} ${maxGoalsMatch.home_score}-${maxGoalsMatch.away_score} ${maxGoalsMatch.away_player?.name ?? 'TBD'}`,
         color: '#EA6C56',
@@ -214,23 +214,29 @@ function computeFunFacts(
 
   // 6. Most MOTM Awards
   try {
-    const motmCount = new Map<string, number>();
+    // Count per registered player across every tournament. motm_player_id is a
+    // per-tournament id, so counting it directly reported a single tournament's
+    // tally (6) instead of the career record (63).
+    const motmCount = new Map<string, { count: number; name: string }>();
     for (const m of matches) {
       const stats = m.stats as MatchStats;
-      if (stats?.motm_player_id) {
-        motmCount.set(stats.motm_player_id, (motmCount.get(stats.motm_player_id) ?? 0) + 1);
+      const rp = stats?.motm_player_id ? instanceToRegistered.get(stats.motm_player_id) : null;
+      if (rp) {
+        const current = motmCount.get(rp.id) ?? { count: 0, name: rp.name };
+        current.count++;
+        motmCount.set(rp.id, current);
       }
     }
     let maxMotm = 0;
-    let motmPlayerId = '';
-    for (const [pid, count] of motmCount) {
+    let motmName = '';
+    for (const { count, name } of motmCount.values()) {
       if (count > maxMotm) {
         maxMotm = count;
-        motmPlayerId = pid;
+        motmName = name;
       }
     }
     if (maxMotm >= 2) {
-      const rp = instanceToRegistered.get(motmPlayerId);
+      const rp = { name: motmName };
       facts.push({
         emoji: '🏅',
         title: 'Most Man of the Match awards',

@@ -1,9 +1,6 @@
 import type { Match, Player, RegisteredPlayer } from './types';
 
-export type CompetitivePlayerInstance = Pick<
-  Player,
-  'id' | 'registered_player_id' | 'tournament_id'
->;
+export type CompetitivePlayerInstance = Pick<Player, 'id' | 'registered_player_id'>;
 
 export type CompetitiveScope = { scope: 'season' | 'all-time'; seasonId?: string | null };
 
@@ -28,6 +25,7 @@ export interface CompetitiveRatingSnapshot {
 
 interface RatingSequence {
   ratingMap: Map<string, number>;
+  lastChangeMap: Map<string, number>;
   peakMap: Map<string, number>;
   matchesMap: Map<string, number>;
   formMap: Map<string, ('W' | 'D' | 'L')[]>;
@@ -49,7 +47,7 @@ export function calculateCompetitiveRatings(
   matches: Match[],
   options: CompetitiveScope
 ): CompetitiveRatingRow[] {
-  const { ratingMap, peakMap, matchesMap, formMap } = runCompetitiveRatingSequence(
+  const { ratingMap, lastChangeMap, peakMap, matchesMap, formMap } = runCompetitiveRatingSequence(
     players,
     playerInstances,
     matches,
@@ -60,13 +58,14 @@ export function calculateCompetitiveRatings(
     .map((player) => {
       const rating = ratingMap.get(player.id) ?? 1000;
       const recentForm = (formMap.get(player.id) ?? []).slice(0, 5);
-      const previousRating = estimatePreviousRating(rating, recentForm[0]);
+      // The real change from the player's latest match, not an estimate.
+      const movement = lastChangeMap.get(player.id) ?? 0;
       return {
         player,
         rank: 0,
         rating,
-        previousRating,
-        movement: rating - previousRating,
+        previousRating: rating - movement,
+        movement,
         peakRating: peakMap.get(player.id) ?? rating,
         matches: matchesMap.get(player.id) ?? 0,
         recentForm,
@@ -85,6 +84,7 @@ function runCompetitiveRatingSequence(
 ): RatingSequence {
   const instanceToRegistered = new Map(playerInstances.map((player) => [player.id, player.registered_player_id]));
   const ratingMap = new Map(players.map((player) => [player.id, 1000]));
+  const lastChangeMap = new Map<string, number>();
   const peakMap = new Map(players.map((player) => [player.id, 1000]));
   const matchesMap = new Map(players.map((player) => [player.id, 0]));
   const formMap = new Map(players.map((player) => [player.id, [] as ('W' | 'D' | 'L')[]]));
@@ -119,6 +119,8 @@ function runCompetitiveRatingSequence(
 
     ratingMap.set(homeRegisteredId, homeNext);
     ratingMap.set(awayRegisteredId, awayNext);
+    lastChangeMap.set(homeRegisteredId, homeNext - homeRating);
+    lastChangeMap.set(awayRegisteredId, awayNext - awayRating);
     peakMap.set(homeRegisteredId, Math.max(peakMap.get(homeRegisteredId) ?? 1000, homeNext));
     peakMap.set(awayRegisteredId, Math.max(peakMap.get(awayRegisteredId) ?? 1000, awayNext));
     matchesMap.set(homeRegisteredId, (matchesMap.get(homeRegisteredId) ?? 0) + 1);
@@ -127,7 +129,7 @@ function runCompetitiveRatingSequence(
     formMap.get(awayRegisteredId)?.unshift(awayGoals > homeGoals ? 'W' : awayGoals < homeGoals ? 'L' : 'D');
   }
 
-  return { ratingMap, peakMap, matchesMap, formMap, timeline };
+  return { ratingMap, lastChangeMap, peakMap, matchesMap, formMap, timeline };
 }
 
 function filterMatchesByScope(matches: Match[], options: CompetitiveScope) {
@@ -141,8 +143,13 @@ function compareMatchesChronologically(a: Match, b: Match) {
     || a.id.localeCompare(b.id);
 }
 
-function estimatePreviousRating(rating: number, latestForm?: 'W' | 'D' | 'L') {
-  if (latestForm === 'W') return rating - 18;
-  if (latestForm === 'L') return rating + 18;
-  return rating;
+// The app's single player rating (all-time, results-based). Every screen that
+// shows a "rating" reads this, so the power table, player cards and the
+// competition history can't disagree.
+export function getCompetitiveRatingMap(
+  players: Pick<RegisteredPlayer, 'id' | 'name' | 'base_team'>[],
+  playerInstances: CompetitivePlayerInstance[],
+  matches: Match[]
+) {
+  return runCompetitiveRatingSequence(players, playerInstances, matches, { scope: 'all-time' }).ratingMap;
 }
