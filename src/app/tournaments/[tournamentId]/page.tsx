@@ -25,6 +25,7 @@ import { getChampionName } from '@/lib/season-status';
 import type { Match, StandingRow } from '@/lib/types';
 import PageSkeleton from '@/components/shared/PageSkeleton';
 import { userFacingError } from '@/lib/user-error';
+import TournamentRecap from '@/components/tournament/TournamentRecap';
 
 export default function TournamentDashboard() {
   const params = useParams();
@@ -148,6 +149,8 @@ export default function TournamentDashboard() {
           </Box>
         </CardContent>
       </GlassCard>
+
+      {hasMatches && <TournamentRecap tournamentId={tournamentId} />}
 
       {!hasMatches && (
         <GlassCard sx={{ mb: 3 }}>
