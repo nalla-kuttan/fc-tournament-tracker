@@ -16,12 +16,13 @@ interface Props {
   title: string;
   entries: LeaderboardEntry[];
   valueLabel?: string;
+  nameLabel?: string;
   accentColor?: string;
 }
 
 const MEDAL_COLORS = ['#F59E0B', '#c0c0c0', '#cd7f32'];
 
-export default function StatLeaderboard({ title, entries, valueLabel, accentColor = '#EA6C56' }: Props) {
+export default function StatLeaderboard({ title, entries, valueLabel, nameLabel = 'Player', accentColor = '#EA6C56' }: Props) {
   if (entries.length === 0) return null;
 
   return (
@@ -32,7 +33,7 @@ export default function StatLeaderboard({ title, entries, valueLabel, accentColo
         </Typography>
         {valueLabel && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', px: 0.5, mb: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">Player</Typography>
+            <Typography variant="caption" color="text.secondary">{nameLabel}</Typography>
             <Typography variant="caption" color="text.secondary">{valueLabel}</Typography>
           </Box>
         )}

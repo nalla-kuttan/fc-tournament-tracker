@@ -1,4 +1,5 @@
 import type { CareerStats, Match, MatchStats } from '@/lib/types';
+import { clubForSide } from '@/lib/club-analytics';
 
 export interface PlayerInstanceLite {
   id: string;
@@ -82,7 +83,7 @@ export function getPlayerMatchInsights(matches: Match[], playerIds: Set<string>)
         goalsFor,
         goalsAgainst,
         opponentName: isHome ? match.away_player?.name ?? 'TBD' : match.home_player?.name ?? 'TBD',
-        team: isHome ? match.home_player?.team ?? 'Unknown' : match.away_player?.team ?? 'Unknown',
+        team: clubForSide(match, isHome ? 'home' : 'away'),
         rating: isHome ? stats?.home_rating ?? null : stats?.away_rating ?? null,
       };
     })

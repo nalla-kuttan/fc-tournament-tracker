@@ -1,6 +1,7 @@
 import type { CareerStats, Match, RegisteredPlayer, Tournament } from '@/lib/types';
 import { buildCompetitiveRatingTimeline, getCompetitiveRatingMap } from '@/lib/competitive-ratings';
 import type { PlayerInstanceLite } from '@/lib/player-insights';
+import { clubForSide } from '@/lib/club-analytics';
 
 export interface GoalLite {
   player_id: string;
@@ -191,8 +192,8 @@ export function getTeamAnalytics(matches: Match[]): TeamAnalyticsRow[] {
   };
 
   for (const match of matches.filter((m) => m.is_played && !m.is_bye)) {
-    apply(match.home_player?.team ?? 'Unknown', match.home_score ?? 0, match.away_score ?? 0);
-    apply(match.away_player?.team ?? 'Unknown', match.away_score ?? 0, match.home_score ?? 0);
+    apply(clubForSide(match, 'home'), match.home_score ?? 0, match.away_score ?? 0);
+    apply(clubForSide(match, 'away'), match.away_score ?? 0, match.home_score ?? 0);
   }
 
   return [...teams.values()].sort((a, b) => b.winRate - a.winRate || b.matches - a.matches);

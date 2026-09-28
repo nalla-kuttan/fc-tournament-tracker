@@ -1,5 +1,6 @@
 import type { Match, Player, RegisteredPlayer, Tournament } from '@/lib/types';
 import type { PlayerMatchRow, RecordContext, RecordsScope } from './types';
+import { clubForSide } from '@/lib/club-analytics';
 
 type RegisteredInput = Pick<RegisteredPlayer, 'id' | 'name' | 'base_team'>;
 type InstanceInput = Pick<Player, 'id' | 'registered_player_id' | 'team' | 'tournament_id'>;
@@ -42,8 +43,8 @@ export function buildRecordContext(
     const homeScore = match.home_score ?? 0;
     const awayScore = match.away_score ?? 0;
     const stats = match.stats ?? {};
-    rows.push({ match, registeredPlayerId: homeRegistered.id, playerName: homeRegistered.name, baseTeam: homeRegistered.base_team, instanceId: homeInstance.id, opponentRegisteredPlayerId: awayRegistered.id, opponentName: awayRegistered.name, selectedTeam: homeInstance.team, goalsFor: homeScore, goalsAgainst: awayScore, result: homeScore > awayScore ? 'W' : homeScore < awayScore ? 'L' : 'D', side: 'home', stats });
-    rows.push({ match, registeredPlayerId: awayRegistered.id, playerName: awayRegistered.name, baseTeam: awayRegistered.base_team, instanceId: awayInstance.id, opponentRegisteredPlayerId: homeRegistered.id, opponentName: homeRegistered.name, selectedTeam: awayInstance.team, goalsFor: awayScore, goalsAgainst: homeScore, result: awayScore > homeScore ? 'W' : awayScore < homeScore ? 'L' : 'D', side: 'away', stats });
+    rows.push({ match, registeredPlayerId: homeRegistered.id, playerName: homeRegistered.name, baseTeam: homeRegistered.base_team, instanceId: homeInstance.id, opponentRegisteredPlayerId: awayRegistered.id, opponentName: awayRegistered.name, selectedTeam: clubForSide(match, 'home', homeInstance.team), goalsFor: homeScore, goalsAgainst: awayScore, result: homeScore > awayScore ? 'W' : homeScore < awayScore ? 'L' : 'D', side: 'home', stats });
+    rows.push({ match, registeredPlayerId: awayRegistered.id, playerName: awayRegistered.name, baseTeam: awayRegistered.base_team, instanceId: awayInstance.id, opponentRegisteredPlayerId: homeRegistered.id, opponentName: homeRegistered.name, selectedTeam: clubForSide(match, 'away', awayInstance.team), goalsFor: awayScore, goalsAgainst: homeScore, result: awayScore > homeScore ? 'W' : awayScore < homeScore ? 'L' : 'D', side: 'away', stats });
   }
 
   const rowsByPlayer = new Map<string, PlayerMatchRow[]>();
