@@ -5,6 +5,7 @@ import { calculateStandings } from '@/lib/algorithms/standings';
 import { ApiError } from '@/lib/api-guards';
 import { createServerClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/pagination';
+import { loadTournamentRecap } from '@/lib/tournament-recap-data';
 import type { Match } from '@/lib/types';
 
 const TOURNAMENT_SUMMARY_MATCH_LIMIT = 100;
@@ -108,9 +109,14 @@ export async function getTournamentSummaryFacts(tournamentId: string) {
   if (matchesResult.error) throw matchesResult.error;
   const matches = (matchesResult.data ?? []) as unknown as Match[];
   // Standings need every played match; the prompt only needs the latest ones.
+  // The recap adds awards, the biggest win and rating movers, so the summary
+  // can cite them instead of inferring them.
+  const recap = await loadTournamentRecap(tournamentId);
   return {
     tournament: tournamentResult.data,
     standings: calculateStandings(matches, playersResult.data ?? []),
+    // shareText repeats the same facts; undefined keeps it out of the prompt.
+    recap: { ...recap, shareText: undefined },
     matches: matches.slice(0, TOURNAMENT_SUMMARY_MATCH_LIMIT),
   };
 }
