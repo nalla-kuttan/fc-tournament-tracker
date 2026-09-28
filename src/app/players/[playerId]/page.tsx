@@ -50,6 +50,7 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
 import Link from 'next/link';
 
+const RatingHistoryChart = dynamic(() => import('@/components/player/RatingHistoryChart'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
 const SingleRadarChart = dynamic(() => import('@/components/analytics/SingleRadarChart'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
 const FormMomentumChart = dynamic(() => import('@/components/analytics/FormMomentumChart'), { ssr: false, loading: () => <CircularProgress size={24} sx={{ display: 'block', mx: 'auto', my: 2 }} /> });
 
@@ -420,6 +421,18 @@ export default function PlayerProfilePage() {
               </Grid>
             )}
           </Grid>
+        </Box>
+      )}
+
+      {/* Rating history */}
+      {stats && stats.total_matches > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <SectionTitle title="Rating history" />
+          <GlassCard>
+            <CardContent>
+              <RatingHistoryChart playerId={playerId} />
+            </CardContent>
+          </GlassCard>
         </Box>
       )}
 
