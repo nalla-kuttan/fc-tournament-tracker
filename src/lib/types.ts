@@ -54,6 +54,10 @@ export interface MatchStats {
   away_rating?: number;
   motm_player_id?: string;
   motm_rating?: number;
+  // In-game clubs for this match (recorded on nearly every result).
+  home_team?: string;
+  away_team?: string;
+  motm_team?: string;
 }
 
 export interface Match {

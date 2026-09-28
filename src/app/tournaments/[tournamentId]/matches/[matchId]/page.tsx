@@ -16,6 +16,7 @@ import AIMatchReport from '@/components/ai/AIMatchReport';
 import type { MatchStats } from '@/lib/types';
 import PageSkeleton from '@/components/shared/PageSkeleton';
 import { MATCH_RESTORED_EVENT } from '@/components/tournament/SavedResultNotice';
+import { clubForSide } from '@/lib/club-analytics';
 
 interface MatchDetail {
   id: string;
@@ -157,7 +158,7 @@ export default function MatchDetailPage() {
                 {match.home_player?.name}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {match.home_player?.team}
+                {clubForSide(match as never, 'home')}
               </Typography>
             </Box>
             <Box
@@ -178,7 +179,7 @@ export default function MatchDetailPage() {
                 {match.away_player?.name}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {match.away_player?.team}
+                {clubForSide(match as never, 'away')}
               </Typography>
             </Box>
           </Box>

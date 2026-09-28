@@ -41,6 +41,7 @@ import {
   type GoalLite,
 } from '@/lib/analytics-insights';
 import dynamic from 'next/dynamic';
+import { getClubMatchups } from '@/lib/club-analytics';
 
 const GoalDistributionChart = dynamic(() => import('@/components/analytics/GoalDistributionChart'), {
   ssr: false,
@@ -157,7 +158,9 @@ export default function GlobalAnalyticsPage() {
     () => data ? getFormRankings(data.registered_players, data.player_instances, filteredMatches) : [],
     [data, filteredMatches]
   );
-  const teamAnalytics = useMemo(() => getTeamAnalytics(filteredMatches), [filteredMatches]);
+  // Clubs need a real sample before a win rate means anything.
+  const teamAnalytics = useMemo(() => getTeamAnalytics(filteredMatches).filter((row) => row.matches >= 5), [filteredMatches]);
+  const clubMatchups = useMemo(() => getClubMatchups(filteredMatches), [filteredMatches]);
   const clutchRankings = useMemo(
     () => data && hasTimedGoalData ? getClutchRankings(filteredGoals, data.player_instances, data.registered_players) : [],
     [data, filteredGoals, hasTimedGoalData]
@@ -561,13 +564,28 @@ export default function GlobalAnalyticsPage() {
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, md: 6 }}>
           <StatLeaderboard
-            title="Team Performance"
-            valueLabel="WR"
+            title="Club win rates"
+            nameLabel="Club"
+            valueLabel="Win %"
             entries={teamAnalytics.slice(0, 8).map((row, index) => ({
               rank: index + 1,
               name: row.team,
-              team: `${row.matches} matches · ${row.goalsFor}-${row.goalsAgainst}`,
+              team: `${row.wins}-${row.draws}-${row.losses} in ${row.matches} matches`,
               value: `${row.winRate.toFixed(0)}%`,
+            }))}
+            accentColor="#7E8CC2"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <StatLeaderboard
+            title="Club vs club"
+            nameLabel="Matchup"
+            valueLabel="Record"
+            entries={clubMatchups.slice(0, 8).map((row, index) => ({
+              rank: index + 1,
+              name: `${row.club} vs ${row.opponent}`,
+              team: `${row.meetings} meetings · ${row.goalsFor}-${row.goalsAgainst} goals`,
+              value: `${row.wins}-${row.draws}-${row.losses}`,
             }))}
             accentColor="#7E8CC2"
           />
