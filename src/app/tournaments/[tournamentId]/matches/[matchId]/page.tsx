@@ -17,6 +17,7 @@ import type { MatchStats } from '@/lib/types';
 import PageSkeleton from '@/components/shared/PageSkeleton';
 import { MATCH_RESTORED_EVENT } from '@/components/tournament/SavedResultNotice';
 import { clubForSide } from '@/lib/club-analytics';
+import MatchOdds from '@/components/tournament/MatchOdds';
 
 interface MatchDetail {
   id: string;
@@ -100,9 +101,14 @@ export default function MatchDetailPage() {
         <Typography variant="h5" fontWeight={700} gutterBottom>
           Round {match.round_number} {match.stage && `- ${match.stage}`}
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {match.home_player?.name} vs {match.away_player?.name}
         </Typography>
+        {match.home_player && match.away_player && (
+          <Box sx={{ mb: 3, maxWidth: 720 }}>
+            <MatchOdds matchId={match.id} homeName={match.home_player.name} awayName={match.away_player.name} />
+          </Box>
+        )}
         <AdminGate tournamentId={tournamentId}>
           <MatchResultForm key={match.id} match={match as never} />
         </AdminGate>
@@ -203,6 +209,12 @@ export default function MatchDetailPage() {
           )}
         </CardContent>
       </GlassCard>
+
+      {match.home_player && match.away_player && (
+        <Box sx={{ mb: 3 }}>
+          <MatchOdds matchId={match.id} homeName={match.home_player.name} awayName={match.away_player.name} />
+        </Box>
+      )}
 
       <AIMatchReport match={match} stats={stats} />
 

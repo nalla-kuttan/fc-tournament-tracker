@@ -37,6 +37,7 @@ import {
   type ChampionEntry,
   type MatchNightState,
 } from '@/lib/season-status';
+import MatchOdds from '@/components/tournament/MatchOdds';
 
 const FunFactsSection = dynamic(() => import('@/components/analytics/FunFactsSection'), {
   ssr: false,
@@ -388,6 +389,11 @@ function MatchNightCommand({
           <Typography sx={{ color: COLORS.textSteel, mt: 1, maxWidth: 680, lineHeight: 1.6 }}>
             {content.body}
           </Typography>
+          {state.kind === 'next-match' && state.match.home_player && state.match.away_player && (
+            <Box sx={{ mt: 1.5, maxWidth: 520 }}>
+              <MatchOdds matchId={state.match.id} homeName={state.match.home_player.name} awayName={state.match.away_player.name} compact />
+            </Box>
+          )}
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
             <Button
               variant="contained"
