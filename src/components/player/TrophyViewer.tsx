@@ -41,7 +41,7 @@ export default function TrophyViewer({ item, playerName, onClose }: { item: Trop
         scene.environment = sprites.studioEnvironment(renderer);
         models.lightStudio(scene);
         scene.add(sprites.contactShadow());
-        const trophy = models.buildTrophy(item.kind);
+        const trophy = models.buildTrophy(item.kind, Boolean(item.perfect));
         scene.add(trophy);
         const camera = new THREE.PerspectiveCamera(30, width / height, 0.1, 100);
         camera.position.set(3.2, 3.2, 8.4);
@@ -103,15 +103,15 @@ export default function TrophyViewer({ item, playerName, onClose }: { item: Trop
           <Box
             ref={setNode}
             role="img"
-            aria-label={`${label.name} trophy, ${item.tournamentName}. Drag to turn it.`}
+            aria-label={`${label.name} trophy${item.perfect ? ' with a crown for a perfect tournament' : ''}, ${item.tournamentName}. Drag to turn it.`}
             sx={{ height: { xs: 340, sm: 420 }, cursor: 'grab', '&:active': { cursor: 'grabbing' }, display: 'grid', placeItems: 'center' }}
           >
-            {failed && <Trophy3D kind={item.kind} width={200} spinning />}
+            {failed && <Trophy3D kind={item.kind} width={200} spinning crowned={Boolean(item.perfect)} />}
           </Box>
           <Box sx={{ px: 3, pb: 3, textAlign: 'center' }}>
             <Typography sx={{ fontSize: '0.8125rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#F59E0B' }}>{item.tournamentName}</Typography>
-            <Typography component="h2" sx={{ fontSize: '1.75rem', fontWeight: 700 }}>{label.name}</Typography>
-            <Typography color="text.secondary">{playerName} · {label.description} · {item.detail}</Typography>
+            <Typography component="h2" sx={{ fontSize: '1.75rem', fontWeight: 700 }}>{item.perfect ? `${label.name} · Perfect tournament` : label.name}</Typography>
+            <Typography color="text.secondary">{playerName} · {item.kind === 'title' ? item.detail : `${label.description} · ${item.detail}`}</Typography>
           </Box>
         </Box>
       )}

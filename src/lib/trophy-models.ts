@@ -59,8 +59,46 @@ function handle(m: THREE.Material, side: 1 | -1) {
   return new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 0.065, 16, false), m);
 }
 
+// A gold crown with pointed tips, pearls and coral gems, for a title won
+// without dropping a point.
+function crown(m: Materials) {
+  const group = new THREE.Group();
+  const radius = 0.34;
+  const bandMaterial = m.gold.clone();
+  bandMaterial.side = THREE.DoubleSide;
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius * 0.94, 0.2, 64, 1, true), bandMaterial);
+  band.position.y = 0.1;
+  const rimLow = new THREE.Mesh(new THREE.TorusGeometry(radius * 0.95, 0.03, 12, 64), m.paleGold);
+  rimLow.rotation.x = Math.PI / 2;
+  const rimHigh = rimLow.clone();
+  rimHigh.scale.setScalar(radius / (radius * 0.95));
+  rimHigh.position.y = 0.2;
+  group.add(band, rimLow, rimHigh);
+  const points = 6;
+  for (let i = 0; i < points; i++) {
+    const angle = (i / points) * Math.PI * 2;
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.3, 4), m.gold);
+    tip.position.set(Math.cos(angle) * radius * 0.97, 0.34, Math.sin(angle) * radius * 0.97);
+    tip.rotation.y = -angle;
+    const pearl = new THREE.Mesh(new THREE.SphereGeometry(0.045, 16, 12), m.paleGold);
+    pearl.position.set(tip.position.x, 0.51, tip.position.z);
+    const gemAngle = angle + Math.PI / points;
+    const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.05), m.coral);
+    gem.position.set(Math.cos(gemAngle) * radius * 1.01, 0.1, Math.sin(gemAngle) * radius * 1.01);
+    gem.rotation.y = -gemAngle;
+    group.add(tip, pearl, gem);
+  }
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(radius * 0.8, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), m.coral);
+  cap.scale.y = 0.55;
+  cap.position.y = 0.16;
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 20, 14), m.paleGold);
+  orb.position.y = 0.34;
+  group.add(cap, orb);
+  return group;
+}
+
 // Champion: a lidded two-handled cup on a round plinth.
-function championCup(m: Materials) {
+function championCup(m: Materials, crowned = false) {
   const group = new THREE.Group();
   const base = plinth(m, 'round', 1.7);
   const cup = lathe([
@@ -69,10 +107,18 @@ function championCup(m: Materials) {
   ], m.gold);
   const band = lathe([[0.83, 1.78], [0.86, 1.8], [0.9, 1.95], [0.87, 1.98], [0.84, 1.96]], m.paleGold);
   const lid = lathe([[0, 2.9], [0.82, 2.66], [0.9, 2.66], [0.86, 2.74], [0.5, 2.98], [0.18, 3.1], [0.14, 3.2], [0, 3.22]], m.gold);
-  const finial = new THREE.Mesh(new THREE.SphereGeometry(0.15, 32, 16), m.paleGold);
-  finial.position.y = 3.34;
   const top = new THREE.Group();
-  top.add(cup, band, lid, finial, handle(m.gold, 1), handle(m.gold, -1));
+  top.add(cup, band, lid, handle(m.gold, 1), handle(m.gold, -1));
+  if (crowned) {
+    const topper = crown(m);
+    topper.position.y = 3.14;
+    topper.scale.setScalar(1.55);
+    top.add(topper);
+  } else {
+    const finial = new THREE.Mesh(new THREE.SphereGeometry(0.15, 32, 16), m.paleGold);
+    finial.position.y = 3.34;
+    top.add(finial);
+  }
   top.position.y = base.userData.top;
   group.add(base, top);
   return group;
@@ -267,7 +313,7 @@ function ironWall(m: Materials) {
   return group;
 }
 
-const BUILDERS: Record<TrophyKind, (m: Materials) => THREE.Group> = {
+const BUILDERS: Record<TrophyKind, (m: Materials, crowned: boolean) => THREE.Group> = {
   title: championCup,
   'runner-up': runnerUpMedal,
   'golden-boot': goldenBoot,
@@ -277,8 +323,9 @@ const BUILDERS: Record<TrophyKind, (m: Materials) => THREE.Group> = {
 };
 
 // A trophy centred on the origin, feet on y = 0, scaled to 4 units tall.
-export function buildTrophy(kind: TrophyKind) {
-  const group = BUILDERS[kind](materials());
+// `crowned` tops the champion cup with a crown (a perfect tournament).
+export function buildTrophy(kind: TrophyKind, crowned = false) {
+  const group = BUILDERS[kind](materials(), crowned);
   const box = new THREE.Box3().setFromObject(group);
   const size = box.getSize(new THREE.Vector3());
   // Fit 4 units tall, or narrower if it's wide, so it never leaves the frame

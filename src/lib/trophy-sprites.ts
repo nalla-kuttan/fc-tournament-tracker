@@ -15,7 +15,7 @@ const PIXEL_RATIO = 1.5;
 const START_ANGLE = -0.5;
 
 let studio: { renderer: THREE.WebGLRenderer; scene: THREE.Scene; camera: THREE.PerspectiveCamera } | null | undefined;
-const sheets = new Map<TrophyKind, Promise<string | null>>();
+const sheets = new Map<string, Promise<string | null>>();
 let queue: Promise<unknown> = Promise.resolve();
 
 export function contactShadow() {
@@ -69,11 +69,11 @@ function getStudio() {
   return studio;
 }
 
-function render(kind: TrophyKind): string | null {
+function render(kind: TrophyKind, crowned: boolean): string | null {
   const setup = getStudio();
   if (!setup) return null;
   const { renderer, scene, camera } = setup;
-  const trophy = buildTrophy(kind);
+  const trophy = buildTrophy(kind, crowned);
   scene.add(trophy);
   const frameWidth = SPRITE_WIDTH * PIXEL_RATIO;
   const frameHeight = SPRITE_HEIGHT * PIXEL_RATIO;
@@ -92,22 +92,23 @@ function render(kind: TrophyKind): string | null {
   return sheet.toDataURL('image/webp', 0.9);
 }
 
-// One sheet per kind, rendered at most once per page load, one at a time.
-export function getTrophySheet(kind: TrophyKind): Promise<string | null> {
-  let sheet = sheets.get(kind);
+// One sheet per trophy design, rendered at most once per page load, one at a time.
+export function getTrophySheet(kind: TrophyKind, crowned = false): Promise<string | null> {
+  const key = `${kind}${crowned ? ':crowned' : ''}`;
+  let sheet = sheets.get(key);
   if (!sheet) {
     sheet = queue.then(() => new Promise<string | null>((resolve) => {
       // Yield between kinds so the page stays responsive.
       requestAnimationFrame(() => {
         try {
-          resolve(render(kind));
+          resolve(render(kind, crowned));
         } catch {
           resolve(null);
         }
       });
     }));
     queue = sheet;
-    sheets.set(kind, sheet);
+    sheets.set(key, sheet);
   }
   return sheet;
 }
