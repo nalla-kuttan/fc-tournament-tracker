@@ -79,11 +79,14 @@ describe('predictions', () => {
 describe('trophy room', () => {
   it('lists titles, runner-up finishes and golden boots per tournament', () => {
     const matches = [game('rA', 'rB', 3, 0), game('rB', 'rC', 2, 1), game('rC', 'rA', 0, 1)];
-    const tournaments = [{ id: 't', name: 'Season 1', format: 'league' as const, status: 'completed' as const, created_at: '2026-01-01' }];
+    const tournaments = [{ id: 't', name: 'Season 1', format: 'league' as const, status: 'completed' as 'completed' | 'active', created_at: '2026-01-01' }];
     const goals = [{ player_id: 'rA-t', match_id: matches[0].id }, { player_id: 'rA-t', match_id: matches[0].id }, { player_id: 'rB-t', match_id: matches[1].id }];
-    expect(buildTrophyRoom('rA', tournaments, instances, matches, goals).map((item) => item.kind)).toEqual(['title', 'golden-boot']);
-    expect(buildTrophyRoom('rB', tournaments, instances, matches, goals)).toEqual([expect.objectContaining({ kind: 'runner-up', detail: 'Finished second' })]);
-    expect(buildTrophyRoom('rA', [{ ...tournaments[0], status: 'active' }], instances, matches, goals)).toEqual([]);
+    const room = (id: string, list = tournaments) => buildTrophyRoom(id, players, list, instances, matches, goals);
+    // Alex won the league, scored most and conceded least.
+    expect(room('rA').map((item) => item.kind)).toEqual(['title', 'golden-boot', 'best-defence']);
+    expect(room('rA').find((item) => item.kind === 'golden-boot')?.detail).toBe('2 goals');
+    expect(room('rB')).toEqual([expect.objectContaining({ kind: 'runner-up', detail: 'Finished second' })]);
+    expect(room('rA', [{ ...tournaments[0], status: 'active' }])).toEqual([]);
   });
 });
 

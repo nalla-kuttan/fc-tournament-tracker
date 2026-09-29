@@ -19,7 +19,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pla
       .order('id', { ascending: true })
       .range(from, to));
     if (goals.error) throw goals.error;
-    return NextResponse.json({ items: buildTrophyRoom(playerId, data.tournaments, data.playerInstances, data.matches, goals.data ?? []) }, { headers: { 'Cache-Control': 'private, no-store' } });
+    return NextResponse.json({ items: buildTrophyRoom(playerId, data.registeredPlayers, data.tournaments, data.playerInstances, data.matches, goals.data ?? []) }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
     return handleApiError(error, 'Load trophy room');
   }
