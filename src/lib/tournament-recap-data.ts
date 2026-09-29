@@ -4,11 +4,13 @@ import { getCompetitiveData } from '@/lib/competitive-data';
 import { ApiError } from '@/lib/api-error';
 import { createServerClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/pagination';
+import { buildPlayerCards } from '@/lib/player-cards';
 import { buildTournamentRecap } from '@/lib/tournament-recap';
+import { buildTournamentWrapped } from '@/lib/tournament-wrapped';
 
 // Loads what a tournament recap needs: every played match (ratings depend on
 // the full history) and this tournament's goal records.
-export async function loadTournamentRecap(tournamentId: string) {
+async function loadTournamentInputs(tournamentId: string) {
   const supabase = createServerClient();
   const data = await getCompetitiveData(supabase);
   const tournament = data.tournaments.find((row) => row.id === tournamentId);
@@ -25,5 +27,17 @@ export async function loadTournamentRecap(tournamentId: string) {
     : { data: [], error: null };
   if (goals.error) throw goals.error;
 
-  return buildTournamentRecap(tournament, data.registeredPlayers, data.playerInstances, data.matches, goals.data ?? []);
+  return { data, tournament, goals: goals.data ?? [] };
+}
+
+export async function loadTournamentRecap(tournamentId: string) {
+  const { data, tournament, goals } = await loadTournamentInputs(tournamentId);
+  return buildTournamentRecap(tournament, data.registeredPlayers, data.playerInstances, data.matches, goals);
+}
+
+export async function loadTournamentWrapped(tournamentId: string) {
+  const { data, tournament, goals } = await loadTournamentInputs(tournamentId);
+  const wrapped = buildTournamentWrapped(tournament, data.registeredPlayers, data.playerInstances, data.matches, goals);
+  const cards = buildPlayerCards(data.registeredPlayers, data.playerInstances, data.matches, data.tournaments);
+  return { ...wrapped, cards: cards.filter((card) => wrapped.players.some((player) => player.playerId === card.playerId)) };
 }

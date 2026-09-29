@@ -16,7 +16,12 @@ import InputLabel from '@mui/material/InputLabel';
 import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 import PeopleIcon from '@mui/icons-material/People';
+import Link from 'next/link';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import PlayerCard from '@/components/player/PlayerCard';
+import UltimateCard from '@/components/player/UltimateCard';
+import type { PlayerCardData } from '@/lib/player-cards';
 import EmptyState from '@/components/shared/EmptyState';
 import { getRecentForm } from '@/lib/player-insights';
 import { getCompetitiveRatingMap } from '@/lib/competitive-ratings';
@@ -35,6 +40,9 @@ export default function PlayersPage() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('name');
+  const [view, setView] = useState<'cards' | 'list'>('cards');
+  const { data: cardData } = useSWR<{ cards: PlayerCardData[] }>('/api/players/cards', fetcher, { revalidateOnFocus: false, onError: () => undefined });
+  const cardById = useMemo(() => new Map((cardData?.cards ?? []).map((card) => [card.playerId, card])), [cardData?.cards]);
   const { data: players = [], isLoading: loadingPlayers } = useSWR<RegisteredPlayer[]>('/api/players', fetcher);
   const { data: analytics } = useSWR<GlobalAnalyticsData>('/api/analytics/global', fetcher, { revalidateOnFocus: false });
 
@@ -145,7 +153,7 @@ export default function PlayersPage() {
       </Box>
 
       {players.length > 0 && (
-        <Box className="animate-section" sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 180px' }, gap: 1.5, mb: 2 }}>
+        <Box className="animate-section" sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr auto', sm: '1fr 180px auto' }, gap: 1.5, mb: 2 }}>
           <TextField
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -153,7 +161,7 @@ export default function PlayersPage() {
             size="small"
             fullWidth
           />
-          <FormControl size="small" fullWidth>
+          <FormControl size="small" fullWidth sx={{ gridColumn: { xs: '1 / -1', sm: 'auto' } }}>
             <InputLabel>Sort</InputLabel>
             <Select value={sortMode} label="Sort" onChange={(event) => setSortMode(event.target.value as SortMode)}>
               <MenuItem value="name">Name</MenuItem>
@@ -164,6 +172,17 @@ export default function PlayersPage() {
               <MenuItem value="form">Recent Form</MenuItem>
             </Select>
           </FormControl>
+          <ToggleButtonGroup
+            size="small"
+            exclusive
+            value={view}
+            onChange={(_, next) => next && setView(next)}
+            aria-label="Show players as"
+            sx={{ gridRow: { xs: 1, sm: 'auto' }, gridColumn: { xs: 2, sm: 'auto' }, '& .MuiToggleButton-root': { textTransform: 'none', px: 1.5 } }}
+          >
+            <ToggleButton value="cards">Cards</ToggleButton>
+            <ToggleButton value="list">List</ToggleButton>
+          </ToggleButtonGroup>
         </Box>
       )}
 
@@ -198,6 +217,37 @@ export default function PlayersPage() {
             </Button>
           }
         />
+      ) : view === 'cards' && cardById.size > 0 ? (
+        <Box
+          component="ul"
+          className="animate-section"
+          sx={{ listStyle: 'none', m: 0, p: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: { xs: 2, sm: 3 } }}
+        >
+          {visiblePlayers.map((p) => {
+            const card = cardById.get(p.id);
+            return (
+              <Box component="li" key={p.id}>
+                <Box
+                  component={Link}
+                  href={`/players/${p.id}`}
+                  aria-label={`Open ${p.name}'s profile`}
+                  sx={{ display: 'block', borderRadius: '16px', '&:focus-visible': { outline: '3px solid rgba(255, 138, 115, 0.78)', outlineOffset: 4 } }}
+                >
+                  {card ? (
+                    <UltimateCard card={card} width="100%" />
+                  ) : (
+                    <Box sx={{ aspectRatio: '5 / 7', borderRadius: '16px', border: '1px dashed rgba(201, 185, 190, 0.24)', display: 'grid', placeItems: 'center', textAlign: 'center', p: 2 }}>
+                      <Box>
+                        <Typography fontWeight={700}>{p.name}</Typography>
+                        <Typography variant="caption" color="text.secondary">Card unlocks after a first match</Typography>
+                      </Box>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            );
+          })}
+        </Box>
       ) : (
         <Box
           className="animate-section"

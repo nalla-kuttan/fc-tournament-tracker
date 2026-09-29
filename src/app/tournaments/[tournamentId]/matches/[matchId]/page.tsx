@@ -17,6 +17,7 @@ import type { MatchStats } from '@/lib/types';
 import PageSkeleton from '@/components/shared/PageSkeleton';
 import { MATCH_RESTORED_EVENT } from '@/components/tournament/SavedResultNotice';
 import { clubForSide } from '@/lib/club-analytics';
+import ClubBadge from '@/components/shared/ClubBadge';
 import MatchOdds from '@/components/tournament/MatchOdds';
 
 interface MatchDetail {
@@ -159,7 +160,8 @@ export default function MatchDetailPage() {
       <GlassCard sx={{ mb: 3 }}>
         <CardContent>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)', alignItems: 'center', gap: { xs: 1.5, sm: 4 }, py: 2 }}>
-            <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ textAlign: 'center', display: 'grid', justifyItems: 'center', gap: 0.5 }}>
+              <ClubBadge club={clubForSide(match as never, 'home')} size={44} />
               <Typography variant="h6" fontWeight={600}>
                 {match.home_player?.name}
               </Typography>
@@ -180,7 +182,8 @@ export default function MatchDetailPage() {
                 {match.home_score} – {match.away_score}
               </Typography>
             </Box>
-            <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ textAlign: 'center', display: 'grid', justifyItems: 'center', gap: 0.5 }}>
+              <ClubBadge club={clubForSide(match as never, 'away')} size={44} />
               <Typography variant="h6" fontWeight={600}>
                 {match.away_player?.name}
               </Typography>

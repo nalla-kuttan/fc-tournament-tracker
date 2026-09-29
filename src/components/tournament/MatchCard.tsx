@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import { getMatchIntelligenceLabels } from '@/lib/competitive';
 import type { Match, MatchStats } from '@/lib/types';
 import { clubForSide } from '@/lib/club-analytics';
+import ClubBadge from '@/components/shared/ClubBadge';
 
 interface MatchCardProps {
   match: {
@@ -102,7 +103,10 @@ export default function MatchCard({ match }: MatchCardProps) {
       >
         <Box sx={{ gridArea: 'home', textAlign: 'right', pr: 1.5, minWidth: 0 }}>
           <Typography variant="body1" noWrap sx={nameSx(homeWon, awayWon)}>{match.home_player?.name ?? 'TBD'}</Typography>
-          <Typography variant="caption" noWrap sx={{ display: 'block', color: '#C9B9BE' }}>{match.is_played ? clubForSide(match, 'home') : match.home_player?.team ?? ''}</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexDirection: 'row-reverse', minWidth: 0 }}>
+            <ClubBadge club={(match.is_played ? clubForSide(match, 'home') : match.home_player?.team ?? '')} size={14} />
+            <Typography variant="caption" noWrap sx={{ display: 'block', color: '#C9B9BE', minWidth: 0 }}>{(match.is_played ? clubForSide(match, 'home') : match.home_player?.team ?? '')}</Typography>
+          </Box>
         </Box>
 
         <Box sx={{ gridArea: 'score', minWidth: 76, textAlign: 'center', py: 0.75, px: 2, borderRadius: '10px', bgcolor: match.is_played ? 'rgba(234, 108, 86, 0.1)' : 'rgba(201, 185, 190, 0.06)' }}>
@@ -113,7 +117,10 @@ export default function MatchCard({ match }: MatchCardProps) {
 
         <Box sx={{ gridArea: 'away', textAlign: 'left', pl: 1.5, minWidth: 0 }}>
           <Typography variant="body1" noWrap sx={nameSx(awayWon, homeWon)}>{match.away_player?.name ?? 'TBD'}</Typography>
-          <Typography variant="caption" noWrap sx={{ display: 'block', color: '#C9B9BE' }}>{match.is_played ? clubForSide(match, 'away') : match.away_player?.team ?? ''}</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexDirection: 'row', minWidth: 0 }}>
+            <ClubBadge club={(match.is_played ? clubForSide(match, 'away') : match.away_player?.team ?? '')} size={14} />
+            <Typography variant="caption" noWrap sx={{ display: 'block', color: '#C9B9BE', minWidth: 0 }}>{(match.is_played ? clubForSide(match, 'away') : match.away_player?.team ?? '')}</Typography>
+          </Box>
         </Box>
 
         {hasTags && (

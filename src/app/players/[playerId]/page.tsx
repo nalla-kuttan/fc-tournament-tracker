@@ -27,6 +27,9 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Divider from '@mui/material/Divider';
 import PlayerStatsGrid from '@/components/player/PlayerStatsGrid';
+import UltimateCard from '@/components/player/UltimateCard';
+import ShareImageButton from '@/components/shared/ShareImageButton';
+import type { PlayerCardData } from '@/lib/player-cards';
 import ArchetypeIcon, { getArchetypeMeta } from '@/components/player/ArchetypeIcon';
 import AIScoutModal from '@/components/ai/AIScoutModal';
 import BackButton from '@/components/shared/BackButton';
@@ -90,6 +93,8 @@ export default function PlayerProfilePage() {
   const { data: statsData, isLoading: loadingStats } = useSWR<{ stats: CareerStats, matches: Match[], playerIds: string[] }>(`/api/players/${playerId}/stats`, fetcher);
   const { data: players = [] } = useSWR<RegisteredPlayer[]>('/api/players', fetcher);
   const { data: competitive } = useSWR<CompetitiveOverviewLite>('/api/competitive/overview', fetcher);
+  const { data: cardData } = useSWR<{ cards: PlayerCardData[] }>('/api/players/cards', fetcher, { onError: () => undefined });
+  const card = cardData?.cards.find((entry) => entry.playerId === playerId) ?? null;
 
   const loading = loadingPlayer || loadingStats;
   const stats = statsData?.stats || null;
@@ -170,6 +175,12 @@ export default function PlayerProfilePage() {
             p: { xs: 2, sm: 2.5 },
           }}
         >
+          {card ? (
+            <Box sx={{ display: 'grid', placeItems: 'center', py: { xs: 1, md: 0 } }}>
+              <UltimateCard card={card} width={230} />
+              <ShareImageButton src={`/api/og/player/${playerId}`} fileName={`${player.name.toLowerCase()}-card.png`} title={`${player.name}'s card`} label="Share card" sx={{ mt: 2 }} />
+            </Box>
+          ) : (
           <Box
             sx={{
               position: 'relative',
@@ -217,7 +228,7 @@ export default function PlayerProfilePage() {
               </Box>
             )}
           </Box>
-
+          )}
           <Box sx={{ minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 2 }}>
             <Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'flex-start', mb: 1 }}>
@@ -236,6 +247,14 @@ export default function PlayerProfilePage() {
 
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1.5 }}>
                 <Chip label={player.base_team} variant="outlined" />
+                {card && archetypeHighlight && (
+                  <Chip
+                    icon={<ArchetypeIcon archetype={archetypeHighlight.value} size={20} showTooltip={false} />}
+                    label={archetypeHighlight.value}
+                    variant="outlined"
+                    sx={{ color: getArchetypeMeta(archetypeHighlight.value).color, fontWeight: 700 }}
+                  />
+                )}
                 {playerTags.map((tag) => (
                   <Chip
                     key={tag}

@@ -10,25 +10,13 @@ import CardContent from '@mui/material/CardContent';
 import RadarChartComponent from './RadarChart';
 import WDLDoughnut from './WDLDoughnut';
 import RivalryCard from './RivalryCard';
+import TaleOfTheTape from './TaleOfTheTape';
 import dayjs from 'dayjs';
 import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
 import type { H2HData, Match } from '@/lib/types';
 
 interface Props {
   data: H2HData;
-}
-
-function BigStat({ value, label, color }: { value: number | string; label: string; color?: string }) {
-  return (
-    <Box sx={{ textAlign: 'center' }}>
-      <Typography variant="h3" fontWeight={800} sx={{ color: color ?? 'primary.main', fontFamily: 'monospace' }}>
-        {value}
-      </Typography>
-      <Typography variant="caption" color="text.secondary" textTransform="uppercase">
-        {label}
-      </Typography>
-    </Box>
-  );
 }
 
 function MatchHistoryRow({ match, player1Name }: { match: Match; player1Name: string }) {
@@ -85,7 +73,6 @@ function MatchHistoryRow({ match, player1Name }: { match: Match; player1Name: st
 }
 
 export default function H2HComparison({ data }: Props) {
-  const hasEncounters = data.total_encounters > 0;
   const p1Recent = data.player1_career.win_rate;
   const p2Recent = data.player2_career.win_rate;
   const p1Prediction = p1Recent + data.player1_wins * 4 + data.player1_goals;
@@ -99,90 +86,7 @@ export default function H2HComparison({ data }: Props) {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Head-to-Head Record */}
-      <GlassCard>
-        <CardContent>
-          <Typography variant="h6" fontWeight={600} gutterBottom textAlign="center">
-            Head-to-Head Record
-          </Typography>
-
-          {hasEncounters ? (
-            <>
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4, py: 2 }}>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h5" fontWeight={700}>
-                    {data.player1.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {data.player1.base_team}
-                  </Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: 'flex',
-                    gap: 2,
-                    px: 3,
-                    py: 1.5,
-                    borderRadius: 2,
-                    bgcolor: 'rgba(51, 64, 117,0.08)',
-                  }}
-                >
-                  <BigStat value={data.player1_wins} label="Wins" color="#EA6C56" />
-                  <BigStat value={data.draws} label="Draws" color="#A18A93" />
-                  <BigStat value={data.player2_wins} label="Wins" color="#7E8CC2" />
-                </Box>
-
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h5" fontWeight={700}>
-                    {data.player2.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {data.player2.base_team}
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, mt: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Total encounters: {data.total_encounters}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Goals: {data.player1_goals} - {data.player2_goals}
-                </Typography>
-              </Box>
-            </>
-          ) : (
-            <Box sx={{ textAlign: 'center', py: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4, mb: 3 }}>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h5" fontWeight={700}>
-                    {data.player1.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {data.player1.base_team}
-                  </Typography>
-                </Box>
-                <Typography variant="h6" color="text.secondary">vs</Typography>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h5" fontWeight={700}>
-                    {data.player2.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {data.player2.base_team}
-                  </Typography>
-                </Box>
-              </Box>
-              <Typography variant="body1" color="text.secondary">
-                No direct encounters found
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                These players have not faced each other in any tournament
-              </Typography>
-            </Box>
-          )}
-        </CardContent>
-      </GlassCard>
+      <TaleOfTheTape data={data} />
 
       {/* Rivalry Intensity */}
       <RivalryCard data={data} />
