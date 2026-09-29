@@ -107,6 +107,35 @@ body {
   font-synthesis: none;
 }
 
+/* ─── Stadium night: floodlight glows and faint pitch markings ─── */
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 45% 38% at 8% -6%, rgba(255, 214, 170, 0.16), transparent 70%),
+    radial-gradient(ellipse 45% 38% at 92% -6%, rgba(126, 140, 194, 0.17), transparent 70%),
+    radial-gradient(ellipse 70% 30% at 50% 108%, rgba(98, 17, 34, 0.35), transparent 70%);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  left: 50%;
+  bottom: -38vmin;
+  width: 76vmin;
+  height: 76vmin;
+  transform: translateX(-50%);
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 247, 246, 0.035);
+  box-shadow: 0 0 0 1px rgba(255, 247, 246, 0.015) inset;
+}
+
 a {
   color: inherit;
   text-decoration: none;

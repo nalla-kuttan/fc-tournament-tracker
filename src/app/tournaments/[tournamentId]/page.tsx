@@ -11,6 +11,7 @@ import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import TvIcon from '@mui/icons-material/Tv';
 import MatchCard from '@/components/tournament/MatchCard';
 import StandingsTable from '@/components/tournament/StandingsTable';
 import BracketView from '@/components/tournament/BracketView';
@@ -21,11 +22,11 @@ import CardContent from '@mui/material/CardContent';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import AIPunditModal from '@/components/ai/AIPunditModal';
 import { useAdmin } from '@/contexts/AdminContext';
-import { getChampionName } from '@/lib/season-status';
 import type { Match, StandingRow } from '@/lib/types';
 import PageSkeleton from '@/components/shared/PageSkeleton';
 import { userFacingError } from '@/lib/user-error';
 import TournamentRecap from '@/components/tournament/TournamentRecap';
+import ChampionCelebration from '@/components/tournament/ChampionCelebration';
 
 export default function TournamentDashboard() {
   const params = useParams();
@@ -93,13 +94,10 @@ export default function TournamentDashboard() {
   const isKnockout = tournament.format === 'knockout';
   const tableLabel = isKnockout ? 'View bracket' : 'View standings';
   const tablePath = `/tournaments/${tournamentId}/${isKnockout ? 'bracket' : 'standings'}`;
-  const champion = tournament.status === 'completed'
-    ? getChampionName(tournament.format, standings, tournament.matches ?? [])
-    : null;
   const headline = !hasMatches
     ? 'Schedule not generated'
     : tournament.status === 'completed'
-      ? champion ? `${champion} won` : 'Tournament complete'
+      ? 'Tournament complete'
       : pendingCount === 0
         ? 'All fixtures recorded'
         : `${pendingCount} ${pendingCount === 1 ? 'fixture' : 'fixtures'} left`;
@@ -131,6 +129,11 @@ export default function TournamentDashboard() {
             <Button variant="outlined" onClick={() => router.push(`/tournaments/${tournamentId}/matches`)}>
               Open Matches
             </Button>
+            {hasMatches && (
+              <Button variant="outlined" startIcon={<TvIcon />} onClick={() => router.push(`/tournaments/${tournamentId}/tv`)}>
+                TV mode
+              </Button>
+            )}
             <Button variant="outlined" onClick={() => router.push(tablePath)}>
               {tableLabel}
             </Button>
@@ -150,6 +153,7 @@ export default function TournamentDashboard() {
         </CardContent>
       </GlassCard>
 
+      {hasMatches && <ChampionCelebration tournamentId={tournamentId} lastPlayedAt={recentMatches[0]?.played_at ?? null} />}
       {hasMatches && <TournamentRecap tournamentId={tournamentId} />}
 
       {!hasMatches && (

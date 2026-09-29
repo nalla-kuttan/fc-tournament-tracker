@@ -28,7 +28,7 @@ import { fetcher } from '@/lib/fetcher';
 const SIDEBAR_WIDTH = 248;
 
 const COLORS = {
-  pitchBlack: BRAND_COLORS.background, textIce: BRAND_COLORS.text,
+  textIce: BRAND_COLORS.text,
   textSteel: BRAND_COLORS.textSecondary, textMuted: BRAND_COLORS.textSecondary,
   coral: BRAND_COLORS.coral, coralLight: BRAND_COLORS.coralLight,
   frenchBlue: BRAND_COLORS.frenchBlue, frenchBlueLight: BRAND_COLORS.frenchBlueLight,
@@ -149,7 +149,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
       sx={{
         minHeight: '100vh',
         color: COLORS.textIce,
-        background: COLORS.pitchBlack,
+        // Transparent so the floodlight glows on body (globals.css) show through.
+        background: 'transparent',
         position: 'relative',
         // `clip`, not `hidden`: hidden turns this box into a scroll container,
         // which silently disables position: sticky for everything inside it.
@@ -268,9 +269,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
             gap: 1.5,
             px: { xs: 2, sm: 3, lg: 4 },
             py: { xs: 1.25, sm: 1.75 },
-            background: BRAND_COLORS.background,
-            backdropFilter: { xs: 'blur(22px)', lg: 'none' },
-            WebkitBackdropFilter: { xs: 'blur(22px)', lg: 'none' },
+            background: 'rgba(18, 8, 12, 0.8)',
+            backdropFilter: 'blur(22px)',
+            WebkitBackdropFilter: 'blur(22px)',
             borderBottom: { xs: '1px solid rgba(201, 185, 190, 0.08)', lg: 'none' },
           }}
         >

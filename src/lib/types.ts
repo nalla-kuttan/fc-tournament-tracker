@@ -119,6 +119,8 @@ export interface StandingRow {
   goal_difference: number;
   points: number;
   form: ('W' | 'D' | 'L')[];
+  // Table position before the most recent result, when there is one.
+  previous_position?: number;
 }
 
 export interface CareerStats {

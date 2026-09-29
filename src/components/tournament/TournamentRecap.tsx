@@ -9,7 +9,10 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import Link from 'next/link';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import GlassCard from '@/components/shared/GlassCard';
+import ShareImageButton from '@/components/shared/ShareImageButton';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { fetcher } from '@/lib/fetcher';
 import type { TournamentRecap as Recap } from '@/lib/tournament-recap';
@@ -49,10 +52,19 @@ export default function TournamentRecap({ tournamentId }: { tournamentId: string
     <Box sx={{ mb: 3 }}>
       <SectionTitle
         title={data.decided ? 'Tournament recap' : 'Recap so far'}
+        sx={{ flexWrap: 'wrap' }}
         action={
-          <Button size="small" startIcon={<ContentCopyIcon />} onClick={() => void copy()} aria-live="polite">
-            {copied === 'done' ? 'Copied' : copied === 'failed' ? 'Copy failed' : 'Copy recap'}
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {data.decided && (
+              <Button size="small" variant="contained" startIcon={<AutoAwesomeIcon />} component={Link} href={`/tournaments/${tournamentId}/wrapped`}>
+                Wrapped
+              </Button>
+            )}
+            <ShareImageButton src={`/api/og/recap/${tournamentId}`} fileName={`${data.tournament.name.toLowerCase().replace(/\s+/g, '-')}-recap.png`} title={`${data.tournament.name} recap`} />
+            <Button size="small" startIcon={<ContentCopyIcon />} onClick={() => void copy()} aria-live="polite">
+              {copied === 'done' ? 'Copied' : copied === 'failed' ? 'Copy failed' : 'Copy text'}
+            </Button>
+          </Box>
         }
       />
       <GlassCard>

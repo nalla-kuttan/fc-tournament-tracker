@@ -131,3 +131,22 @@ function resolveTieGroup(group: StandingRow[], matches: Match[]) {
       || a.player_id.localeCompare(b.player_id);
   });
 }
+
+/**
+ * Standings with each row's position before the latest result, so the table
+ * can show who climbed or dropped.
+ */
+export function withMovement(
+  matches: Match[],
+  players: { id: string; name: string; team: string }[]
+): StandingRow[] {
+  const current = calculateStandings(matches, players);
+  const played = matches
+    .filter((match) => match.is_played && !match.is_bye)
+    .sort((a, b) => (a.played_at ?? '').localeCompare(b.played_at ?? '') || a.match_number - b.match_number || a.id.localeCompare(b.id));
+  if (played.length < 2) return current;
+  const latest = played.at(-1)!;
+  const before = calculateStandings(matches.filter((match) => match.id !== latest.id), players);
+  const previous = new Map(before.map((row, index) => [row.player_id, index + 1]));
+  return current.map((row) => ({ ...row, previous_position: previous.get(row.player_id) }));
+}

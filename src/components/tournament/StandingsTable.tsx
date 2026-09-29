@@ -12,6 +12,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
 import type { StandingRow } from '@/lib/types';
+import CountUp from '@/components/shared/CountUp';
 
 const MotionTableRow = motion.create(TableRow);
 
@@ -19,6 +20,24 @@ const HEAD_BORDER = { borderBottom: '1px solid rgba(201, 185, 190, 0.08)' };
 // Phones keep #, Player (with team beneath), P, GD, Pts and recent form.
 const WIDE_ONLY = { display: { xs: 'none', sm: 'table-cell' } } as const;
 const PHONE_FORM_RESULTS = 3;
+
+// ▲ / ▼ against the table before the latest result.
+function Movement({ row, position }: { row: StandingRow; position: number }) {
+  if (row.previous_position == null || row.previous_position === position) return null;
+  const up = row.previous_position > position;
+  const places = Math.abs(row.previous_position - position);
+  return (
+    <Box
+      component="span"
+      title={`${up ? 'Up' : 'Down'} ${places} since the last result`}
+      sx={{ fontSize: '0.6875rem', fontWeight: 700, color: up ? '#FF8A73' : '#EF4444', lineHeight: 1, whiteSpace: 'nowrap' }}
+    >
+      <Box component="span" aria-hidden>{up ? '▲' : '▼'}</Box>
+      {places}
+      <Box component="span" sx={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>{` ${up ? 'up' : 'down'} ${places}`}</Box>
+    </Box>
+  );
+}
 
 function FormDot({ result, phoneHidden = false }: { result: 'W' | 'D' | 'L'; phoneHidden?: boolean }) {
   return (
@@ -85,10 +104,10 @@ export default function StandingsTable({ standings }: { standings: StandingRow[]
             {standings.map((row, idx) => (
               <MotionTableRow
                 layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.25, delay: idx * 0.03 }}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.35, delay: idx * 0.04, layout: { type: 'spring', stiffness: 260, damping: 28 } }}
                 key={row.player_id}
                 sx={{
                 bgcolor:
@@ -115,6 +134,7 @@ export default function StandingsTable({ standings }: { standings: StandingRow[]
                   <Typography variant="body2" fontWeight={700} sx={{ color: idx === 0 ? '#F59E0B' : '#FFF7F6' }}>
                     {idx + 1}
                   </Typography>
+                  <Movement row={row} position={idx + 1} />
                 </Box>
               </TableCell>
               <TableCell>
@@ -159,7 +179,7 @@ export default function StandingsTable({ standings }: { standings: StandingRow[]
                     textShadow: '0 0 8px rgba(234, 108, 86, 0.3)',
                   }}
                 >
-                  {row.points}
+                  <CountUp value={row.points} />
                 </Typography>
               </TableCell>
               <TableCell>

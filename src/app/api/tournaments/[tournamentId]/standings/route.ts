@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
-import { calculateStandings } from '@/lib/algorithms/standings';
 import type { Match } from '@/lib/types';
 import { handleApiError } from '@/lib/api-guards';
+import { withMovement } from '@/lib/algorithms/standings';
 
 export async function GET(
   _request: Request,
@@ -29,7 +29,7 @@ export async function GET(
       .order('played_at');
     if (matchError) throw matchError;
 
-    const standings = calculateStandings((matches ?? []) as Match[], players);
+    const standings = withMovement((matches ?? []) as Match[], players);
 
     return NextResponse.json(standings, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
