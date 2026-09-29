@@ -444,7 +444,7 @@ export default function PlayerProfilePage() {
         </Box>
       )}
 
-      <TrophyRoom playerId={playerId} />
+      <TrophyRoom playerId={playerId} playerName={player.name} />
 
       {/* Rating history */}
       {stats && stats.total_matches > 0 && (
