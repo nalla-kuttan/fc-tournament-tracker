@@ -27,6 +27,7 @@ import PageSkeleton from '@/components/shared/PageSkeleton';
 import { userFacingError } from '@/lib/user-error';
 import TournamentRecap from '@/components/tournament/TournamentRecap';
 import ChampionCelebration from '@/components/tournament/ChampionCelebration';
+import PunditTable from '@/components/tournament/PunditTable';
 
 export default function TournamentDashboard() {
   const params = useParams();
@@ -279,6 +280,8 @@ export default function TournamentDashboard() {
                 </Box>
               </Box>
             )}
+
+            <PunditTable tournamentId={tournamentId} />
           </Grid>
         </Grid>
       )}

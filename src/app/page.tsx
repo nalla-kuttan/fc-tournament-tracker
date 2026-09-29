@@ -24,6 +24,7 @@ import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import TournamentCard from '@/components/tournament/TournamentCard';
 import GlassCard from '@/components/shared/GlassCard';
 import SectionTitle from '@/components/shared/SectionTitle';
+import RecordAlerts from '@/components/analytics/RecordAlerts';
 import { getPowerRankings } from '@/lib/analytics-insights';
 import { getPlayerImagePath } from '@/lib/player-images';
 import type { CareerStats, Match, Player, RegisteredPlayer, Tournament } from '@/lib/types';
@@ -595,6 +596,8 @@ export default function HomePage() {
       ) : loadingAnalytics ? (
         <Skeleton width={260} height={24} sx={{ mb: 1.5 }} />
       ) : null}
+
+      <RecordAlerts />
 
       {/* Where the group stands: current form on one side, legacy on the other. */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' }, gap: 1.5, alignItems: 'start' }}>

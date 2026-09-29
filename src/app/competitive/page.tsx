@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
 import Alert from '@mui/material/Alert';
+import RatingRace from '@/components/analytics/RatingRace';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CardContent from '@mui/material/CardContent';
@@ -195,6 +196,7 @@ export default function CompetitivePage() {
 
       {!isLoading && data && hasCompetitiveHistory && (
         <>
+          <RatingRace />
           {(ratingsError || recordsError) && (
             <Alert
               severity="error"

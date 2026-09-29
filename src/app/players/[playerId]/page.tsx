@@ -28,6 +28,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import Divider from '@mui/material/Divider';
 import PlayerStatsGrid from '@/components/player/PlayerStatsGrid';
 import UltimateCard from '@/components/player/UltimateCard';
+import TrophyRoom from '@/components/player/TrophyRoom';
 import ShareImageButton from '@/components/shared/ShareImageButton';
 import type { PlayerCardData } from '@/lib/player-cards';
 import ArchetypeIcon, { getArchetypeMeta } from '@/components/player/ArchetypeIcon';
@@ -442,6 +443,8 @@ export default function PlayerProfilePage() {
           </Grid>
         </Box>
       )}
+
+      <TrophyRoom playerId={playerId} />
 
       {/* Rating history */}
       {stats && stats.total_matches > 0 && (

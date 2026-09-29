@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import Box from '@mui/material/Box';
@@ -13,6 +13,10 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import ClubBadge from '@/components/shared/ClubBadge';
 import CountUp from '@/components/shared/CountUp';
 import MatchOdds from '@/components/tournament/MatchOdds';
+import Walkout from '@/components/tournament/Walkout';
+import RecordAlerts from '@/components/analytics/RecordAlerts';
+import Button from '@mui/material/Button';
+import { useLiveScoreChannel, type LiveScore } from '@/lib/live-score';
 import { clubForSide } from '@/lib/club-analytics';
 import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
 import { fetcher } from '@/lib/fetcher';
@@ -108,6 +112,32 @@ function ResultReveal({ match }: { match: TvMatch }) {
   );
 }
 
+// "GOAL!" over everything when the live scorer taps a goal.
+function GoalFlash({ match, score }: { match: TvMatch; score: LiveScore }) {
+  const reduceMotion = useReducedMotion();
+  const scorer = score.lastGoal === 'home' ? match.home_player?.name : match.away_player?.name;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      role="status"
+      aria-live="assertive"
+      style={{ position: 'fixed', inset: 0, zIndex: 1600, display: 'grid', placeItems: 'center', background: 'radial-gradient(circle at 50% 50%, rgba(200, 79, 61, 0.96) 0%, rgba(98, 17, 34, 0.98) 40%, #0B0508 75%)' }}
+    >
+      <Box sx={{ textAlign: 'center' }}>
+        <motion.div initial={reduceMotion ? false : { scale: 0.2, rotate: -8 }} animate={{ scale: [0.2, 1.25, 1], rotate: 0 }} transition={{ duration: 0.7 }}>
+          <Typography sx={{ fontSize: { xs: '6rem', md: '12rem' }, fontWeight: 700, lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 80px rgba(255, 138, 115, 0.9)' }}>GOAL!</Typography>
+        </motion.div>
+        <Typography sx={{ fontSize: { xs: '2rem', md: '3.5rem' }, fontWeight: 700, mt: 2 }}>{scorer}</Typography>
+        <Typography sx={{ fontSize: { xs: '1.5rem', md: '2.5rem' }, color: 'rgba(255, 247, 246, 0.85)', fontVariantNumeric: 'tabular-nums' }}>
+          {match.home_player?.name} {score.home}–{score.away} {match.away_player?.name}
+        </Typography>
+      </Box>
+    </motion.div>
+  );
+}
+
 // A living-room TV view of match night: the table, the next fixture with
 // odds, the latest result, refreshing on its own.
 export default function TvModePage() {
@@ -118,12 +148,35 @@ export default function TvModePage() {
   const [fullscreen, setFullscreen] = useState(false);
   const [seenLatest, setSeenLatest] = useState<string | null | undefined>(undefined);
   const [reveal, setReveal] = useState<TvMatch | null>(null);
+  const [live, setLive] = useState<LiveScore | null>(null);
+  const [goal, setGoal] = useState<LiveScore | null>(null);
+  const [walkoutFor, setWalkoutFor] = useState<string | null>(null);
+  const [walkedOut, setWalkedOut] = useState<Set<string>>(() => new Set());
+
+  const liveRef = useRef<LiveScore | null>(null);
+  useLiveScoreChannel(tournamentId, {
+    onScore: (score) => {
+      const current = liveRef.current;
+      if (current && current.matchId === score.matchId && current.version >= score.version) return;
+      const kickOff = score.status === 'live' && score.home + score.away === 0 && (!current || current.matchId !== score.matchId);
+      if (kickOff && !walkedOut.has(score.matchId)) {
+        setWalkoutFor(score.matchId);
+        setWalkedOut((seen) => new Set(seen).add(score.matchId));
+      }
+      if (current?.matchId === score.matchId && score.lastGoal && score.home + score.away > current.home + current.away) setGoal(score);
+      liveRef.current = score;
+      setLive(score);
+    },
+  });
 
   const matches = useMemo(() => tournament?.matches ?? [], [tournament?.matches]);
   const played = useMemo(() => matches.filter((match) => match.is_played && !match.is_bye).sort(byPlayedAt), [matches]);
   const upcoming = matches.filter((match) => !match.is_played && !match.is_bye);
   const latest = played[0] ?? null;
-  const next = upcoming[0] ?? null;
+  // A match being scored live takes the "up next" spot until it's saved.
+  const liveMatch = live ? upcoming.find((match) => match.id === live.matchId) ?? null : null;
+  const next = liveMatch ?? upcoming[0] ?? null;
+  const walkoutMatch = walkoutFor ? matches.find((match) => match.id === walkoutFor) ?? null : null;
 
   // A result that arrives while the screen is up gets the full-time reveal.
   // Adjusted during render (React's "storing information from previous
@@ -134,6 +187,12 @@ export default function TvModePage() {
     if (seenLatest !== undefined && latestId) setReveal(latest);
     setSeenLatest(latestKey);
   }
+
+  useEffect(() => {
+    if (!goal) return;
+    const timer = window.setTimeout(() => setGoal(null), 3800);
+    return () => window.clearTimeout(timer);
+  }, [goal]);
 
   useEffect(() => {
     if (!reveal) return;
@@ -237,12 +296,25 @@ export default function TvModePage() {
 
         <Box sx={{ display: 'grid', gap: 3, alignContent: 'start' }}>
           <Box component="section" aria-label="Next fixture" sx={{ borderRadius: '20px', p: { xs: 2, md: 3 }, background: 'linear-gradient(135deg, rgba(51, 64, 117, 0.5), rgba(36, 16, 25, 0.8))', border: '1px solid rgba(126, 140, 194, 0.3)' }}>
-            <Typography sx={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.24em', color: '#7E8CC2', mb: 2 }}>UP NEXT</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Typography sx={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.24em', color: liveMatch ? 'primary.light' : '#7E8CC2' }}>
+                {liveMatch ? (live?.status === 'ended' ? 'FULL TIME · SAVING' : 'LIVE NOW') : 'UP NEXT'}
+              </Typography>
+              {next && !liveMatch && next.home_player && next.away_player && (
+                <Button size="small" onClick={() => setWalkoutFor(next.id)} sx={{ ml: 'auto', color: '#FFF7F6' }}>Walkout</Button>
+              )}
+            </Box>
             {next ? (
               <>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 2, mb: 2.5 }}>
                   <Side match={next} side="home" align="left" />
-                  <Typography sx={{ fontSize: '1.4rem', fontWeight: 700, color: 'text.secondary' }}>VS</Typography>
+                  {liveMatch && live ? (
+                    <motion.div key={`${live.home}-${live.away}`} initial={{ scale: 1.4 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 14 }}>
+                      <Typography sx={{ fontSize: { xs: '2.75rem', xl: '4rem' }, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums', textShadow: '0 0 30px rgba(234, 108, 86, 0.6)' }}>{live.home}–{live.away}</Typography>
+                    </motion.div>
+                  ) : (
+                    <Typography sx={{ fontSize: '1.4rem', fontWeight: 700, color: 'text.secondary' }}>VS</Typography>
+                  )}
                   <Side match={next} side="away" align="right" />
                 </Box>
                 <MatchOdds key={next.id} matchId={next.id} homeName={next.home_player?.name ?? 'Home'} awayName={next.away_player?.name ?? 'Away'} />
@@ -263,10 +335,12 @@ export default function TvModePage() {
             </Box>
           )}
 
+          <RecordAlerts size="tv" limit={3} />
+
           {upcoming.length > 1 && (
             <Box component="section" aria-label="Later fixtures" sx={{ borderRadius: '20px', p: { xs: 2, md: 3 }, bgcolor: 'rgba(36, 16, 25, 0.6)', border: '1px solid rgba(201, 185, 190, 0.08)' }}>
               <Typography sx={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.24em', color: 'text.secondary', mb: 1.5 }}>LATER</Typography>
-              {upcoming.slice(1, 4).map((match) => (
+              {upcoming.filter((match) => match.id !== next?.id).slice(0, 3).map((match) => (
                 <Typography key={match.id} sx={{ fontSize: '1.35rem', py: 0.5 }}>{match.home_player?.name ?? 'TBD'} <Box component="span" sx={{ color: 'text.secondary' }}>vs</Box> {match.away_player?.name ?? 'TBD'}</Typography>
               ))}
             </Box>
@@ -275,6 +349,18 @@ export default function TvModePage() {
       </Box>
 
       <AnimatePresence>{reveal && <ResultReveal key={reveal.id} match={reveal} />}</AnimatePresence>
+      <AnimatePresence>{goal && liveMatch && <GoalFlash key={goal.version} match={liveMatch} score={goal} />}</AnimatePresence>
+      <AnimatePresence>
+        {walkoutMatch && (
+          <Walkout
+            key={walkoutMatch.id}
+            matchId={walkoutMatch.id}
+            homeName={walkoutMatch.home_player?.name ?? 'Home'}
+            awayName={walkoutMatch.away_player?.name ?? 'Away'}
+            onDone={() => setWalkoutFor(null)}
+          />
+        )}
+      </AnimatePresence>
     </Box>
   );
 }
