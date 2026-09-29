@@ -19,6 +19,8 @@ import { MATCH_RESTORED_EVENT } from '@/components/tournament/SavedResultNotice'
 import { clubForSide } from '@/lib/club-analytics';
 import ClubBadge from '@/components/shared/ClubBadge';
 import MatchOdds from '@/components/tournament/MatchOdds';
+import MatchPreview from '@/components/tournament/MatchPreview';
+import LiveScorer from '@/components/tournament/LiveScorer';
 
 interface MatchDetail {
   id: string;
@@ -58,6 +60,8 @@ export default function MatchDetailPage() {
     if (editRequested) router.replace(`/tournaments/${tournamentId}/matches/${matchId}`, { scroll: false });
   };
   const [reloadKey, setReloadKey] = useState(0);
+  // A live score finished on this phone prefills the result form.
+  const [livePrefill, setLivePrefill] = useState<{ home: number; away: number } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,6 +79,16 @@ export default function MatchDetailPage() {
       cancelled = true;
     };
   }, [matchId, reloadKey]);
+
+  // Once the result is saved, the live score on this phone is done with.
+  useEffect(() => {
+    if (!match?.is_played) return;
+    try {
+      window.localStorage.removeItem(`fc-live:${match.id}`);
+    } catch {
+      // Nothing stored.
+    }
+  }, [match?.is_played, match?.id]);
 
   // Reload after "Undo" restores the previous result from the confirmation.
   useEffect(() => {
@@ -110,8 +124,25 @@ export default function MatchDetailPage() {
             <MatchOdds matchId={match.id} homeName={match.home_player.name} awayName={match.away_player.name} />
           </Box>
         )}
+        {match.home_player && match.away_player && (
+          <Box sx={{ maxWidth: 720 }}>
+            <MatchPreview match={match} homeName={match.home_player.name} awayName={match.away_player.name} />
+          </Box>
+        )}
         <AdminGate tournamentId={tournamentId}>
-          <MatchResultForm key={match.id} match={match as never} />
+          {match.home_player && match.away_player && (
+            <LiveScorer
+              matchId={match.id}
+              tournamentId={tournamentId}
+              homeName={match.home_player.name}
+              awayName={match.away_player.name}
+              onFullTime={(home, away) => setLivePrefill({ home, away })}
+            />
+          )}
+          <MatchResultForm
+            key={livePrefill ? `${match.id}-live-${livePrefill.home}-${livePrefill.away}` : match.id}
+            match={(livePrefill ? { ...match, home_score: livePrefill.home, away_score: livePrefill.away } : match) as never}
+          />
         </AdminGate>
       </Box>
     );
@@ -217,6 +248,9 @@ export default function MatchDetailPage() {
         <Box sx={{ mb: 3 }}>
           <MatchOdds matchId={match.id} homeName={match.home_player.name} awayName={match.away_player.name} />
         </Box>
+      )}
+      {match.home_player && match.away_player && (
+        <MatchPreview match={match} homeName={match.home_player.name} awayName={match.away_player.name} />
       )}
 
       <AIMatchReport match={match} stats={stats} />
