@@ -85,8 +85,14 @@ describe('trophy room', () => {
     // Alex won the league, scored most and conceded least.
     expect(room('rA').map((item) => item.kind)).toEqual(['title', 'golden-boot', 'best-defence']);
     expect(room('rA').find((item) => item.kind === 'golden-boot')?.detail).toBe('2 goals');
+    // Alex won both matches: a perfect tournament, crowned.
+    expect(room('rA')[0]).toMatchObject({ kind: 'title', perfect: true, detail: 'Won the league, winning all 2 matches' });
     expect(room('rB')).toEqual([expect.objectContaining({ kind: 'runner-up', detail: 'Finished second' })]);
     expect(room('rA', [{ ...tournaments[0], status: 'active' }])).toEqual([]);
+    // A draw along the way means no crown.
+    const drawn = [game('rA', 'rB', 3, 0), game('rB', 'rC', 2, 1), game('rC', 'rA', 1, 1), game('rA', 'rC', 2, 0)];
+    const title = buildTrophyRoom('rA', players, tournaments, instances, drawn, []).find((item) => item.kind === 'title');
+    expect(title?.perfect).toBeUndefined();
   });
 });
 

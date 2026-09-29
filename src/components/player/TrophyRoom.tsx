@@ -24,7 +24,8 @@ export default function TrophyRoom({ playerId, playerName }: { playerId: string;
   const shelves = SHELF_ORDER
     .map((kind) => ({ kind, items: data.items.filter((item) => item.kind === kind) }))
     .filter((shelf) => shelf.items.length > 0);
-  const summary = shelves.map((shelf) => `${shelf.items.length} ${shelf.items.length === 1 ? TROPHY_LABELS[shelf.kind].name : TROPHY_LABELS[shelf.kind].plural}`).join(', ');
+  const perfect = data.items.filter((item) => item.perfect).length;
+  const summary = shelves.map((shelf) => `${shelf.items.length} ${shelf.items.length === 1 ? TROPHY_LABELS[shelf.kind].name : TROPHY_LABELS[shelf.kind].plural}`).join(', ') + (perfect ? ` · ${perfect} perfect ${perfect === 1 ? 'tournament' : 'tournaments'}, crowned` : '');
 
   return (
     <Box sx={{ mb: 4 }}>
@@ -85,12 +86,12 @@ export default function TrophyRoom({ playerId, playerName }: { playerId: string;
                       onMouseLeave={() => setActive((current) => (current === key ? null : current))}
                       onFocus={() => setActive(key)}
                       onBlur={() => setActive((current) => (current === key ? null : current))}
-                      aria-label={`${TROPHY_LABELS[item.kind].name}, ${item.tournamentName}: ${item.detail}. Open to view in 3D.`}
+                      aria-label={`${TROPHY_LABELS[item.kind].name}${item.perfect ? ' (perfect tournament)' : ''}, ${item.tournamentName}: ${item.detail}. Open to view in 3D.`}
                       sx={{ display: 'grid', justifyItems: 'center', borderRadius: '10px', px: 0.25, pb: 0.5, transition: 'transform 200ms ease', '&:hover': { transform: 'translateY(-3px)' }, '&:focus-visible': { outline: '2px solid #F59E0B', outlineOffset: 2 } }}
                     >
-                      <Trophy3D kind={item.kind} width={shelf.kind === 'title' ? 92 : 76} spinning={active === key} />
-                      <Typography sx={{ fontSize: '0.6875rem', fontWeight: 700, color: '#FCE7A8', whiteSpace: 'nowrap', mt: 0.25 }}>
-                        {item.tournamentName.replace(/^Season\s+/i, 'S')}
+                      <Trophy3D kind={item.kind} width={shelf.kind === 'title' ? 92 : 76} spinning={active === key} crowned={Boolean(item.perfect)} />
+                      <Typography sx={{ fontSize: '0.6875rem', fontWeight: 700, color: item.perfect ? '#FF8A73' : '#FCE7A8', whiteSpace: 'nowrap', mt: 0.25 }}>
+                        {item.tournamentName.replace(/^Season\s+/i, 'S')}{item.perfect ? ' · Perfect' : ''}
                       </Typography>
                     </ButtonBase>
                   </Box>

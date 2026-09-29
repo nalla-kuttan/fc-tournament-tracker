@@ -11,6 +11,8 @@ export interface TrophyItem {
   tournamentName: string;
   detail: string;
   date: string | null;
+  // A title won without dropping a point: every match played was won.
+  perfect?: boolean;
 }
 
 export const TROPHY_LABELS: Record<TrophyKind, { name: string; plural: string; description: string }> = {
@@ -60,7 +62,18 @@ export function buildTrophyRoom(
     const base = { tournamentId: tournament.id, tournamentName: tournament.name, date: lastDate };
 
     if (champion.registeredPlayerId === registeredPlayerId) {
-      items.push({ ...base, kind: 'title', detail: tournament.format === 'knockout' ? 'Won the final' : 'Won the league' });
+      const ownMatches = played.filter((match) => match.home_player_id === own.id || match.away_player_id === own.id);
+      const perfect = ownMatches.every((match) => {
+        const home = match.home_player_id === own.id;
+        return (home ? match.home_score ?? 0 : match.away_score ?? 0) > (home ? match.away_score ?? 0 : match.home_score ?? 0);
+      });
+      const won = tournament.format === 'knockout' ? 'Won the final' : 'Won the league';
+      items.push({
+        ...base,
+        kind: 'title',
+        detail: perfect ? `${won}, winning all ${ownMatches.length} matches` : won,
+        ...(perfect && { perfect: true }),
+      });
     } else {
       const final = played.find((match) => match.stage === 'F' && match.home_score !== match.away_score);
       const runnerUpInstance = final

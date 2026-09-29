@@ -23,18 +23,18 @@ const FALLBACK: Record<TrophyKind, { icon: typeof EmojiEventsIcon; color: string
 
 // One trophy from its rendered turntable sheet. It rests at a three-quarter
 // view and spins while hovered or focused (never under reduced motion).
-export default function Trophy3D({ kind, width = 90, spinning = false }: { kind: TrophyKind; width?: number; spinning?: boolean }) {
+export default function Trophy3D({ kind, width = 90, spinning = false, crowned = false }: { kind: TrophyKind; width?: number; spinning?: boolean; crowned?: boolean }) {
   const [sheet, setSheet] = useState<string | null | 'failed'>(null);
 
   useEffect(() => {
     let cancelled = false;
     // three.js loads only when a trophy case is on screen.
     import('@/lib/trophy-sprites')
-      .then((module) => module.getTrophySheet(kind))
+      .then((module) => module.getTrophySheet(kind, crowned))
       .then((url) => { if (!cancelled) setSheet(url ?? 'failed'); })
       .catch(() => { if (!cancelled) setSheet('failed'); });
     return () => { cancelled = true; };
-  }, [kind]);
+  }, [kind, crowned]);
 
   const height = Math.round(width * (4 / 3));
   if (sheet === 'failed') {
