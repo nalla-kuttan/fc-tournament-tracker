@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerClient, createAdminClient } from '@/lib/supabase/server';
 import { hashPin } from '@/lib/auth';
-import { handleApiError, rateLimit, readJsonBody } from '@/lib/api-guards';
+import { ApiError, handleApiError, rateLimit, readJsonBody } from '@/lib/api-guards';
 import { tournamentCreateSchema } from '@/lib/validation';
 
 export async function GET() {
@@ -34,8 +34,27 @@ export async function POST(request: Request) {
 
     const { name, format, pin, playerSelections, season_id, new_season_name } = await readJsonBody(request, tournamentCreateSchema);
 
-    const hashedPin = await hashPin(pin);
     const supabase = createAdminClient();
+
+    // No PIN given: carry over the previous tournament's PIN, so creating
+    // needs none while results stay protected by the PIN the group already
+    // uses.
+    let hashedPin: string;
+    let pinFrom: string | null = null;
+    if (pin) {
+      hashedPin = await hashPin(pin);
+    } else {
+      const { data: previous, error: previousError } = await supabase
+        .from('tournament')
+        .select('id, pin')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (previousError) throw previousError;
+      if (!previous?.pin) throw new ApiError('Set an admin PIN for your first tournament', 400, 'PIN_REQUIRED');
+      hashedPin = previous.pin;
+      pinFrom = previous.id;
+    }
 
     // Anyone creating a tournament can already get an auto-created season from
     // the RPC; this only lets them name it (e.g. "Season 25").
@@ -64,7 +83,7 @@ export async function POST(request: Request) {
       throw error;
     }
 
-    return NextResponse.json(tournament, { status: 201 });
+    return NextResponse.json({ ...tournament, pin_from: pinFrom }, { status: 201 });
   } catch (error) {
     return handleApiError(error, 'Create tournament');
   }

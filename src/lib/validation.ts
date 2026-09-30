@@ -12,7 +12,9 @@ export const playerMutationSchema = z.object({
 export const tournamentCreateSchema = z.object({
   name: z.string().trim().min(1, 'Tournament name is required').max(100),
   format: z.enum(['league', 'knockout', 'cup']),
-  pin: pinSchema,
+  // Optional: without one, the new tournament reuses the previous
+  // tournament's PIN. Only the very first tournament must set one.
+  pin: pinSchema.optional(),
   season_id: uuidSchema.nullish(),
   // Start a new competitive season with this name instead of joining one.
   new_season_name: z.string().trim().min(1).max(100).optional(),

@@ -30,8 +30,11 @@ import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import { TEAMS } from '@/lib/constants';
 import type { RegisteredPlayer, Season } from '@/lib/types';
 import { userFacingError } from '@/lib/user-error';
+import { useAdmin } from '@/contexts/AdminContext';
 
 const STEPS = ['Tournament Info', 'Select Players', 'Set Admin PIN'];
+// With an earlier tournament to take the PIN from, there's no PIN step.
+const STEPS_REUSING_PIN = ['Tournament Info', 'Select Players'];
 
 const NEW_SEASON = 'new';
 
@@ -55,6 +58,13 @@ export default function CreateTournamentForm({ prefill = {} }: { prefill?: Tourn
   const [teamOverrides, setTeamOverrides] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  // The newest existing tournament, whose PIN a new one reuses. undefined
+  // while loading; null when this will be the first tournament.
+  const [pinSource, setPinSource] = useState<{ id: string; name: string } | null | undefined>(undefined);
+  const [customPin, setCustomPin] = useState(false);
+  const { getPinForTournament, verifyPin } = useAdmin();
+  const reusingPin = Boolean(pinSource) && !customPin;
+  const needsPinStep = pinSource === null;
 
   const [openAddPlayer, setOpenAddPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
@@ -107,6 +117,11 @@ export default function CreateTournamentForm({ prefill = {} }: { prefill?: Tourn
         .catch(() => { });
     }
 
+    fetch('/api/tournaments')
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: { id: string; name: string }[]) => setPinSource(data[0] ? { id: data[0].id, name: data[0].name } : null))
+      .catch(() => setPinSource(null));
+
     fetch('/api/seasons')
       .then((r) => r.json())
       .then((data: Season[]) => {
@@ -129,7 +144,7 @@ export default function CreateTournamentForm({ prefill = {} }: { prefill?: Tourn
   };
 
   const handleSubmit = async () => {
-    if (pin !== pinConfirm) {
+    if (!reusingPin && pin !== pinConfirm) {
       setError('PINs do not match');
       return;
     }
@@ -156,7 +171,7 @@ export default function CreateTournamentForm({ prefill = {} }: { prefill?: Tourn
         body: JSON.stringify({
           name,
           format,
-          pin,
+          ...(reusingPin ? {} : { pin }),
           ...(seasonId === NEW_SEASON ? { new_season_name: name.trim() } : { season_id: seasonId || null }),
           playerSelections,
         }),
@@ -167,7 +182,12 @@ export default function CreateTournamentForm({ prefill = {} }: { prefill?: Tourn
         throw new Error(data.error || 'The tournament could not be created. Try again.');
       }
 
-      const tournament = await res.json();
+      const tournament: { id: string; pin_from: string | null } = await res.json();
+      // Unlock the new tournament on this device when the PIN is already known
+      // here: the one just typed, or the carried-over one if the earlier
+      // tournament was unlocked.
+      const knownPin = reusingPin && tournament.pin_from ? getPinForTournament(tournament.pin_from) : pin || null;
+      if (knownPin) await verifyPin(tournament.id, knownPin).catch(() => false);
       router.push(`/tournaments/${tournament.id}`);
     } catch (err) {
       setError(userFacingError(err, 'The tournament', 'created'));
@@ -179,7 +199,7 @@ export default function CreateTournamentForm({ prefill = {} }: { prefill?: Tourn
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto' }}>
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-        {STEPS.map((label) => (
+        {(needsPinStep ? STEPS : STEPS_REUSING_PIN).map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
           </Step>
@@ -325,20 +345,68 @@ export default function CreateTournamentForm({ prefill = {} }: { prefill?: Tourn
               <Button variant="outlined" onClick={() => setOpenAddPlayer(true)} fullWidth>
                 Enter Player
               </Button>
-              <Button
-                variant="contained"
-                onClick={() => setActiveStep(2)}
-                disabled={selectedPlayerIds.size < 2}
-                fullWidth
-              >
-                Next ({selectedPlayerIds.size} selected)
-              </Button>
+              {needsPinStep ? (
+                <Button
+                  variant="contained"
+                  onClick={() => setActiveStep(2)}
+                  disabled={selectedPlayerIds.size < 2}
+                  fullWidth
+                >
+                  Next ({selectedPlayerIds.size} selected)
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  onClick={handleSubmit}
+                  disabled={loading || pinSource === undefined || selectedPlayerIds.size < 2 || (customPin && (!pin || pin !== pinConfirm))}
+                  fullWidth
+                >
+                  {loading ? <CircularProgress size={24} /> : "Create"}
+                </Button>
+              )}
             </Box>
+
+            {pinSource && (
+              <Box sx={{ display: 'grid', gap: 1.5 }}>
+                {customPin ? (
+                  <>
+                    <TextField
+                      id="create-tournament-custom-pin"
+                      label="New admin PIN"
+                      type="password"
+                      fullWidth
+                      value={pin}
+                      onChange={(e) => setPin(e.target.value)}
+                    />
+                    <TextField
+                      id="create-tournament-custom-pin-confirm"
+                      label="Confirm PIN"
+                      type="password"
+                      fullWidth
+                      value={pinConfirm}
+                      onChange={(e) => setPinConfirm(e.target.value)}
+                      error={pinConfirm !== '' && pin !== pinConfirm}
+                      helperText={pinConfirm !== '' && pin !== pinConfirm ? 'PINs do not match' : ''}
+                    />
+                    <Button size="small" onClick={() => { setCustomPin(false); setPin(''); setPinConfirm(''); }} sx={{ justifySelf: 'start' }}>
+                      Use the same PIN as {pinSource.name}
+                    </Button>
+                  </>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    Results are protected by the same admin PIN as {pinSource.name}.{' '}
+                    <Button size="small" onClick={() => setCustomPin(true)} sx={{ minHeight: 0, p: 0, verticalAlign: 'baseline' }}>
+                      Set a different PIN
+                    </Button>
+                  </Typography>
+                )}
+              </Box>
+            )}
           </CardContent>
         </GlassCard>
       )}
 
-      {activeStep === 2 && (
+      {needsPinStep && activeStep === 2 && (
         <GlassCard>
           <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <Typography variant="h6">Set Admin PIN</Typography>

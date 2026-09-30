@@ -4,6 +4,8 @@ vi.mock('server-only', () => ({}));
 
 const calls: Array<{ op: string; table?: string; args?: unknown }> = [];
 let tournamentRpcError: { message: string } | null = null;
+// The newest existing tournament, whose PIN a new one reuses.
+let previousTournament: { id: string; pin: string } | null = null;
 
 function adminClient() {
   return {
@@ -13,6 +15,16 @@ function adminClient() {
       return tournamentRpcError ? { data: null, error: tournamentRpcError } : { data: { id: 'tournament-1' }, error: null };
     },
     from: (table: string) => ({
+      select: () => ({
+        order: () => ({
+          limit: () => ({
+            maybeSingle: async () => {
+              calls.push({ op: 'select', table });
+              return { data: previousTournament, error: null };
+            },
+          }),
+        }),
+      }),
       insert: (row: unknown) => {
         calls.push({ op: 'insert', table, args: row });
         return { select: () => ({ single: async () => ({ data: { id: 'season-new' }, error: null }) }) };
@@ -52,6 +64,7 @@ const tournamentRpc = () => calls.find((call) => call.op === 'rpc' && call.table
 beforeEach(() => {
   calls.length = 0;
   tournamentRpcError = null;
+  previousTournament = { id: 'season-24', pin: '$2a$10$previouspreviouspreviousprevioushash' };
 });
 
 describe('create tournament', () => {
@@ -88,6 +101,36 @@ describe('create tournament', () => {
     const response = await POST(request({ ...body, season_id: '00000000-0000-4000-8000-0000000000aa', new_season_name: 'Season 25' }));
 
     expect(response.status).toBe(400);
+    expect(tournamentRpc()).toBeUndefined();
+  });
+
+  it('reuses the previous tournament\'s PIN when none is given', async () => {
+    const { POST } = await import('@/app/api/tournaments/route');
+    const response = await POST(request({ ...body, pin: undefined }));
+
+    expect(response.status).toBe(201);
+    expect(tournamentRpc()?.args).toMatchObject({ p_pin_hash: previousTournament!.pin });
+    expect(await response.json()).toMatchObject({ id: 'tournament-1', pin_from: 'season-24' });
+  });
+
+  it('hashes a new PIN when one is given, without reading the old one', async () => {
+    const { POST } = await import('@/app/api/tournaments/route');
+    const response = await POST(request(body));
+
+    expect(response.status).toBe(201);
+    const hash = (tournamentRpc()?.args as { p_pin_hash: string }).p_pin_hash;
+    expect(hash).not.toBe(previousTournament!.pin);
+    expect(hash).toMatch(/^\$2[aby]\$/);
+    expect(calls.some((call) => call.op === 'select' && call.table === 'tournament')).toBe(false);
+  });
+
+  it('asks for a PIN when creating the very first tournament', async () => {
+    previousTournament = null;
+    const { POST } = await import('@/app/api/tournaments/route');
+    const response = await POST(request({ ...body, pin: undefined }));
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({ code: 'PIN_REQUIRED' });
     expect(tournamentRpc()).toBeUndefined();
   });
 });
