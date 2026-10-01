@@ -6,7 +6,10 @@ import {
   calculateCompetitiveRecords,
   getMatchIntelligenceLabels,
 } from '../competitive';
+import { RATING_TUNING } from '../competitive-ratings';
 import type { Match, Player, RegisteredPlayer, Tournament } from '../types';
+
+const START = RATING_TUNING.newPlayerRating;
 
 const players: RegisteredPlayer[] = [
   { id: 'rp-a', name: 'Ayaan', base_team: 'Arsenal', created_at: '2026-01-01T00:00:00Z' },
@@ -137,7 +140,7 @@ describe('competitive helpers', () => {
     });
 
     expect(allTime[0].player.id).toBe('rp-a');
-    expect(allTime[0].rating).toBeGreaterThan(1000);
+    expect(allTime[0].rating).toBeGreaterThan(START);
     expect(allTime[0].peakRating).toBeGreaterThanOrEqual(allTime[0].rating);
     expect(allTime.find((row) => row.player.id === 'rp-b')?.recentForm).toEqual(['L', 'W']);
     expect(seasonOnly).toHaveLength(2);
@@ -155,13 +158,13 @@ describe('competitive helpers', () => {
     expect(timeline.get('m-1')).toMatchObject({
       homeRegisteredPlayerId: 'rp-a',
       awayRegisteredPlayerId: 'rp-b',
-      homeRating: 1000,
-      awayRating: 1000,
+      homeRating: START,
+      awayRating: START,
     });
-    expect(timeline.get('m-2')?.homeRating).toBeLessThan(1000);
-    expect(timeline.get('m-2')?.awayRating).toBe(1000);
-    expect(timeline.get('m-3')?.homeRating).not.toBe(1000);
-    expect(timeline.get('m-3')?.awayRating).not.toBe(1000);
+    expect(timeline.get('m-2')?.homeRating).toBeLessThan(START);
+    expect(timeline.get('m-2')?.awayRating).toBe(START);
+    expect(timeline.get('m-3')?.homeRating).not.toBe(START);
+    expect(timeline.get('m-3')?.awayRating).not.toBe(START);
   });
 
   it('calculates trophy and record rows across season and all-time scopes', () => {
@@ -182,7 +185,7 @@ describe('competitive helpers', () => {
       playerName: 'Ayaan',
       streak: 2,
     });
-    // m-1 was 1000 vs 1000 going in, so Bilal's win there is not an upset;
+    // m-1 was level going in, so Bilal's win there is not an upset;
     // Ayaan beating higher-rated opponents afterwards is.
     expect(records.biggestUpsets[0].winnerName).toBe('Ayaan');
     expect(records.biggestUpsets.some((row) => row.matchId === 'm-1')).toBe(false);

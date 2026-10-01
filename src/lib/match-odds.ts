@@ -1,4 +1,4 @@
-import { buildCompetitiveRatingTimeline, getCompetitiveRatingMap, type CompetitivePlayerInstance } from './competitive-ratings';
+import { buildCompetitiveRatingTimeline, getCompetitiveRatingMap, RATING_TUNING, type CompetitivePlayerInstance } from './competitive-ratings';
 import type { Match, RegisteredPlayer } from './types';
 
 export interface ResultOdds {
@@ -104,7 +104,7 @@ export function oddsForFixture(
   }
 
   const ratings = getCompetitiveRatingMap(players, instances, matches);
-  const homeRating = ratings.get(home) ?? 1000;
-  const awayRating = ratings.get(away) ?? 1000;
+  const homeRating = ratings.get(home) ?? RATING_TUNING.newPlayerRating;
+  const awayRating = ratings.get(away) ?? RATING_TUNING.newPlayerRating;
   return { odds: predictResult(homeRating, awayRating, drawRate(matches)), homeRating, awayRating, preMatch: false };
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getRatingHistory, getTournamentChampions } from '../tournament-results';
-import { getCompetitiveRatingMap } from '../competitive-ratings';
+import { getCompetitiveRatingMap, RATING_TUNING } from '../competitive-ratings';
 import type { Match } from '../types';
 
 const players = [
@@ -45,7 +45,7 @@ describe('rating history', () => {
     const history = getRatingHistory(players, instances, matches, 'rA');
 
     expect(history.map((point) => point.result)).toEqual(['W', 'L', 'D']);
-    expect(history[0].ratingBefore).toBe(1000);
+    expect(history[0].ratingBefore).toBe(RATING_TUNING.newPlayerRating);
     for (let i = 1; i < history.length; i++) expect(history[i].ratingBefore).toBe(history[i - 1].ratingAfter);
     expect(history.at(-1)!.ratingAfter).toBe(getCompetitiveRatingMap(players, instances, matches).get('rA'));
   });

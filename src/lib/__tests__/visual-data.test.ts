@@ -33,11 +33,13 @@ const tournaments = [{ id: 't', name: 'Spring', format: 'league' as const, statu
 describe('player cards', () => {
   const cards = buildPlayerCards(players, instances, matches, tournaments);
 
-  it('maps rating to a 0–99 overall and a tier', () => {
-    expect(overallFromRating(1000)).toBe(65);
+  it('maps rating to a 70–99 overall and a tier', () => {
+    expect(overallFromRating(880)).toBe(70);
+    expect(overallFromRating(1000)).toBe(84);
+    expect(overallFromRating(1127)).toBe(99);
     expect(overallFromRating(5000)).toBe(99);
-    expect(overallFromRating(0)).toBe(40);
-    expect([tierFor(90), tierFor(65), tierFor(57), tierFor(50)]).toEqual(['elite', 'gold', 'silver', 'bronze']);
+    expect(overallFromRating(0)).toBe(70);
+    expect([tierFor(90), tierFor(82), tierFor(76), tierFor(75)]).toEqual(['elite', 'gold', 'silver', 'bronze']);
   });
 
   it('gives every player six attributes within range and ranks by rating', () => {
