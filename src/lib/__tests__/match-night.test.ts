@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildHypeLines } from '../hype';
 import { buildPunditTable, MODEL_PREDICTOR_ID, modelPicks, outcomeOf } from '../predictions';
+import { RATING_TUNING } from '../competitive-ratings';
 import { buildRatingRace } from '../rating-race';
 import { buildRecordAlerts } from '../record-alerts';
 import { getSeasonKit, SEASON_KITS } from '../season-theme';
@@ -103,7 +104,7 @@ describe('rating race', () => {
     expect(race.frames).toHaveLength(3);
     expect(Object.keys(race.frames[0].ratings).sort()).toEqual(['rA', 'rB']);
     expect(race.frames.at(-1)!.label).toBe('Today');
-    expect(race.frames.at(-1)!.ratings.rA).toBeGreaterThan(1000);
+    expect(race.frames.at(-1)!.ratings.rA).toBeGreaterThan(RATING_TUNING.newPlayerRating);
   });
 });
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ApiError, handleApiError } from '@/lib/api-guards';
 import { getCompetitiveData } from '@/lib/competitive-data';
+import { RATING_TUNING } from '@/lib/competitive-ratings';
 import { getRatingHistory, getTournamentChampions } from '@/lib/tournament-results';
 import { uuidSchema } from '@/lib/validation';
 
@@ -29,9 +30,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pla
 
     return NextResponse.json({
       points,
-      current: ratings.at(-1) ?? 1000,
-      peak: ratings.length ? Math.max(...ratings) : 1000,
-      lowest: ratings.length ? Math.min(...ratings) : 1000,
+      current: ratings.at(-1) ?? RATING_TUNING.newPlayerRating,
+      peak: ratings.length ? Math.max(...ratings) : RATING_TUNING.newPlayerRating,
+      lowest: ratings.length ? Math.min(...ratings) : RATING_TUNING.newPlayerRating,
       titles: wonTournaments.size,
     }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {

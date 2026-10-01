@@ -1,5 +1,5 @@
 import { clubForSide } from './club-analytics';
-import { buildCompetitiveRatingTimeline, calculateCompetitiveRatings } from './competitive-ratings';
+import { buildCompetitiveRatingTimeline, calculateCompetitiveRatings, RATING_TUNING } from './competitive-ratings';
 import { getTournamentChampions } from './tournament-results';
 import type { Match, MatchStats, Player, RegisteredPlayer, Tournament } from './types';
 
@@ -33,22 +33,23 @@ type PlayerInput = Pick<RegisteredPlayer, 'id' | 'name' | 'base_team'>;
 type InstanceInput = Pick<Player, 'id' | 'registered_player_id' | 'name' | 'team' | 'tournament_id'>;
 type TournamentInput = Pick<Tournament, 'id' | 'name' | 'format' | 'status' | 'created_at'>;
 
-export const PROVISIONAL_MATCHES = 10;
+export const PROVISIONAL_MATCHES = RATING_TUNING.provisionalMatches;
 // Small samples are pulled toward the group average by this many matches'
 // worth of weight, so four lucky games don't make a 99.
 const SHRINK_MATCHES = 10;
 const ATTRIBUTE_FLOOR = 40;
 const ATTRIBUTE_CEILING = 96;
 
-// The rating (about 850–1250 here) mapped onto a FIFA-style 0–99 overall.
+// The rating mapped onto a FIFA-style 70–99 overall: 880 and below is 70,
+// about 1127 and above is 99.
 export function overallFromRating(rating: number) {
-  return Math.max(40, Math.min(99, Math.round(65 + (rating - 1000) / 9)));
+  return Math.max(70, Math.min(99, Math.round(70 + (rating - 880) / 8.5)));
 }
 
 export function tierFor(overall: number): CardTier {
-  if (overall >= 84) return 'elite';
-  if (overall >= 62) return 'gold';
-  if (overall >= 56) return 'silver';
+  if (overall >= 90) return 'elite';
+  if (overall >= 82) return 'gold';
+  if (overall >= 76) return 'silver';
   return 'bronze';
 }
 
@@ -187,7 +188,7 @@ export function buildPlayerCards(
     .map((player) => {
       const entry = lines.get(player.id)!;
       const ratingRow = ratings.get(player.id);
-      const rating = ratingRow?.rating ?? 1000;
+      const rating = ratingRow?.rating ?? RATING_TUNING.newPlayerRating;
       const overall = overallFromRating(rating);
       const recent = entry.recentPoints.slice(-10);
       const favourite = [...entry.clubs].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? player.base_team;
