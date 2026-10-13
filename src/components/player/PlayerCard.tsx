@@ -8,7 +8,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import type { CareerStats, RegisteredPlayer } from '@/lib/types';
 import { getAvatarColor, getInitials, getPlayerArchetype, getPlayerTags } from '@/lib/player-insights';
-import { getPlayerImagePath } from '@/lib/player-images';
+import { getPlayerAvatarPath } from '@/lib/player-images';
 import ArchetypeIcon from '@/components/player/ArchetypeIcon';
 import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
 
@@ -32,7 +32,7 @@ export default function PlayerCard({
   const avatarColor = getAvatarColor(player.id || player.name);
   const archetype = stats ? getPlayerArchetype(stats) : null;
   const tags = stats ? getPlayerTags(stats) : [];
-  const imagePath = getPlayerImagePath(player.name);
+  const imagePath = getPlayerAvatarPath(player.name);
 
   return (
       <Box

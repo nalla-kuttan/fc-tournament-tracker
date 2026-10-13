@@ -26,7 +26,7 @@ import GlassCard from '@/components/shared/GlassCard';
 import SectionTitle from '@/components/shared/SectionTitle';
 import RecordAlerts from '@/components/analytics/RecordAlerts';
 import { getPowerRankings } from '@/lib/analytics-insights';
-import { getPlayerImagePath } from '@/lib/player-images';
+import { getPlayerAvatarPath } from '@/lib/player-images';
 import type { CareerStats, Match, Player, RegisteredPlayer, Tournament } from '@/lib/types';
 import { BRAND_COLORS } from '@/design-tokens';
 import { fetcher } from '@/lib/fetcher';
@@ -47,6 +47,17 @@ const FunFactsSection = dynamic(() => import('@/components/analytics/FunFactsSec
 
 const TOURNAMENT_PREVIEW_COUNT = 3;
 const HOME_RECORD_COUNT = 4;
+
+function CardSkeleton({ rows, rowHeight = 52 }: { rows: number; rowHeight?: number }) {
+  return (
+    <GlassCard sx={surfaceSx} aria-hidden>
+      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+        <Skeleton width={150} height={28} sx={{ mb: 1 }} />
+        {Array.from({ length: rows }, (_, row) => <Skeleton key={row} height={rowHeight} />)}
+      </CardContent>
+    </GlassCard>
+  );
+}
 
 interface HallOfFameEntry {
   tournament_id: string;
@@ -387,7 +398,9 @@ function MatchNightCommand({
             )}
             {content.title}
           </Typography>
-          <Typography sx={{ color: COLORS.textSteel, mt: 1, maxWidth: 680, lineHeight: 1.6 }}>
+          {/* Two lines reserved: the text grows once standings load, and a
+              one-line placeholder would push the whole page down. */}
+          <Typography sx={{ color: COLORS.textSteel, mt: 1, maxWidth: 680, lineHeight: 1.6, minHeight: { xs: '4.8em', sm: '3.2em' } }}>
             {content.body}
           </Typography>
           {state.kind === 'next-match' && state.match.home_player && state.match.away_player && (
@@ -460,6 +473,7 @@ export default function HomePage() {
   const {
     data: hallOfFame = [],
     error: hallOfFameError,
+    isLoading: loadingHallOfFame,
     mutate: retryHallOfFame,
   } = useSWR<HallOfFameEntry[]>(hasTournament ? '/api/analytics/hall-of-fame' : null, fetcher, { ...localErrorHandling, revalidateOnFocus: false });
 
@@ -597,19 +611,13 @@ export default function HomePage() {
         <Skeleton width={260} height={24} sx={{ mb: 1.5 }} />
       ) : null}
 
-      <RecordAlerts />
-
       {/* Where the group stands: current form on one side, legacy on the other. */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' }, gap: 1.5, alignItems: 'start' }}>
         <Box sx={{ display: 'grid', gap: 1.5, minWidth: 0 }}>
-          {loadingAnalytics && (
-            <GlassCard sx={surfaceSx}>
-              <CardContent>
-                <Skeleton width={150} height={28} />
-                {[1, 2, 3].map((row) => <Skeleton key={row} height={48} />)}
-              </CardContent>
-            </GlassCard>
-          )}
+          {/* Placeholders roughly the size of the real cards, so the page
+              doesn't jump when the data arrives. */}
+          {loadingAnalytics && <CardSkeleton rows={5} />}
+          {loadingAnalytics && <CardSkeleton rows={5} rowHeight={48} />}
 
           {powerRankings.length > 0 && (
             <GlassCard sx={surfaceSx}>
@@ -636,7 +644,7 @@ export default function HomePage() {
                   >
                     <Typography sx={{ color: index === 0 ? COLORS.coralLight : COLORS.textSteel, fontWeight: 700 }}>#{row.rank}</Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-                      <Avatar src={getPlayerImagePath(row.player.name)} sx={{ width: 36, height: 36 }}>{row.player.name.slice(0, 1)}</Avatar>
+                      <Avatar src={getPlayerAvatarPath(row.player.name) ?? undefined} alt={row.player.name} sx={{ width: 36, height: 36 }}>{row.player.name.slice(0, 1)}</Avatar>
                       <Box sx={{ minWidth: 0 }}>
                         <Typography sx={{ fontWeight: 700 }} noWrap>{row.player.name}</Typography>
                         <Typography sx={{ color: COLORS.textSteel, fontSize: '0.875rem' }} noWrap>{row.player.base_team}</Typography>
@@ -688,9 +696,14 @@ export default function HomePage() {
               </CardContent>
             </GlassCard>
           )}
+
+          {/* Loads after the rest, so it sits at the end of the column where
+              its arrival can't push anything on screen down. */}
+          <RecordAlerts />
         </Box>
 
         <Box sx={{ display: 'grid', gap: 1.5, minWidth: 0 }}>
+          {loadingHallOfFame && <CardSkeleton rows={4} />}
           {champions.length > 0 && (
             <GlassCard sx={surfaceSx}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -709,6 +722,7 @@ export default function HomePage() {
             </GlassCard>
           )}
 
+          {loadingAnalytics && <CardSkeleton rows={HOME_RECORD_COUNT} rowHeight={56} />}
           {analytics && analytics.all_matches.length > 0 && (
             <GlassCard sx={surfaceSx}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>

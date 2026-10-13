@@ -11,21 +11,36 @@ import {
   subscribeToAnalyticsChanges,
 } from '@/lib/analytics-realtime';
 import { FetchError, fetcher } from '@/lib/fetcher';
-import { createClient } from '@/lib/supabase/client';
 
+// Live updates start once the page is idle, and the Supabase client loads only
+// then, so neither weighs on the first render.
 function AnalyticsRealtimeSync() {
   const { mutate } = useSWRConfig();
 
   useEffect(() => {
-    const supabase = createClient();
-    const revalidator = createBatchedAnalyticsRevalidator(() => {
-      void mutate(isAnalyticsDataKey);
-    });
-    const unsubscribe = subscribeToAnalyticsChanges(supabase, revalidator.schedule);
+    let cancelled = false;
+    let stop = () => {};
+    const start = () => {
+      void import('@/lib/supabase/client').then(({ createClient }) => {
+        if (cancelled) return;
+        const revalidator = createBatchedAnalyticsRevalidator(() => {
+          void mutate(isAnalyticsDataKey);
+        });
+        const unsubscribe = subscribeToAnalyticsChanges(createClient(), revalidator.schedule);
+        stop = () => {
+          revalidator.dispose();
+          unsubscribe();
+        };
+      });
+    };
+    const idle = typeof window.requestIdleCallback === 'function'
+      ? { id: window.requestIdleCallback(start, { timeout: 5000 }), cancel: (id: number) => window.cancelIdleCallback(id) }
+      : { id: window.setTimeout(start, 3000), cancel: (id: number) => window.clearTimeout(id) };
 
     return () => {
-      revalidator.dispose();
-      unsubscribe();
+      cancelled = true;
+      idle.cancel(idle.id);
+      stop();
     };
   }, [mutate]);
 

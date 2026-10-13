@@ -17,3 +17,9 @@ function slugifyPlayerName(name: string) {
 export function getPlayerImagePath(name: string) {
   return PLAYER_IMAGE_BY_SLUG[slugifyPlayerName(name)] ?? null;
 }
+
+// A 96px copy for small avatars (up to about 48px on screen), so lists don't
+// download full profile photos.
+export function getPlayerAvatarPath(name: string) {
+  return getPlayerImagePath(name)?.replace('/players/', '/players/thumbs/') ?? null;
+}
