@@ -29,7 +29,7 @@ function Fighter({ name, card, align }: { name: string; card?: PlayerCardData; a
           <UltimateCard card={card} width="100%" />
         </Box>
       ) : (
-        <Avatar src={getPlayerImagePath(name) ?? undefined} sx={{ width: 96, height: 96, fontSize: '2rem', border: `2px solid ${align === 'left' ? LEFT : RIGHT}` }}>
+        <Avatar src={getPlayerImagePath(name) ?? undefined} alt={name} sx={{ width: 96, height: 96, fontSize: '2rem', border: `2px solid ${align === 'left' ? LEFT : RIGHT}` }}>
           {name.slice(0, 1)}
         </Avatar>
       )}

@@ -22,7 +22,6 @@ export default function RecordAlerts({ limit = 4, size = 'normal', playerIds }: 
       sx={{
         borderRadius: tv ? '20px' : '16px',
         p: tv ? { xs: 2, md: 3 } : 2,
-        mb: tv ? 0 : 1.5,
         background: 'linear-gradient(120deg, rgba(245, 158, 11, 0.12), rgba(36, 16, 25, 0.8) 60%)',
         border: '1px solid rgba(245, 158, 11, 0.25)',
       }}

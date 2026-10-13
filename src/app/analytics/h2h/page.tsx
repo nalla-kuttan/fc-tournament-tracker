@@ -20,7 +20,7 @@ import AIH2HModal from '@/components/ai/AIH2HModal';
 import GlassCard from '@/components/shared/GlassCard';
 import { getRivalries, type GoalLite, type RivalrySummary } from '@/lib/analytics-insights';
 import { fetcher } from '@/lib/fetcher';
-import { getPlayerImagePath } from '@/lib/player-images';
+import { getPlayerAvatarPath } from '@/lib/player-images';
 import type { RegisteredPlayer, H2HData, CareerStats, Match } from '@/lib/types';
 import PageSkeleton from '@/components/shared/PageSkeleton';
 import { userFacingError } from '@/lib/user-error';
@@ -171,7 +171,8 @@ function H2HPageContent() {
                     <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 1.25, mb: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
                         <Avatar
-                          src={getPlayerImagePath(rivalry.p1Name)}
+                          src={getPlayerAvatarPath(rivalry.p1Name) ?? undefined}
+                          alt={rivalry.p1Name}
                           sx={{ width: 46, height: 46, border: '1px solid rgba(234, 108, 86, 0.45)' }}
                         >
                           {rivalry.p1Name.slice(0, 1)}
@@ -188,7 +189,8 @@ function H2HPageContent() {
                           <Typography variant="caption" color="text.secondary">{rivalry.p2Wins} {rivalry.p2Wins === 1 ? 'win' : 'wins'}</Typography>
                         </Box>
                         <Avatar
-                          src={getPlayerImagePath(rivalry.p2Name)}
+                          src={getPlayerAvatarPath(rivalry.p2Name) ?? undefined}
+                          alt={rivalry.p2Name}
                           sx={{ width: 46, height: 46, border: '1px solid rgba(126, 140, 194, 0.45)' }}
                         >
                           {rivalry.p2Name.slice(0, 1)}
