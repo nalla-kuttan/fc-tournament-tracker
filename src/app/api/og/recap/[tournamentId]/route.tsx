@@ -4,6 +4,7 @@ import { getCompetitiveData } from '@/lib/competitive-data';
 import { buildPlayerCards } from '@/lib/player-cards';
 import { getPlayerImagePath } from '@/lib/player-images';
 import { loadOgFonts, loadPlayerPhoto } from '@/lib/og/assets';
+import { OgBrandLockup } from '@/lib/og/brand';
 import { CardArt, STADIUM_BACKGROUND } from '@/lib/og/card-art';
 import { loadTournamentRecap } from '@/lib/tournament-recap-data';
 import { uuidSchema } from '@/lib/validation';
@@ -33,8 +34,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tou
     return new ImageResponse(
       (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', height: '100%', backgroundImage: STADIUM_BACKGROUND, color: '#FFF7F6', fontFamily: 'Chakra Petch', padding: '90px 80px' }}>
-          <div style={{ display: 'flex', fontSize: 30, fontWeight: 700, letterSpacing: 6, color: '#FF8A73' }}>FC TRACKER</div>
-          <div style={{ display: 'flex', fontSize: 64, fontWeight: 700, marginTop: 18, textAlign: 'center' }}>{recap.tournament.name}</div>
+          <OgBrandLockup />
+          <div style={{ display: 'flex', fontSize: 64, fontWeight: 700, marginTop: 32, textAlign: 'center' }}>{recap.tournament.name}</div>
           <div style={{ display: 'flex', fontSize: 30, color: '#C9B9BE', marginTop: 8 }}>
             {`${recap.decided ? 'Final recap' : 'Recap so far'} · ${recap.matchesPlayed} matches · ${recap.goals} goals`}
           </div>

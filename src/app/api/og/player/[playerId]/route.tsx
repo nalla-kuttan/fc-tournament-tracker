@@ -4,6 +4,7 @@ import { getCompetitiveData } from '@/lib/competitive-data';
 import { buildPlayerCards } from '@/lib/player-cards';
 import { getPlayerImagePath } from '@/lib/player-images';
 import { loadOgFonts, loadPlayerPhoto } from '@/lib/og/assets';
+import { OgBrandLockup } from '@/lib/og/brand';
 import { CardArt, STADIUM_BACKGROUND } from '@/lib/og/card-art';
 import { uuidSchema } from '@/lib/validation';
 
@@ -20,8 +21,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pla
     return new ImageResponse(
       (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', height: '100%', backgroundImage: STADIUM_BACKGROUND, color: '#FFF7F6', fontFamily: 'Chakra Petch', padding: '64px 0' }}>
-          <div style={{ display: 'flex', fontSize: 30, fontWeight: 700, letterSpacing: 6, color: '#FF8A73' }}>FC TRACKER</div>
-          <div style={{ display: 'flex', fontSize: 26, color: '#C9B9BE', marginTop: 6 }}>Player card</div>
+          <OgBrandLockup />
+          <div style={{ display: 'flex', fontSize: 26, color: '#C9B9BE', marginTop: 20 }}>Player card</div>
           <div style={{ display: 'flex', marginTop: 48 }}>
             <CardArt card={card} photo={photo} width={640} />
           </div>
