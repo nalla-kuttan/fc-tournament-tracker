@@ -218,10 +218,120 @@ p {
   text-shadow: 0 0 10px rgba(234, 108, 86, 0.3);
 }
 
+/* ─── Opening Intro (components/layout/SplashIntro) ─── */
+
+.fc-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(ellipse 60% 50% at 50% 45%, rgba(98, 17, 34, 0.45), transparent 70%), #12080C;
+  pointer-events: none;
+  animation: splashOut 300ms cubic-bezier(0.4, 0, 0.2, 1) 1420ms forwards;
+}
+
+/* Shown once per session (see lib/splash) and never with reduced motion. */
+html[data-splash='off'] .fc-splash {
+  display: none;
+}
+
+.fc-splash__inner {
+  display: grid;
+  justify-items: center;
+  gap: 26px;
+  animation: splashMarkOut 220ms ease-in 1300ms forwards;
+}
+
+.fc-splash svg {
+  width: min(44vw, 200px);
+  height: auto;
+  overflow: visible;
+}
+
+.fc-splash__ghost {
+  fill: #FFF7F6;
+  opacity: 0;
+  animation: splashGhost 220ms ease-out forwards;
+}
+
+.fc-splash__seg {
+  fill: #FFF7F6;
+  opacity: 0;
+  animation: splashSeg 170ms linear forwards;
+}
+
+.fc-splash__dot,
+.fc-splash__ring {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.fc-splash__dot {
+  fill: #EA6C56;
+  opacity: 0;
+  animation: splashDot 280ms cubic-bezier(0.34, 1.56, 0.64, 1) 600ms forwards;
+}
+
+.fc-splash__ring {
+  fill: none;
+  stroke: #EA6C56;
+  stroke-width: 4;
+  opacity: 0;
+  animation: splashRing 650ms ease-out 700ms forwards;
+}
+
+.fc-splash__name {
+  color: #FFF7F6;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.4em;
+  padding-left: 0.4em;
+  opacity: 0;
+  animation: splashName 420ms cubic-bezier(0.16, 1, 0.3, 1) 680ms forwards;
+}
+
+@keyframes splashGhost {
+  to { opacity: 0.07; }
+}
+
+/* A segment lighting up: on, a quick dip, then steady, like a real display. */
+@keyframes splashSeg {
+  0% { opacity: 0; }
+  30% { opacity: 1; }
+  50% { opacity: 0.35; }
+  70%, 100% { opacity: 1; }
+}
+
+@keyframes splashDot {
+  0% { opacity: 0; transform: scale(0); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes splashRing {
+  0% { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(3.2); }
+}
+
+@keyframes splashName {
+  from { opacity: 0; transform: translateY(8px); letter-spacing: 0.4em; padding-left: 0.4em; }
+  to { opacity: 1; transform: none; letter-spacing: 0.22em; padding-left: 0.22em; }
+}
+
+/* The mark leaves before the backdrop so the two never cross-fade over the app. */
+@keyframes splashMarkOut {
+  to { opacity: 0; transform: scale(1.06); }
+}
+
+@keyframes splashOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
 /* ─── Reduced Motion ─── */
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  .fc-splash { display: none; }
   *,
   *::before,
   *::after {

@@ -8,7 +8,9 @@ import { AdminProvider } from '@/contexts/AdminContext';
 import AppShell from '@/components/layout/AppShell';
 import DeferredMusicPlayer from '@/components/layout/DeferredMusicPlayer';
 import PwaManager from '@/components/pwa/PwaManager';
+import SplashIntro from '@/components/layout/SplashIntro';
 import DataProvider from '@/components/providers/DataProvider';
+import { SPLASH_SCRIPT } from '@/lib/splash';
 import './globals.css';
 
 const chakraPetch = Chakra_Petch({
@@ -43,8 +45,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    // suppressHydrationWarning: the intro script may set data-splash before React loads.
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SPLASH_SCRIPT }} />
+      </head>
       <body className={chakraPetch.className}>
+        <SplashIntro />
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
