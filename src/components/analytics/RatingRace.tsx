@@ -5,7 +5,7 @@ import useSWR from 'swr';
 import Box from '@mui/material/Box';
 import CardContent from '@mui/material/CardContent';
 import IconButton from '@mui/material/IconButton';
-import Skeleton from '@mui/material/Skeleton';
+import Skeleton from '@/components/shared/GlyphSkeleton';
 import Slider from '@mui/material/Slider';
 import Typography from '@mui/material/Typography';
 import PauseIcon from '@mui/icons-material/Pause';

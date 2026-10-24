@@ -23,6 +23,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import type { RegisteredPlayer, Tournament } from '@/lib/types';
 import BrandMark from '@/components/shared/BrandMark';
+import DecodeReveal from '@/components/shared/DecodeReveal';
 import { BRAND_COLORS } from '@/design-tokens';
 import { fetcher } from '@/lib/fetcher';
 
@@ -470,7 +471,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             mx: 'auto',
           }}
         >
-          {children}
+          <DecodeReveal>{children}</DecodeReveal>
         </Box>
       </Box>
 

@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box';
-import Skeleton from '@mui/material/Skeleton';
+import Skeleton from '@/components/shared/GlyphSkeleton';
 
 const SKELETON_SX = { bgcolor: 'rgba(201, 185, 190, 0.05)' };
 

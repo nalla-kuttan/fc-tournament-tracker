@@ -16,7 +16,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import Skeleton from '@mui/material/Skeleton';
+import Skeleton from '@/components/shared/GlyphSkeleton';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import ShowChartIcon from '@mui/icons-material/ShowChart';

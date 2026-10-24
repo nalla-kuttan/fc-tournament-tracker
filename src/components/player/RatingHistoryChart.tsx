@@ -5,7 +5,7 @@ import { CategoryScale, Chart as ChartJS, Filler, LinearScale, LineElement, Poin
 import { Line } from 'react-chartjs-2';
 import useSWR from 'swr';
 import Box from '@mui/material/Box';
-import Skeleton from '@mui/material/Skeleton';
+import Skeleton from '@/components/shared/GlyphSkeleton';
 import Typography from '@mui/material/Typography';
 import { BRAND_COLORS } from '@/design-tokens';
 import { fetcher } from '@/lib/fetcher';

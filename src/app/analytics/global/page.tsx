@@ -19,7 +19,7 @@ import Chip from '@mui/material/Chip';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import TuneIcon from '@mui/icons-material/Tune';
-import Skeleton from '@mui/material/Skeleton';
+import Skeleton from '@/components/shared/GlyphSkeleton';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import GlassCard from '@/components/shared/GlassCard';

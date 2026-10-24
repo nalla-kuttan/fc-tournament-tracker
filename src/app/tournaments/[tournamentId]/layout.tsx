@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
-import Skeleton from '@mui/material/Skeleton';
+import Skeleton from '@/components/shared/GlyphSkeleton';
 import TournamentTabs from '@/components/layout/TournamentTabs';
 import RealtimeProvider from '@/components/shared/RealtimeProvider';
 import BackButton from '@/components/shared/BackButton';
