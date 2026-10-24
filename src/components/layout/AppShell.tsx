@@ -22,6 +22,7 @@ import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import SearchIcon from '@mui/icons-material/Search';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import type { RegisteredPlayer, Tournament } from '@/lib/types';
+import BrandMark from '@/components/shared/BrandMark';
 import { BRAND_COLORS } from '@/design-tokens';
 import { fetcher } from '@/lib/fetcher';
 
@@ -175,27 +176,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
           zIndex: 20,
         }}
       >
-        <Box sx={{ p: 2.25, display: 'flex', alignItems: 'center', gap: 1.25 }}>
-          <Box
-            sx={{
-              width: 42,
-              height: 42,
-              borderRadius: '12px',
-              display: 'grid',
-              placeItems: 'center',
-              color: COLORS.textIce,
-              background: BRAND_COLORS.frenchBlueDark,
-            }}
-          >
-            <SportsSoccerIcon sx={{ fontSize: 26 }} />
-          </Box>
-          <Box>
-            <Typography sx={{ fontWeight: 700, fontSize: '1.38rem', lineHeight: 0.9, color: '#FF8A73' }}>
-              FC
-            </Typography>
-            <Typography sx={{ fontSize: '0.875rem', letterSpacing: '0.14em', fontWeight: 700, color: COLORS.textIce }}>
-              TOURNAMENT TRACKER
-            </Typography>
+        <Box sx={{ p: 2.25, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <BrandMark height={36} title="FC" />
+          <Box sx={{ color: COLORS.textIce, fontSize: '0.9375rem', fontWeight: 500, letterSpacing: '0.05em', lineHeight: 1.15 }}>
+            TOURNAMENT
+            <br />
+            TRACKER
           </Box>
         </Box>
 
@@ -295,14 +281,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
               font: 'inherit',
             }}
           >
-            <SportsSoccerIcon sx={{ color: '#EA6C56', fontSize: 28 }} />
-            <Box sx={{ minWidth: 0 }}>
-              <Typography sx={{ fontWeight: 700, color: '#FFF7F6', lineHeight: 1 }}>
-                FC Tracker
-              </Typography>
-              <Typography noWrap sx={{ color: '#D7C6CB', fontSize: '0.875rem', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
-                Tournament hub
-              </Typography>
+            <BrandMark height={26} title="FC" />
+            <Box sx={{ minWidth: 0, color: '#FFF7F6', fontSize: '0.8125rem', fontWeight: 500, letterSpacing: '0.05em', lineHeight: 1.15, display: { xs: 'none', sm: 'block' } }}>
+              TOURNAMENT
+              <br />
+              TRACKER
             </Box>
           </Box>
 

@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'fc-tracker-v2';
+const CACHE_VERSION = 'fc-tracker-v3';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const PAGE_CACHE = `${CACHE_VERSION}-pages`;
 const APP_SHELL = ['/', '/manifest.webmanifest', '/icon192.png', '/icon512.png'];
