@@ -100,6 +100,40 @@ function inRange(value: number | null, min: number, max: number, integer = false
 
 const asText = (value: number | null) => (value === null ? undefined : String(value));
 
+// The screen has no team rating, so one is worked out on the scale the
+// group types in by hand. Fitted to 492 hand-entered ratings: a draw sits at
+// 7.8, wins climb toward 10 with each extra goal worth less, losses drop
+// about 0.9 a goal, and xG nudges it slightly. Possession, tackles and
+// interceptions made no measurable difference, so they're left out.
+const DRAW_RATING = 7.8;
+const WIN_DECAY = 0.35;
+const LOSS_PER_GOAL = 0.9;
+const LOSS_POWER = 0.9;
+const XG_WEIGHT = 0.1;
+const XG_CAP = 0.3;
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
+function sideRating(goalsFor: number, goalsAgainst: number, xgEdge: number | null) {
+  const margin = goalsFor - goalsAgainst;
+  const base = margin > 0
+    ? 10 - (10 - DRAW_RATING) * Math.exp(-WIN_DECAY * margin)
+    : DRAW_RATING - LOSS_PER_GOAL * Math.pow(-margin, LOSS_POWER);
+  const nudge = xgEdge === null ? 0 : clamp(XG_WEIGHT * xgEdge, -XG_CAP, XG_CAP);
+  return Math.round(clamp(base + nudge, 0, 10) * 10) / 10;
+}
+
+type RatingSide = { goals: number | null; xg: number | null };
+
+export function teamRatings(home: RatingSide, away: RatingSide) {
+  if (home.goals === null || away.goals === null) return null;
+  const xgEdge = home.xg !== null && away.xg !== null ? home.xg - away.xg : null;
+  return {
+    home: sideRating(home.goals, away.goals, xgEdge),
+    away: sideRating(away.goals, home.goals, xgEdge === null ? null : -xgEdge),
+  };
+}
+
 export function toReadStatsResult(
   reading: StatsReading,
   fixture: { homeTeam?: string | null; awayTeam?: string | null }
@@ -114,7 +148,10 @@ export function toReadStatsResult(
 
   const homeGoals = inRange(home.goals, 0, 99, true);
   const awayGoals = inRange(away.goals, 0, 99, true);
+  const homeXg = inRange(home.xg, 0, 20);
+  const awayXg = inRange(away.xg, 0, 20);
   const homePossession = inRange(home.possession, 0, 100);
+  const ratings = teamRatings({ goals: homeGoals, xg: homeXg }, { goals: awayGoals, xg: awayXg });
 
   const potmSide = reading.player_of_the_match.side;
   const motmSide: StatSheet['motmSide'] = potmSide === null
@@ -122,13 +159,15 @@ export function toReadStatsResult(
     : (potmSide === 'left') !== swapped ? 'home' : 'away';
 
   const sheet: Partial<StatSheet> = {
-    homeXg: asText(inRange(home.xg, 0, 20)),
-    awayXg: asText(inRange(away.xg, 0, 20)),
+    homeXg: asText(homeXg),
+    awayXg: asText(awayXg),
     homePossession: asText(homePossession === null ? null : Math.round(homePossession)),
     homeTackles: asText(inRange(home.tackles, 0, 99, true)),
     awayTackles: asText(inRange(away.tackles, 0, 99, true)),
     homeInterceptions: asText(inRange(home.interceptions, 0, 99, true)),
     awayInterceptions: asText(inRange(away.interceptions, 0, 99, true)),
+    homeRating: ratings?.home.toFixed(1),
+    awayRating: ratings?.away.toFixed(1),
   };
   if (motmSide) {
     sheet.motmSide = motmSide;
