@@ -9,6 +9,8 @@ import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import ClubBadge from '@/components/shared/ClubBadge';
 import CountUp from '@/components/shared/CountUp';
@@ -16,6 +18,7 @@ import MatchOdds from '@/components/tournament/MatchOdds';
 import Walkout from '@/components/tournament/Walkout';
 import RecordAlerts from '@/components/analytics/RecordAlerts';
 import Button from '@mui/material/Button';
+import { playGoalSound, unlockGoalSound } from '@/lib/goal-sound';
 import { useLiveScoreChannel, type LiveScore } from '@/lib/live-score';
 import { clubForSide } from '@/lib/club-analytics';
 import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
@@ -153,6 +156,17 @@ export default function TvModePage() {
   const [walkoutFor, setWalkoutFor] = useState<string | null>(null);
   const [walkedOut, setWalkedOut] = useState<Set<string>>(() => new Set());
 
+  // Off until someone taps it: browsers block sound on a page nobody has
+  // touched, which is exactly what a TV left on this screen is.
+  const [sound, setSound] = useState(false);
+  const soundRef = useRef(false);
+  const toggleSound = () => {
+    const next = !sound;
+    if (next) unlockGoalSound();
+    soundRef.current = next;
+    setSound(next);
+  };
+
   const liveRef = useRef<LiveScore | null>(null);
   useLiveScoreChannel(tournamentId, {
     onScore: (score) => {
@@ -163,7 +177,10 @@ export default function TvModePage() {
         setWalkoutFor(score.matchId);
         setWalkedOut((seen) => new Set(seen).add(score.matchId));
       }
-      if (current?.matchId === score.matchId && score.lastGoal && score.home + score.away > current.home + current.away) setGoal(score);
+      if (current?.matchId === score.matchId && score.lastGoal && score.home + score.away > current.home + current.away) {
+        setGoal(score);
+        if (soundRef.current) playGoalSound();
+      }
       liveRef.current = score;
       setLive(score);
     },
@@ -245,6 +262,9 @@ export default function TvModePage() {
         <Typography component="h1" sx={{ fontSize: { xs: '1.75rem', md: '2.5rem' }, fontWeight: 700, flex: 1, minWidth: 0 }} noWrap>{tournament?.name ?? ''}</Typography>
         <Typography sx={{ color: 'text.secondary', fontSize: '1.25rem', display: { xs: 'none', sm: 'block' } }}>{played.length} / {total} played</Typography>
         <Clock />
+        <IconButton aria-label="Goal horn" aria-pressed={sound} title={sound ? 'Goal horn on' : 'Turn on the goal horn'} onClick={toggleSound} sx={{ color: sound ? '#FFF7F6' : '#FF8A73', ...(sound ? {} : { border: '1px solid rgba(234, 108, 86, 0.5)' }) }}>
+          {sound ? <VolumeUpIcon /> : <VolumeOffIcon />}
+        </IconButton>
         <IconButton aria-label={fullscreen ? 'Exit full screen' : 'Full screen'} onClick={toggleFullscreen} sx={{ color: '#FFF7F6' }}>
           {fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
         </IconButton>
