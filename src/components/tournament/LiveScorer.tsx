@@ -9,7 +9,10 @@ import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import SensorsIcon from '@mui/icons-material/Sensors';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import GlassCard from '@/components/shared/GlassCard';
+import { goalSoundEnabled, playGoalSound, setGoalSoundEnabled } from '@/lib/goal-sound';
 import { useLiveScoreChannel, type LiveScore } from '@/lib/live-score';
 
 const storageKey = (matchId: string) => `fc-live:${matchId}`;
@@ -46,6 +49,11 @@ interface Props {
 export default function LiveScorer({ matchId, tournamentId, homeName, awayName, onFullTime }: Props) {
   const [score, setScore] = useState<LiveScore | null>(() => (typeof window === 'undefined' ? null : readStored(matchId)));
   const { connected, send } = useLiveScoreChannel(tournamentId, { source: () => score });
+  const [sound, setSound] = useState(() => (typeof window === 'undefined' ? true : goalSoundEnabled()));
+  const toggleSound = () => {
+    setGoalSoundEnabled(!sound);
+    setSound(!sound);
+  };
 
   // Re-announce a match that was already live when the page reloaded.
   useEffect(() => {
@@ -64,6 +72,7 @@ export default function LiveScorer({ matchId, tournamentId, homeName, awayName, 
     if (!score) return;
     const value = Math.max(0, score[side] + delta);
     if (value === score[side]) return;
+    if (delta > 0 && sound) playGoalSound();
     update({ ...score, [side]: value, lastGoal: delta > 0 ? side : null, version: Date.now() });
   };
   const fullTime = () => {
@@ -98,6 +107,9 @@ export default function LiveScorer({ matchId, tournamentId, homeName, awayName, 
           <Box aria-hidden sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: score.status === 'live' ? 'primary.main' : 'text.secondary', animation: score.status === 'live' ? 'livePulse 1.6s ease-in-out infinite' : 'none', '@keyframes livePulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.35 } } }} />
           <Typography sx={{ fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.8125rem' }}>{score.status === 'live' ? 'LIVE' : 'FULL TIME'}</Typography>
           <Typography sx={{ color: 'text.secondary', fontSize: '0.8125rem', ml: 'auto' }}>{connected ? 'TV connected' : 'Connecting…'}</Typography>
+          <IconButton size="small" onClick={toggleSound} aria-pressed={sound} aria-label="Goal sound" title={sound ? 'Goal sound on' : 'Goal sound off'} sx={{ color: 'text.secondary', mr: -0.5 }}>
+            {sound ? <VolumeUpIcon fontSize="small" /> : <VolumeOffIcon fontSize="small" />}
+          </IconButton>
         </Box>
         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
           {sides.map((entry) => (
