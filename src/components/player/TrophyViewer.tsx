@@ -95,6 +95,8 @@ export default function TrophyViewer({ item, playerName, onClose }: { item: Trop
       onClose={onClose}
       maxWidth="sm"
       fullWidth
+      // Above full-screen celebrations, which open it from their trophy lineup.
+      sx={{ zIndex: 1700 }}
       slotProps={{ transition: { onExited: () => setFailed(false) }, paper: { sx: { overflow: 'hidden', background: 'radial-gradient(ellipse 80% 60% at 50% 20%, rgba(245, 158, 11, 0.18), transparent 70%), linear-gradient(180deg, #2D1620, #12080C)' } } }}
     >
       {item && label && (

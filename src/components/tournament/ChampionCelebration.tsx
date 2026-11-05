@@ -11,6 +11,8 @@ import UltimateCard from '@/components/player/UltimateCard';
 import { fetcher } from '@/lib/fetcher';
 import type { PlayerCardData } from '@/lib/player-cards';
 import type { TournamentRecap } from '@/lib/tournament-recap';
+import { buildCeremony, type TrophyKind } from '@/lib/trophies';
+import TrophyCeremony from '@/components/tournament/TrophyCeremony';
 
 const CONFETTI = ['#EA6C56', '#FF8A73', '#F59E0B', '#FCE7A8', '#7E8CC2', '#FFF7F6'];
 // Only celebrate on its own for a tournament decided in the last week, so
@@ -179,32 +181,62 @@ export default function ChampionCelebration({ tournamentId, lastPlayedAt }: Prop
 }
 
 // The full-screen trophy moment: rays, confetti, the champion's card and
-// their numbers. Shared with TV mode.
-export function ChampionMoment({ recap, onClose }: { recap: TournamentRecap; onClose: () => void }) {
+// their numbers, then every trophy from the tournament with its winner.
+// Shared with TV mode, which passes `autoAdvanceMs` since nobody taps a TV.
+export function ChampionMoment({ recap, onClose, autoAdvanceMs }: { recap: TournamentRecap; onClose: () => void; autoAdvanceMs?: number }) {
   const reduceMotion = useReducedMotion();
   const { data: cardData } = useSWR<{ cards: PlayerCardData[] }>('/api/players/cards', fetcher, { revalidateOnFocus: false, onError: () => undefined });
   const champion = recap.champion ?? '';
   const winner = recap.podium[0];
   const card = cardData?.cards.find((entry) => entry.name === champion);
+  const ceremony = buildCeremony(recap);
+  const [stage, setStage] = useState<'champion' | 'trophies'>('champion');
+  const hasTrophies = ceremony.length > 1;
+  const advance = () => (hasTrophies && stage === 'champion' ? setStage('trophies') : onClose());
+
+  // Render the trophies' turntables while the champion is on screen, so the
+  // lineup is ready when it appears (they're cached for the page).
+  const ceremonyKey = ceremony.map((award) => `${award.kind}${award.perfect ? ':crowned' : ''}`).join(',');
+  useEffect(() => {
+    if (!ceremonyKey) return;
+    import('@/lib/trophy-sprites')
+      .then((sprites) => {
+        for (const key of ceremonyKey.split(',')) {
+          const [kind, crowned] = key.split(':');
+          void sprites.getTrophySheet(kind as TrophyKind, crowned === 'crowned');
+        }
+      })
+      .catch(() => undefined);
+  }, [ceremonyKey]);
+
+  useEffect(() => {
+    if (!autoAdvanceMs || !hasTrophies || stage !== 'champion') return;
+    const timer = window.setTimeout(() => setStage('trophies'), autoAdvanceMs);
+    return () => window.clearTimeout(timer);
+  }, [autoAdvanceMs, hasTrophies, stage]);
+
   return (
     <motion.div
       role="dialog"
       aria-modal="true"
-      aria-label={`${champion} wins ${recap.tournament.name}`}
+      aria-label={stage === 'champion' ? `${champion} wins ${recap.tournament.name}` : `${recap.tournament.name} trophies`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
-      onClick={onClose}
-      style={{ position: 'fixed', inset: 0, zIndex: 1400, display: 'grid', placeItems: 'center', background: 'radial-gradient(circle at 50% 40%, rgba(98, 17, 34, 0.92) 0%, rgba(11, 5, 8, 0.97) 65%)', cursor: 'pointer' }}
+      onClick={stage === 'champion' ? advance : onClose}
+      style={{ position: 'fixed', inset: 0, zIndex: 1400, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: 'radial-gradient(circle at 50% 40%, rgba(98, 17, 34, 0.92) 0%, rgba(11, 5, 8, 0.97) 65%)', cursor: 'pointer' }}
     >
       {!reduceMotion && (
         <Box
           aria-hidden
           sx={{
-            position: 'absolute',
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
             width: '160vmax',
             height: '160vmax',
+            translate: '-50% -50%',
             background: 'repeating-conic-gradient(from 0deg, rgba(245, 158, 11, 0.12) 0deg 8deg, transparent 8deg 24deg)',
             maskImage: 'radial-gradient(circle, #000 0%, transparent 45%)',
             animation: 'championRays 30s linear infinite',
@@ -212,26 +244,43 @@ export function ChampionMoment({ recap, onClose }: { recap: TournamentRecap; onC
           }}
         />
       )}
-      {!reduceMotion && <Confetti />}
-      <Box sx={{ position: 'relative', textAlign: 'center', px: 3, display: 'grid', justifyItems: 'center' }}>
-        <motion.div
-          initial={reduceMotion ? false : { scale: 0.3, y: 40, opacity: 0 }}
-          animate={{ scale: 1, y: 0, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 160, damping: 14, delay: 0.15 }}
-        >
-          {card ? (
-            <Box sx={{ width: { xs: 190, sm: 230 } }}><UltimateCard card={card} width="100%" interactive={false} /></Box>
-          ) : (
-            <EmojiEventsIcon sx={{ fontSize: 140, color: '#F59E0B', filter: 'drop-shadow(0 0 40px rgba(245, 158, 11, 0.6))' }} />
-          )}
-        </motion.div>
-        <motion.div initial={reduceMotion ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.5 }}>
-          <Typography sx={{ mt: 3, fontSize: '0.9375rem', fontWeight: 700, letterSpacing: '0.3em', color: '#F59E0B' }}>{recap.tournament.name.toUpperCase()} CHAMPION</Typography>
-          <Typography component="p" sx={{ fontSize: { xs: '3.25rem', sm: '4.5rem' }, fontWeight: 700, lineHeight: 1, textShadow: '0 0 40px rgba(234, 108, 86, 0.6)' }}>{champion}</Typography>
-          {winner && <Typography sx={{ mt: 1, color: 'rgba(255, 247, 246, 0.8)' }}>{winner.points} points · {winner.wins} wins · {winner.goal_difference > 0 ? '+' : ''}{winner.goal_difference} goal difference</Typography>}
-          <Button variant="contained" autoFocus onClick={onClose} sx={{ mt: 3 }}>Continue</Button>
-        </motion.div>
-      </Box>
+      {!reduceMotion && <Confetti key={stage} />}
+      <AnimatePresence mode="wait">
+        {stage === 'champion' ? (
+          <motion.div key="champion" exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.3 }} style={{ position: 'relative', margin: 'auto' }}>
+            <Box sx={{ textAlign: 'center', px: 3, display: 'grid', justifyItems: 'center' }}>
+              <motion.div
+                initial={reduceMotion ? false : { scale: 0.3, y: 40, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 160, damping: 14, delay: 0.15 }}
+              >
+                {card ? (
+                  <Box sx={{ width: { xs: 190, sm: 230 } }}><UltimateCard card={card} width="100%" interactive={false} /></Box>
+                ) : (
+                  <EmojiEventsIcon sx={{ fontSize: 140, color: '#F59E0B', filter: 'drop-shadow(0 0 40px rgba(245, 158, 11, 0.6))' }} />
+                )}
+              </motion.div>
+              <motion.div initial={reduceMotion ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.5 }}>
+                <Typography sx={{ mt: 3, fontSize: '0.9375rem', fontWeight: 700, letterSpacing: '0.3em', color: '#F59E0B' }}>{recap.tournament.name.toUpperCase()} CHAMPION</Typography>
+                <Typography component="p" sx={{ fontSize: { xs: '3.25rem', sm: '4.5rem' }, fontWeight: 700, lineHeight: 1, textShadow: '0 0 40px rgba(234, 108, 86, 0.6)' }}>{champion}</Typography>
+                {winner && <Typography sx={{ mt: 1, color: 'rgba(255, 247, 246, 0.8)' }}>{winner.points} points · {winner.wins} wins · {winner.goal_difference > 0 ? '+' : ''}{winner.goal_difference} goal difference</Typography>}
+                <Button variant="contained" autoFocus onClick={(event) => { event.stopPropagation(); advance(); }} sx={{ mt: 3 }}>
+                  {hasTrophies ? 'See the trophies' : 'Continue'}
+                </Button>
+              </motion.div>
+            </Box>
+          </motion.div>
+        ) : (
+          <motion.div key="trophies" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} style={{ position: 'relative', width: '100%', margin: 'auto' }}>
+            <Box onClick={(event) => event.stopPropagation()} sx={{ px: { xs: 2, md: 4 }, py: { xs: 3, md: 4 }, cursor: 'default', textAlign: 'center' }}>
+              <Typography sx={{ fontSize: '0.9375rem', fontWeight: 700, letterSpacing: '0.3em', color: '#F59E0B' }}>{recap.tournament.name.toUpperCase()}</Typography>
+              <Typography component="h2" sx={{ fontSize: { xs: '2rem', md: '2.75rem' }, fontWeight: 700, lineHeight: 1.1, mb: { xs: 2, md: 3 } }}>The trophies</Typography>
+              <TrophyCeremony awards={ceremony} tournamentId={recap.tournament.id} tournamentName={recap.tournament.name} />
+              <Button variant="contained" autoFocus onClick={onClose} sx={{ mt: 3 }}>Done</Button>
+            </Box>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

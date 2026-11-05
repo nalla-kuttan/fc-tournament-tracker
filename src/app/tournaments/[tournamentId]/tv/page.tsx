@@ -438,7 +438,7 @@ export default function TvModePage() {
       </Box>
 
       <AnimatePresence>{reveal && <ResultReveal key={reveal.id} match={reveal} />}</AnimatePresence>
-      <AnimatePresence>{showChampion && recap && <ChampionMoment key="champion" recap={recap} onClose={() => setChampionOpen(false)} />}</AnimatePresence>
+      <AnimatePresence>{showChampion && recap && <ChampionMoment key="champion" recap={recap} autoAdvanceMs={12000} onClose={() => setChampionOpen(false)} />}</AnimatePresence>
       <AnimatePresence>{goal && liveMatch && <GoalFlash key={goal.version} match={liveMatch} score={goal} />}</AnimatePresence>
       <AnimatePresence>
         {walkoutMatch && (

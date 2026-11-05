@@ -1,5 +1,5 @@
 import { calculateStandings } from './algorithms/standings';
-import { buildTournamentRecap } from './tournament-recap';
+import { buildTournamentRecap, type TournamentRecap } from './tournament-recap';
 import { getTournamentChampions } from './tournament-results';
 import type { Match, Player, RegisteredPlayer, Tournament } from './types';
 
@@ -91,4 +91,42 @@ export function buildTrophyRoom(
     }
   }
   return items;
+}
+
+export interface CeremonyAward {
+  kind: TrophyKind;
+  winners: string[];
+  detail: string;
+  // The champion won every match they played.
+  perfect?: boolean;
+}
+
+const CEREMONY_ORDER: TrophyKind[] = ['title', 'runner-up', 'golden-ball', 'golden-boot', 'motm', 'best-defence'];
+
+// Every trophy handed out at the end of a decided tournament, with who won
+// it, in presentation order. Shared awards list every winner.
+export function buildCeremony(recap: Pick<TournamentRecap, 'decided' | 'champion' | 'podium' | 'awards' | 'tournament'>): CeremonyAward[] {
+  if (!recap.decided || !recap.champion) return [];
+  const awards: CeremonyAward[] = [];
+  const [first, second] = recap.podium;
+  const champion = first?.player_name === recap.champion ? first : undefined;
+  const perfect = Boolean(champion && champion.wins > 0 && champion.draws === 0 && champion.losses === 0);
+  awards.push({
+    kind: 'title',
+    winners: [recap.champion],
+    detail: champion ? `${champion.points} points · ${champion.wins}W ${champion.draws}D ${champion.losses}L` : recap.tournament.format === 'knockout' ? 'Won the final' : 'Won the league',
+    ...(perfect && { perfect: true }),
+  });
+  // A knockout's table doesn't say who lost the final, so only leagues get
+  // a runner-up here.
+  if (recap.tournament.format !== 'knockout' && second) {
+    awards.push({ kind: 'runner-up', winners: [second.player_name], detail: `${second.points} points · finished second` });
+  }
+  for (const award of recap.awards) {
+    const kind = AWARD_KINDS[award.label];
+    if (!kind || award.winners.length === 0) continue;
+    const detail = kind === 'motm' ? `${award.value}× Man of the Match` : kind === 'golden-ball' ? `${award.value} average rating` : award.value;
+    awards.push({ kind, winners: award.winners, detail });
+  }
+  return awards.sort((a, b) => CEREMONY_ORDER.indexOf(a.kind) - CEREMONY_ORDER.indexOf(b.kind));
 }
