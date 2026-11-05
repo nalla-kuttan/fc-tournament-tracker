@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -29,15 +29,21 @@ export default function Walkout({ matchId, homeName, awayName, onDone }: Props) 
   const home = cardData?.cards.find((card) => card.playerId === preview?.homePlayerId);
   const away = cardData?.cards.find((card) => card.playerId === preview?.awayPlayerId);
 
+  // Held in a ref so a parent re-rendering with a new callback doesn't
+  // restart the auto-close timer (TV mode re-renders every few seconds).
+  const done = useRef(onDone);
   useEffect(() => {
-    const timer = window.setTimeout(onDone, AUTO_CLOSE_MS);
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape' || event.key === 'Enter') onDone(); };
+    done.current = onDone;
+  });
+  useEffect(() => {
+    const timer = window.setTimeout(() => done.current(), AUTO_CLOSE_MS);
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape' || event.key === 'Enter') done.current(); };
     window.addEventListener('keydown', onKey);
     return () => {
       window.clearTimeout(timer);
       window.removeEventListener('keydown', onKey);
     };
-  }, [onDone]);
+  }, []);
 
   const enter = (delay: number, from: Record<string, number>) => (reduceMotion
     ? { initial: false as const }

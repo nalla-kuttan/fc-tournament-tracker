@@ -100,10 +100,8 @@ interface Props {
 // champion banner that stays on the tournament page (and can replay it).
 export default function ChampionCelebration({ tournamentId, lastPlayedAt }: Props) {
   const { data: recap } = useSWR<TournamentRecap>(`/api/tournaments/${tournamentId}/recap`, fetcher, { revalidateOnFocus: false, onError: () => undefined });
-  const { data: cardData } = useSWR<{ cards: PlayerCardData[] }>(recap?.decided ? '/api/players/cards' : null, fetcher, { revalidateOnFocus: false, onError: () => undefined });
   const [replay, setReplay] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const reduceMotion = useReducedMotion();
 
   const decided = Boolean(recap?.decided && recap.champion);
   // Decided once on the client when the page opens: a stored "seen" never
@@ -130,7 +128,6 @@ export default function ChampionCelebration({ tournamentId, lastPlayedAt }: Prop
   if (!recap || !decided) return null;
   const champion = recap.champion!;
   const winner = recap.podium[0];
-  const card = cardData?.cards.find((entry) => entry.name === champion);
   const close = () => { setDismissed(true); setReplay(false); };
 
   return (
@@ -176,56 +173,65 @@ export default function ChampionCelebration({ tournamentId, lastPlayedAt }: Prop
         </Button>
       </Box>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-label={`${champion} wins ${recap.tournament.name}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            onClick={close}
-            style={{ position: 'fixed', inset: 0, zIndex: 1400, display: 'grid', placeItems: 'center', background: 'radial-gradient(circle at 50% 40%, rgba(98, 17, 34, 0.92) 0%, rgba(11, 5, 8, 0.97) 65%)', cursor: 'pointer' }}
-          >
-            {!reduceMotion && (
-              <Box
-                aria-hidden
-                sx={{
-                  position: 'absolute',
-                  width: '160vmax',
-                  height: '160vmax',
-                  background: 'repeating-conic-gradient(from 0deg, rgba(245, 158, 11, 0.12) 0deg 8deg, transparent 8deg 24deg)',
-                  maskImage: 'radial-gradient(circle, #000 0%, transparent 45%)',
-                  animation: 'championRays 30s linear infinite',
-                  '@keyframes championRays': { to: { transform: 'rotate(360deg)' } },
-                }}
-              />
-            )}
-            {!reduceMotion && <Confetti />}
-            <Box sx={{ position: 'relative', textAlign: 'center', px: 3, display: 'grid', justifyItems: 'center' }}>
-              <motion.div
-                initial={reduceMotion ? false : { scale: 0.3, y: 40, opacity: 0 }}
-                animate={{ scale: 1, y: 0, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 160, damping: 14, delay: 0.15 }}
-              >
-                {card ? (
-                  <Box sx={{ width: { xs: 190, sm: 230 } }}><UltimateCard card={card} width="100%" interactive={false} /></Box>
-                ) : (
-                  <EmojiEventsIcon sx={{ fontSize: 140, color: '#F59E0B', filter: 'drop-shadow(0 0 40px rgba(245, 158, 11, 0.6))' }} />
-                )}
-              </motion.div>
-              <motion.div initial={reduceMotion ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.5 }}>
-                <Typography sx={{ mt: 3, fontSize: '0.9375rem', fontWeight: 700, letterSpacing: '0.3em', color: '#F59E0B' }}>{recap.tournament.name.toUpperCase()} CHAMPION</Typography>
-                <Typography component="p" sx={{ fontSize: { xs: '3.25rem', sm: '4.5rem' }, fontWeight: 700, lineHeight: 1, textShadow: '0 0 40px rgba(234, 108, 86, 0.6)' }}>{champion}</Typography>
-                {winner && <Typography sx={{ mt: 1, color: 'rgba(255, 247, 246, 0.8)' }}>{winner.points} points · {winner.wins} wins · {winner.goal_difference > 0 ? '+' : ''}{winner.goal_difference} goal difference</Typography>}
-                <Button variant="contained" autoFocus onClick={close} sx={{ mt: 3 }}>Continue</Button>
-              </motion.div>
-            </Box>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <AnimatePresence>{open && <ChampionMoment recap={recap} onClose={close} />}</AnimatePresence>
     </>
+  );
+}
+
+// The full-screen trophy moment: rays, confetti, the champion's card and
+// their numbers. Shared with TV mode.
+export function ChampionMoment({ recap, onClose }: { recap: TournamentRecap; onClose: () => void }) {
+  const reduceMotion = useReducedMotion();
+  const { data: cardData } = useSWR<{ cards: PlayerCardData[] }>('/api/players/cards', fetcher, { revalidateOnFocus: false, onError: () => undefined });
+  const champion = recap.champion ?? '';
+  const winner = recap.podium[0];
+  const card = cardData?.cards.find((entry) => entry.name === champion);
+  return (
+    <motion.div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${champion} wins ${recap.tournament.name}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4 }}
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, zIndex: 1400, display: 'grid', placeItems: 'center', background: 'radial-gradient(circle at 50% 40%, rgba(98, 17, 34, 0.92) 0%, rgba(11, 5, 8, 0.97) 65%)', cursor: 'pointer' }}
+    >
+      {!reduceMotion && (
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            width: '160vmax',
+            height: '160vmax',
+            background: 'repeating-conic-gradient(from 0deg, rgba(245, 158, 11, 0.12) 0deg 8deg, transparent 8deg 24deg)',
+            maskImage: 'radial-gradient(circle, #000 0%, transparent 45%)',
+            animation: 'championRays 30s linear infinite',
+            '@keyframes championRays': { to: { transform: 'rotate(360deg)' } },
+          }}
+        />
+      )}
+      {!reduceMotion && <Confetti />}
+      <Box sx={{ position: 'relative', textAlign: 'center', px: 3, display: 'grid', justifyItems: 'center' }}>
+        <motion.div
+          initial={reduceMotion ? false : { scale: 0.3, y: 40, opacity: 0 }}
+          animate={{ scale: 1, y: 0, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 160, damping: 14, delay: 0.15 }}
+        >
+          {card ? (
+            <Box sx={{ width: { xs: 190, sm: 230 } }}><UltimateCard card={card} width="100%" interactive={false} /></Box>
+          ) : (
+            <EmojiEventsIcon sx={{ fontSize: 140, color: '#F59E0B', filter: 'drop-shadow(0 0 40px rgba(245, 158, 11, 0.6))' }} />
+          )}
+        </motion.div>
+        <motion.div initial={reduceMotion ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.5 }}>
+          <Typography sx={{ mt: 3, fontSize: '0.9375rem', fontWeight: 700, letterSpacing: '0.3em', color: '#F59E0B' }}>{recap.tournament.name.toUpperCase()} CHAMPION</Typography>
+          <Typography component="p" sx={{ fontSize: { xs: '3.25rem', sm: '4.5rem' }, fontWeight: 700, lineHeight: 1, textShadow: '0 0 40px rgba(234, 108, 86, 0.6)' }}>{champion}</Typography>
+          {winner && <Typography sx={{ mt: 1, color: 'rgba(255, 247, 246, 0.8)' }}>{winner.points} points · {winner.wins} wins · {winner.goal_difference > 0 ? '+' : ''}{winner.goal_difference} goal difference</Typography>}
+          <Button variant="contained" autoFocus onClick={onClose} sx={{ mt: 3 }}>Continue</Button>
+        </motion.div>
+      </Box>
+    </motion.div>
   );
 }

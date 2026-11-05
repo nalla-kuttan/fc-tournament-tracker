@@ -13,6 +13,10 @@ import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import ClubBadge from '@/components/shared/ClubBadge';
+import { ChampionMoment } from '@/components/tournament/ChampionCelebration';
+import TvQrCode from '@/components/tv/TvQrCode';
+import TvSpotlight from '@/components/tv/TvSpotlight';
+import { useTvScreen } from '@/components/tv/useTvScreen';
 import CountUp from '@/components/shared/CountUp';
 import MatchOdds from '@/components/tournament/MatchOdds';
 import Walkout from '@/components/tournament/Walkout';
@@ -21,6 +25,9 @@ import Button from '@mui/material/Button';
 import { playGoalSound, unlockGoalSound } from '@/lib/goal-sound';
 import { useLiveScoreChannel, type LiveScore } from '@/lib/live-score';
 import { clubForSide } from '@/lib/club-analytics';
+import { getClubBadge } from '@/lib/club-badge';
+import type { TournamentRecap } from '@/lib/tournament-recap';
+import { projectLiveTable, tournamentLeaders } from '@/lib/tv-mode';
 import { FORM_COLORS, FORM_TEXT_COLOR } from '@/lib/constants';
 import { fetcher } from '@/lib/fetcher';
 import type { Match, StandingRow } from '@/lib/types';
@@ -118,7 +125,11 @@ function ResultReveal({ match }: { match: TvMatch }) {
 // "GOAL!" over everything when the live scorer taps a goal.
 function GoalFlash({ match, score }: { match: TvMatch; score: LiveScore }) {
   const reduceMotion = useReducedMotion();
-  const scorer = score.lastGoal === 'home' ? match.home_player?.name : match.away_player?.name;
+  const side = score.lastGoal === 'away' ? 'away' : 'home';
+  const scorer = side === 'home' ? match.home_player?.name : match.away_player?.name;
+  const club = (side === 'home' ? match.home_player?.team : match.away_player?.team) ?? '';
+  const colours = getClubBadge(club);
+  const stripes = `repeating-linear-gradient(90deg, ${colours.primary} 0 48px, ${colours.secondary} 48px 96px)`;
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -128,7 +139,17 @@ function GoalFlash({ match, score }: { match: TvMatch; score: LiveScore }) {
       aria-live="assertive"
       style={{ position: 'fixed', inset: 0, zIndex: 1600, display: 'grid', placeItems: 'center', background: 'radial-gradient(circle at 50% 50%, rgba(200, 79, 61, 0.96) 0%, rgba(98, 17, 34, 0.98) 40%, #0B0508 75%)' }}
     >
-      <Box sx={{ textAlign: 'center' }}>
+      {/* The scoring club's colours in bands top and bottom, and glowing behind the crest. */}
+      <Box aria-hidden sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: 18, background: stripes }} />
+      <Box aria-hidden sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 18, background: stripes }} />
+      <Box sx={{ textAlign: 'center', display: 'grid', justifyItems: 'center' }}>
+        {club && (
+          <motion.div initial={reduceMotion ? false : { scale: 0.4, y: 30, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 13, delay: 0.15 }}>
+            <Box sx={{ mb: 2, p: 2, borderRadius: '50%', background: `radial-gradient(circle, ${colours.primary}66 0%, ${colours.primary}00 70%)` }}>
+              <ClubBadge club={club} size={150} />
+            </Box>
+          </motion.div>
+        )}
         <motion.div initial={reduceMotion ? false : { scale: 0.2, rotate: -8 }} animate={{ scale: [0.2, 1.25, 1], rotate: 0 }} transition={{ duration: 0.7 }}>
           <Typography sx={{ fontSize: { xs: '6rem', md: '12rem' }, fontWeight: 700, lineHeight: 1, letterSpacing: '-0.03em', textShadow: '0 0 80px rgba(255, 138, 115, 0.9)' }}>GOAL!</Typography>
         </motion.div>
@@ -155,6 +176,7 @@ export default function TvModePage() {
   const [goal, setGoal] = useState<LiveScore | null>(null);
   const [walkoutFor, setWalkoutFor] = useState<string | null>(null);
   const [walkedOut, setWalkedOut] = useState<Set<string>>(() => new Set());
+  const cursorHidden = useTvScreen();
 
   // Off until someone taps it: browsers block sound on a page nobody has
   // touched, which is exactly what a TV left on this screen is.
@@ -194,6 +216,34 @@ export default function TvModePage() {
   const liveMatch = live ? upcoming.find((match) => match.id === live.matchId) ?? null : null;
   const next = liveMatch ?? upcoming[0] ?? null;
   const walkoutMatch = walkoutFor ? matches.find((match) => match.id === walkoutFor) ?? null : null;
+
+  // The tournament being decided while the TV is on gets the trophy moment,
+  // straight after the full-time reveal of the deciding match.
+  const { data: recap, mutate: refreshRecap } = useSWR<TournamentRecap>(`/api/tournaments/${tournamentId}/recap`, fetcher, { revalidateOnFocus: false, onError: () => undefined });
+  const decided = Boolean(recap?.decided && recap.champion);
+  useEffect(() => {
+    if (played.length > 0) void refreshRecap();
+  }, [played.length, refreshRecap]);
+  const [wasDecided, setWasDecided] = useState<boolean | undefined>(undefined);
+  const [championOpen, setChampionOpen] = useState(false);
+  if (recap && wasDecided !== decided) {
+    if (wasDecided === false && decided) setChampionOpen(true);
+    setWasDecided(decided);
+  }
+  const showChampion = championOpen && decided && !reveal;
+  useEffect(() => {
+    if (showChampion && soundRef.current) playGoalSound();
+  }, [showChampion]);
+
+  // While a match is scored, the table shows where everyone would finish if
+  // it ended now.
+  const liveTable = useMemo(() => {
+    if (!live || !standings.length) return null;
+    const players = standings.map((row) => ({ id: row.player_id, name: row.player_name, team: row.team }));
+    return projectLiveTable(matches, players, live);
+  }, [live, matches, standings]);
+  const tableRows = liveTable ?? standings.map((row, index) => ({ ...row, live_move: row.previous_position != null ? row.previous_position - (index + 1) : 0, playing: false }));
+  const leaders = useMemo(() => tournamentLeaders(standings, matches), [standings, matches]);
 
   // A result that arrives while the screen is up gets the full-time reveal.
   // Adjusted during render (React's "storing information from previous
@@ -245,6 +295,7 @@ export default function TvModePage() {
         position: 'fixed',
         inset: 0,
         zIndex: 1300,
+        cursor: cursorHidden ? 'none' : 'auto',
         overflow: 'auto',
         color: '#FFF7F6',
         background: 'radial-gradient(ellipse 50% 40% at 15% -5%, rgba(255, 214, 170, 0.18), transparent 70%), radial-gradient(ellipse 50% 40% at 85% -5%, rgba(126, 140, 194, 0.2), transparent 70%), linear-gradient(180deg, #1D0D14 0%, #0B0508 100%)',
@@ -275,21 +326,26 @@ export default function TvModePage() {
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: isLeague ? '1.4fr 1fr' : '1fr' }, gap: 3, flex: 1, minHeight: 0 }}>
         {isLeague && (
-          <Box component="section" aria-label="Table" sx={{ overflowX: 'auto', borderRadius: '20px', bgcolor: 'rgba(36, 16, 25, 0.75)', border: '1px solid rgba(201, 185, 190, 0.1)', p: { xs: 2, md: 3 } }}>
-            <Box role="table" aria-label="Standings" sx={{ display: 'grid', gap: 0.5 }}>
+          <Box component="section" aria-label="Table" sx={{ display: 'flex', flexDirection: 'column', overflowX: 'auto', borderRadius: '20px', bgcolor: 'rgba(36, 16, 25, 0.75)', border: '1px solid rgba(201, 185, 190, 0.1)', p: { xs: 2, md: 3 } }}>
+            {liveTable && (
+              <Typography sx={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.24em', color: '#FF8A73', mb: 1.5, px: 1.5 }}>
+                LIVE TABLE <Box component="span" sx={{ color: 'text.secondary', letterSpacing: '0.04em', fontWeight: 600 }}>· if it ended {live?.home}–{live?.away}</Box>
+              </Typography>
+            )}
+            <Box role="table" aria-label={liveTable ? 'Live standings' : 'Standings'} sx={{ display: 'grid', gap: 0.5 }}>
               <Box role="row" sx={{ display: 'grid', gridTemplateColumns: '64px 1fr 70px 90px 100px 190px', alignItems: 'center', color: 'text.secondary', fontSize: '1rem', fontWeight: 600, px: 1.5, pb: 1 }}>
                 <span role="columnheader">#</span><span role="columnheader">Player</span><span role="columnheader" style={{ textAlign: 'center' }}>P</span><span role="columnheader" style={{ textAlign: 'center' }}>GD</span><span role="columnheader" style={{ textAlign: 'center' }}>Pts</span><span role="columnheader">Form</span>
               </Box>
               <AnimatePresence initial={false}>
-                {standings.map((row, index) => {
-                  const moved = row.previous_position != null ? row.previous_position - (index + 1) : 0;
+                {tableRows.map((row, index) => {
+                  const moved = row.live_move;
                   return (
                     <motion.div
                       key={row.player_id}
                       layout
                       role="row"
                       transition={{ layout: { type: 'spring', stiffness: 200, damping: 26 } }}
-                      style={{ display: 'grid', gridTemplateColumns: '64px 1fr 70px 90px 100px 190px', alignItems: 'center', padding: '14px 12px', borderRadius: 14, background: index === 0 ? 'linear-gradient(90deg, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.02))' : 'rgba(201, 185, 190, 0.03)' }}
+                      style={{ display: 'grid', gridTemplateColumns: '64px 1fr 70px 90px 100px 190px', alignItems: 'center', padding: '14px 12px', borderRadius: 14, background: row.playing ? 'linear-gradient(90deg, rgba(234, 108, 86, 0.28), rgba(234, 108, 86, 0.04))' : index === 0 ? 'linear-gradient(90deg, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.02))' : 'rgba(201, 185, 190, 0.03)', boxShadow: row.playing ? 'inset 4px 0 0 #EA6C56' : 'none' }}
                     >
                       <Box role="cell" sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75 }}>
                         <Typography sx={{ fontSize: '1.9rem', fontWeight: 700, color: index === 0 ? '#F59E0B' : '#FFF7F6' }}>{index + 1}</Typography>
@@ -310,6 +366,9 @@ export default function TvModePage() {
                   );
                 })}
               </AnimatePresence>
+            </Box>
+            <Box sx={{ mt: 'auto', pt: 3 }}>
+              <TvQrCode path={`/tournaments/${tournamentId}`} />
             </Box>
           </Box>
         )}
@@ -340,7 +399,17 @@ export default function TvModePage() {
                 <MatchOdds key={next.id} matchId={next.id} homeName={next.home_player?.name ?? 'Home'} awayName={next.away_player?.name ?? 'Away'} />
               </>
             ) : (
-              <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>All fixtures played.</Typography>
+              decided && recap?.champion ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.24em', color: '#F59E0B' }}>CHAMPION</Typography>
+                    <Typography sx={{ fontSize: '2.5rem', fontWeight: 700, lineHeight: 1.1 }} noWrap>{recap.champion}</Typography>
+                  </Box>
+                  <Button onClick={() => setChampionOpen(true)} sx={{ color: '#FCE7A8' }}>Celebrate</Button>
+                </Box>
+              ) : (
+                <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>All fixtures played.</Typography>
+              )
             )}
           </Box>
 
@@ -357,18 +426,19 @@ export default function TvModePage() {
 
           <RecordAlerts size="tv" limit={3} />
 
-          {upcoming.length > 1 && (
-            <Box component="section" aria-label="Later fixtures" sx={{ borderRadius: '20px', p: { xs: 2, md: 3 }, bgcolor: 'rgba(36, 16, 25, 0.6)', border: '1px solid rgba(201, 185, 190, 0.08)' }}>
-              <Typography sx={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.24em', color: 'text.secondary', mb: 1.5 }}>LATER</Typography>
-              {upcoming.filter((match) => match.id !== next?.id).slice(0, 3).map((match) => (
-                <Typography key={match.id} sx={{ fontSize: '1.35rem', py: 0.5 }}>{match.home_player?.name ?? 'TBD'} <Box component="span" sx={{ color: 'text.secondary' }}>vs</Box> {match.away_player?.name ?? 'TBD'}</Typography>
-              ))}
-            </Box>
-          )}
+          <TvSpotlight
+            tournamentId={tournamentId}
+            fixture={next?.home_player && next.away_player ? { id: next.id, homeName: next.home_player.name, awayName: next.away_player.name } : null}
+            live={Boolean(liveMatch && live?.status === 'live')}
+            leaders={leaders}
+            later={upcoming.filter((match) => match.id !== next?.id).map((match) => ({ id: match.id, homeName: match.home_player?.name ?? 'TBD', awayName: match.away_player?.name ?? 'TBD' }))}
+          />
+          {!isLeague && <TvQrCode path={`/tournaments/${tournamentId}`} />}
         </Box>
       </Box>
 
       <AnimatePresence>{reveal && <ResultReveal key={reveal.id} match={reveal} />}</AnimatePresence>
+      <AnimatePresence>{showChampion && recap && <ChampionMoment key="champion" recap={recap} onClose={() => setChampionOpen(false)} />}</AnimatePresence>
       <AnimatePresence>{goal && liveMatch && <GoalFlash key={goal.version} match={liveMatch} score={goal} />}</AnimatePresence>
       <AnimatePresence>
         {walkoutMatch && (
