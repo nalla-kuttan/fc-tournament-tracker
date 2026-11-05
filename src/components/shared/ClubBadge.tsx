@@ -1,9 +1,33 @@
+'use client';
+
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import { getClubBadge } from '@/lib/club-badge';
+import { getClubCrest } from '@/lib/club-crests';
 
-// A shield in the club's colours with its short code. Decorative: the club
-// name is always written next to it.
+// The club's crest when we have one, otherwise a shield in the club's colours
+// with its short code. Decorative: the club name is always written next to it.
 export default function ClubBadge({ club, size = 28 }: { club: string | null | undefined; size?: number | string }) {
+  const crest = getClubCrest(club);
+  const [failed, setFailed] = useState<string | null>(null);
+  const height = typeof size === 'number' ? size * 1.15 : 'auto';
+
+  if (crest && failed !== crest) {
+    return (
+      <Box
+        component="img"
+        src={crest}
+        alt=""
+        aria-hidden
+        draggable={false}
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailed(crest)}
+        sx={{ width: size, height, aspectRatio: '40 / 46', objectFit: 'contain', flexShrink: 0, display: 'block', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }}
+      />
+    );
+  }
+
   const badge = getClubBadge(club);
   const id = `club-${badge.code}-${badge.primary.slice(1)}-${badge.secondary.slice(1)}`;
   return (
@@ -11,7 +35,7 @@ export default function ClubBadge({ club, size = 28 }: { club: string | null | u
       component="svg"
       viewBox="0 0 40 46"
       aria-hidden
-      sx={{ width: size, height: typeof size === 'number' ? size * 1.15 : 'auto', flexShrink: 0, display: 'block', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }}
+      sx={{ width: size, height, flexShrink: 0, display: 'block', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }}
     >
       <defs>
         <clipPath id={id}>

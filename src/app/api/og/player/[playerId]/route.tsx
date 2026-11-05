@@ -3,7 +3,8 @@ import { ApiError, handleApiError } from '@/lib/api-guards';
 import { getCompetitiveData } from '@/lib/competitive-data';
 import { buildPlayerCards } from '@/lib/player-cards';
 import { getPlayerImagePath } from '@/lib/player-images';
-import { loadOgFonts, loadPlayerPhoto } from '@/lib/og/assets';
+import { getClubCrest } from '@/lib/club-crests';
+import { loadClubCrest, loadOgFonts, loadPlayerPhoto } from '@/lib/og/assets';
 import { OgBrandLockup } from '@/lib/og/brand';
 import { CardArt, STADIUM_BACKGROUND } from '@/lib/og/card-art';
 import { uuidSchema } from '@/lib/validation';
@@ -16,7 +17,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pla
     const data = await getCompetitiveData();
     const card = buildPlayerCards(data.registeredPlayers, data.playerInstances, data.matches, data.tournaments).find((entry) => entry.playerId === playerId);
     if (!card) throw new ApiError('Player not found', 404, 'NOT_FOUND');
-    const [fonts, photo] = await Promise.all([loadOgFonts(), loadPlayerPhoto(getPlayerImagePath(card.name))]);
+    const [fonts, photo, crest] = await Promise.all([loadOgFonts(), loadPlayerPhoto(getPlayerImagePath(card.name)), loadClubCrest(getClubCrest(card.club))]);
 
     return new ImageResponse(
       (
@@ -24,7 +25,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pla
           <OgBrandLockup />
           <div style={{ display: 'flex', fontSize: 26, color: '#C9B9BE', marginTop: 20 }}>Player card</div>
           <div style={{ display: 'flex', marginTop: 48 }}>
-            <CardArt card={card} photo={photo} width={640} />
+            <CardArt card={card} photo={photo} crest={crest} width={640} />
           </div>
           <div style={{ display: 'flex', marginTop: 40, fontSize: 30, color: '#C9B9BE' }}>
             {`Rating ${card.rating} · Peak ${card.peakRating} · ${card.matches} matches${card.titles ? ` · ${card.titles} ${card.titles === 1 ? 'title' : 'titles'}` : ''}`}

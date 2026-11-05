@@ -1,6 +1,6 @@
-// Generated club badges: two colours and a short code per club. Real crests
-// are trademarked, so badges only borrow each club's colours. Clubs we don't
-// know get stable colours derived from the name.
+// Generated club badges: two colours and a short code per club. Used when a
+// club has no saved crest (see club-crests.ts) and for colour accents. Clubs
+// we don't know get stable colours derived from the name.
 
 export interface ClubBadgeStyle {
   primary: string;

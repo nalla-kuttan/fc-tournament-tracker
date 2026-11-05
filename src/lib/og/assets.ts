@@ -29,3 +29,15 @@ export async function loadPlayerPhoto(webPath: string | null) {
     return null;
   }
 }
+
+// The club crest as a data URL for the image renderer, or null to fall back
+// to the generated badge.
+export async function loadClubCrest(webPath: string | null) {
+  if (!webPath) return null;
+  try {
+    const file = await readFile(join(process.cwd(), 'public', webPath));
+    return `data:image/png;base64,${file.toString('base64')}`;
+  } catch {
+    return null;
+  }
+}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { withMovement } from '../algorithms/standings';
 import { clubCode, getClubBadge } from '../club-badge';
+import { getClubCrest } from '../club-crests';
 import { buildPlayerCards, overallFromRating, tierFor } from '../player-cards';
 import { buildTournamentWrapped } from '../tournament-wrapped';
 import type { Match } from '../types';
@@ -89,6 +90,14 @@ describe('club badges', () => {
     expect(getClubBadge('Lakeside Rovers').code).toBe('LR');
     expect(clubCode('FC Heidenheim')).toBe('HEI');
     expect(getClubBadge(null).code).toBe('?');
+  });
+
+  it('finds saved crests by name or alias, case-insensitively', () => {
+    expect(getClubCrest('Real Madrid')).toBe('/crests/real-madrid.png');
+    expect(getClubCrest('  manchester city ')).toBe('/crests/man-city.png');
+    expect(getClubCrest('PSG')).toBe('/crests/paris-saint-germain.png');
+    expect(getClubCrest('Lakeside Rovers')).toBeNull();
+    expect(getClubCrest(null)).toBeNull();
   });
 });
 

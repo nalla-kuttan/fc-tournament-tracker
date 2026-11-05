@@ -3,7 +3,8 @@ import { ApiError, handleApiError } from '@/lib/api-guards';
 import { getCompetitiveData } from '@/lib/competitive-data';
 import { buildPlayerCards } from '@/lib/player-cards';
 import { getPlayerImagePath } from '@/lib/player-images';
-import { loadOgFonts, loadPlayerPhoto } from '@/lib/og/assets';
+import { getClubCrest } from '@/lib/club-crests';
+import { loadClubCrest, loadOgFonts, loadPlayerPhoto } from '@/lib/og/assets';
 import { OgBrandLockup } from '@/lib/og/brand';
 import { CardArt, STADIUM_BACKGROUND } from '@/lib/og/card-art';
 import { loadTournamentRecap } from '@/lib/tournament-recap-data';
@@ -23,7 +24,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tou
     const leaderName = recap.podium[0]?.player_name;
     const leader = data.registeredPlayers.find((player) => player.name === leaderName);
     const card = leader ? buildPlayerCards(data.registeredPlayers, data.playerInstances, data.matches, data.tournaments).find((entry) => entry.playerId === leader.id) : undefined;
-    const photo = card ? await loadPlayerPhoto(getPlayerImagePath(card.name)) : null;
+    const [photo, crest] = card ? await Promise.all([loadPlayerPhoto(getPlayerImagePath(card.name)), loadClubCrest(getClubCrest(card.club))]) : [null, null];
 
     const facts = [
       ...recap.awards.map((award) => [award.label, `${award.winners.join(' & ')} · ${award.value}`]),
@@ -45,7 +46,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tou
           </div>
           {card ? (
             <div style={{ display: 'flex', marginTop: 20 }}>
-              <CardArt card={card} photo={photo} width={420} />
+              <CardArt card={card} photo={photo} crest={crest} width={420} />
             </div>
           ) : (
             <div style={{ display: 'flex', fontSize: 90, fontWeight: 700, marginTop: 20 }}>{recap.champion ?? '—'}</div>

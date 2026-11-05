@@ -12,7 +12,7 @@ function shape(width: number, height: number) {
   return `polygon(${points.map(([x, y]) => `${(x * width) / 100}px ${(y * height) / 100}px`).join(', ')})`;
 }
 
-export function CardArt({ card, photo, width }: { card: PlayerCardData; photo: string | null; width: number }) {
+export function CardArt({ card, photo, crest = null, width }: { card: PlayerCardData; photo: string | null; crest?: string | null; width: number }) {
   const finish = cardFinish(card);
   const height = Math.round(width * 1.4);
   const u = width / 100;
@@ -36,9 +36,14 @@ export function CardArt({ card, photo, width }: { card: PlayerCardData; photo: s
         <div style={{ display: 'flex', fontSize: 19 * u, fontWeight: 700, lineHeight: 0.9, letterSpacing: -0.6 * u }}>{card.overall}</div>
         <div style={{ display: 'flex', fontSize: 5 * u, fontWeight: 700, letterSpacing: 0.6 * u, color: finish.muted, marginTop: 1.5 * u }}>OVR</div>
         <div style={{ display: 'flex', width: 11 * u, height: 2, background: finish.muted, opacity: 0.6, margin: `${2 * u}px 0` }} />
-        <div style={{ display: 'flex', width: 12 * u, height: 13.8 * u, alignItems: 'center', justifyContent: 'center', borderRadius: `${1 * u}px ${1 * u}px ${6 * u}px ${6 * u}px`, backgroundImage: `linear-gradient(170deg, ${badge.primary} 62%, ${badge.secondary} 62%)`, border: `${0.4 * u}px solid rgba(255,255,255,0.4)`, color: badge.text, fontSize: 3.6 * u, fontWeight: 700 }}>
-          {badge.code}
-        </div>
+        {crest ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={crest} alt="" width={12 * u} height={13.8 * u} style={{ objectFit: 'contain' }} />
+        ) : (
+          <div style={{ display: 'flex', width: 12 * u, height: 13.8 * u, alignItems: 'center', justifyContent: 'center', borderRadius: `${1 * u}px ${1 * u}px ${6 * u}px ${6 * u}px`, backgroundImage: `linear-gradient(170deg, ${badge.primary} 62%, ${badge.secondary} 62%)`, border: `${0.4 * u}px solid rgba(255,255,255,0.4)`, color: badge.text, fontSize: 3.6 * u, fontWeight: 700 }}>
+            {badge.code}
+          </div>
+        )}
         {card.titles > 0 && (
           <div style={{ display: 'flex', marginTop: 2 * u, fontSize: 4.6 * u, fontWeight: 700 }}>{`${card.titles}×`}</div>
         )}
