@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useParams } from 'next/navigation';
+import useSWR from 'swr';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
@@ -18,20 +19,10 @@ import type { Tournament } from '@/lib/types';
 export default function TournamentLayout({ children }: { children: ReactNode }) {
   const params = useParams();
   const tournamentId = params.tournamentId as string;
-  const [tournament, setTournament] = useState<Tournament | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Same key as the tournament pages, so the header and the page share one request.
+  const { data: tournament, isLoading } = useSWR<Tournament>(`/api/tournaments/${tournamentId}`, { onError: () => undefined });
 
-  useEffect(() => {
-    fetch(`/api/tournaments/${tournamentId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setTournament(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [tournamentId]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Box>
         <Skeleton variant="text" width={300} height={40} sx={{ bgcolor: 'rgba(201, 185, 190, 0.05)' }} />

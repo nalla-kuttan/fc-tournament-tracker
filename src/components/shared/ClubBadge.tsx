@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Box from '@mui/material/Box';
 import { getClubBadge } from '@/lib/club-badge';
 import { getClubCrest } from '@/lib/club-crests';
@@ -13,15 +14,19 @@ export default function ClubBadge({ club, size = 28 }: { club: string | null | u
   const height = typeof size === 'number' ? size * 1.15 : 'auto';
 
   if (crest && failed !== crest) {
+    // The crest files are 250px wide; next/image serves a small WebP/AVIF copy
+    // sized to how the badge is shown instead of the full PNG.
+    const width = typeof size === 'number' ? size : 64;
     return (
       <Box
-        component="img"
+        component={Image}
         src={crest}
         alt=""
         aria-hidden
         draggable={false}
-        loading="lazy"
-        decoding="async"
+        width={width}
+        height={Math.round(width * 1.15)}
+        sizes={typeof size === 'number' ? `${size}px` : '64px'}
         onError={() => setFailed(crest)}
         sx={{ width: size, height, aspectRatio: '40 / 46', objectFit: 'contain', flexShrink: 0, display: 'block', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }}
       />

@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
+import useSWR from 'swr';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
@@ -13,21 +14,12 @@ import PageSkeleton from '@/components/shared/PageSkeleton';
 export default function MatchesPage() {
   const params = useParams();
   const tournamentId = params.tournamentId as string;
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedRound, setSelectedRound] = useState<number | null>(null);
+  // Shares the tournament request the layout already made.
+  const { data, isLoading } = useSWR<{ matches?: Match[] }>(`/api/tournaments/${tournamentId}`, { onError: () => undefined });
+  const matches = data?.matches ?? [];
 
-  useEffect(() => {
-    fetch(`/api/tournaments/${tournamentId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setMatches(data.matches ?? []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [tournamentId]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <PageSkeleton />
     );
